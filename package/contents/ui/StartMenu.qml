@@ -728,10 +728,7 @@ Item {
                     SessionButton {
                         label: "Afmelden"
                         iconFile: "logout.svg"
-                        onActivated: {
-                            menu.closeRequested()
-                            session.requestLogout()
-                        }
+                        onActivated: menu.runXpMode("afmelden")
                     }
                     SessionButton {
                         label: "Computer uitschakelen"

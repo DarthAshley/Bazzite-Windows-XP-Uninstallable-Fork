@@ -78,6 +78,30 @@ if [ -f "$MAP/thema-pakket/xp-avatar.png" ] && [ ! -f "$K/.face.icon" ]; then
     cp -f "$MAP/thema-pakket/xp-avatar.png" "$K/.face.icon"
 fi
 
+# Installeer het 1-op-1 Windows XP Welcome / Login / Lockscreen & Splash scherm
+if [ -d "$MAP/xp-login-screen" ]; then
+    mkdir -p "$K/.local/share/plasma/shells"
+    if [ -d "/usr/share/plasma/shells/org.kde.plasma.desktop" ] && [ ! -d "$K/.local/share/plasma/shells/org.kde.plasma.desktop" ]; then
+        cp -r /usr/share/plasma/shells/org.kde.plasma.desktop "$K/.local/share/plasma/shells/"
+    fi
+    mkdir -p "$K/.local/share/plasma/shells/org.kde.plasma.desktop/contents/lockscreen/images"
+    cp -f "$MAP/xp-login-screen/LockScreenUi.qml" "$K/.local/share/plasma/shells/org.kde.plasma.desktop/contents/lockscreen/LockScreenUi.qml"
+    cp -f "$MAP/xp-login-screen/images/"* "$K/.local/share/plasma/shells/org.kde.plasma.desktop/contents/lockscreen/images/"
+
+    mkdir -p "$K/.local/share/plasma/look-and-feel/org.magpie.xpluna.desktop/contents/lockscreen/images"
+    [ -f "/usr/share/plasma/shells/org.kde.plasma.desktop/contents/lockscreen/LockScreen.qml" ] && cp -f "/usr/share/plasma/shells/org.kde.plasma.desktop/contents/lockscreen/LockScreen.qml" "$K/.local/share/plasma/look-and-feel/org.magpie.xpluna.desktop/contents/lockscreen/LockScreen.qml"
+    cp -f "$MAP/xp-login-screen/LockScreenUi.qml" "$K/.local/share/plasma/look-and-feel/org.magpie.xpluna.desktop/contents/lockscreen/LockScreenUi.qml"
+    cp -f "$MAP/xp-login-screen/images/"* "$K/.local/share/plasma/look-and-feel/org.magpie.xpluna.desktop/contents/lockscreen/images/"
+
+    mkdir -p "$K/.local/share/plasma/look-and-feel/org.magpie.xpluna.desktop/contents/splash/images"
+    cp -f "$MAP/xp-login-screen/Splash.qml" "$K/.local/share/plasma/look-and-feel/org.magpie.xpluna.desktop/contents/splash/Splash.qml"
+    cp -f "$MAP/xp-login-screen/images/"* "$K/.local/share/plasma/look-and-feel/org.magpie.xpluna.desktop/contents/splash/images/"
+
+    mkdir -p "$K/.local/share/sddm/themes/XPLuna/assets"
+    cp -f "$MAP/xp-login-screen/SddmMain.qml" "$K/.local/share/sddm/themes/XPLuna/Main.qml"
+    cp -f "$MAP/xp-login-screen/images/"* "$K/.local/share/sddm/themes/XPLuna/assets/"
+fi
+
 echo "==> [3/9] Tahoma-lettertypen en XP-script installeren..."
 mkdir -p "$K/.local/share/fonts/xpstart"
 cp -f "$MAP/fonts/"*.ttf "$K/.local/share/fonts/xpstart/"

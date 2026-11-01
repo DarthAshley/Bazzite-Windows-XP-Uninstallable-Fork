@@ -2152,6 +2152,86 @@ def sni_menu(svc, path, menu_path="/com/canonical/dbusmenu"):
     Gtk.main()
 
 
+class XpLogoffDialog(Gtk.Window):
+    """Authentiek Windows XP 'Afmelden bij Windows' venster (Gebruiker wisselen / Afmelden)."""
+
+    def __init__(self):
+        super().__init__(title="Afmelden bij Windows")
+        self.set_default_size(340, 200)
+        self.set_resizable(False)
+        self.set_position(Gtk.WindowPosition.CENTER)
+        self.set_decorated(False)
+
+        outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        self.add(outer)
+
+        # Donkerblauwe XP balk bovenaan met Windows XP vlag
+        top = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        top.set_size_request(-1, 44)
+        top.override_background_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0.0, 0.19, 0.61, 1.0))
+        lbl_top = Gtk.Label()
+        lbl_top.set_markup("<span foreground='white' font_desc='Tahoma Bold 12'>  Afmelden bij Windows</span>")
+        lbl_top.set_xalign(0.0)
+        top.pack_start(lbl_top, True, True, 8)
+        top.pack_end(make_icon("xp-flag.svg", 28), False, False, 12)
+        outer.pack_start(top, False, False, 0)
+
+        # Oranje glanslijn
+        sep = Gtk.Box()
+        sep.set_size_request(-1, 2)
+        sep.override_background_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(1.0, 0.60, 0.20, 1.0))
+        outer.pack_start(sep, False, False, 0)
+
+        # Middenblauw vlak met de twee knoppen: Gebruiker wisselen (opent het XP Login scherm!) & Afmelden
+        mid = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=36)
+        mid.set_halign(Gtk.Align.CENTER)
+        mid.set_valign(Gtk.Align.CENTER)
+        mid.set_margin_top(22)
+        mid.set_margin_bottom(22)
+        mid_wrap = Gtk.EventBox()
+        mid_wrap.override_background_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0.35, 0.49, 0.86, 1.0))
+        mid_wrap.add(mid)
+        outer.pack_start(mid_wrap, True, True, 0)
+
+        def make_choice(icon_file, title_str, cb):
+            col = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+            btn = Gtk.Button()
+            btn.set_size_request(44, 44)
+            btn.add(make_icon(icon_file, 32))
+            btn.connect("clicked", cb)
+            lbl = Gtk.Label()
+            lbl.set_markup(f"<span foreground='white' font_desc='Tahoma Bold 9.5'>{title_str}</span>")
+            col.pack_start(btn, False, False, 0)
+            col.pack_start(lbl, False, False, 0)
+            return col
+
+        def on_switch_user(_):
+            play_xp_click()
+            run_cmd(["loginctl", "lock-session"])
+            Gtk.main_quit()
+
+        def on_logoff(_):
+            play_xp_click()
+            run_cmd(["qdbus-qt6", "org.kde.Shutdown", "/Shutdown", "logout"])
+            Gtk.main_quit()
+
+        mid.pack_start(make_choice("cat-users.svg", "Gebruiker wisselen", on_switch_user), False, False, 0)
+        mid.pack_start(make_choice("logout.svg", "Afmelden", on_logoff), False, False, 0)
+
+        # Onderbalk met Annuleren-knop
+        bot = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        bot.set_size_request(-1, 42)
+        bot.override_background_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0.0, 0.19, 0.61, 1.0))
+        cancel_btn = Gtk.Button(label="Annuleren")
+        cancel_btn.get_style_context().add_class("xp-btn")
+        cancel_btn.set_margin_end(14)
+        cancel_btn.set_margin_top(8)
+        cancel_btn.set_margin_bottom(8)
+        cancel_btn.connect("clicked", lambda *_: Gtk.main_quit())
+        bot.pack_end(cancel_btn, False, False, 0)
+        outer.pack_start(bot, False, False, 0)
+
+
 def main():
     mode = sys.argv[1].lower() if len(sys.argv) > 1 else "computer"
     if mode == "sni-list":
@@ -2181,6 +2261,8 @@ def main():
         win = TaskManagerWindow()
     elif mode in ("uitvoeren", "run"):
         win = RunDialog()
+    elif mode in ("afmelden", "logoff"):
+        win = XpLogoffDialog()
     elif mode in ("configuratiescherm", "control", "instellingen"):
         win = XpExplorerWindow("configuratiescherm")
     elif mode in ("klassiek", "classic"):
