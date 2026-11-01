@@ -21,11 +21,24 @@ Welkom bij versie **1.3.2** van de Windows XP Suite voor Bazzite & KDE Plasma 6!
 
 ### ⚡ 2. De Legendarische MSN Nudge & Audio Chimes
 - **Echte Schuddende Vensters**: Klikken op `⚡ Nudge!` of het ontvangen van een nudge schudt het gespreksvenster met authentieke dempende fysica over het beeldscherm en toont *"--- You have just sent a nudge! ---"*.
-- **Originele MSN Geluiden**: Speelt `online.wav` bij aanmelden, `msg.wav` bij inkomende berichten en de legendarische `nudge.wav` zoemer!
+- **Originele MSN Geluiden & Custom Chime**: 
+  - `LockChime.wav` is geïntegreerd als het heldere, nostalgische nieuwe-berichtgeluid (`msg.wav`).
+  - `online.wav` bij het aanmelden en online komen van contacten.
+  - De iconische `nudge.wav` zoemer bij het versturen of ontvangen van een nudge.
 
 ---
 
-### 🔄 3. Live Discord & Vesktop Integratie via CDP WebSocket
+### 🌐 3. Firefox Internet Explorer 6 Volledige Luna Transformatie
+- **Forced Luna Beige (#ECE9D8) Light Theme**: Ongeacht of het OS of Firefox in Dark Mode staat, kleurt de volledige browser shell authentiek Windows XP beige.
+- **Vaste Menubalk**: `Bestand  Bewerken  Beeld  Geschiedenis  Bladwijzers  Extra  Help` permanent zichtbaar met het geanimeerde Windows IE Flag / Globe throbber-icoon rechts.
+- **Navigatiebalk**: Grote retro iconen (Vorige, Volgende, Stop, Vernieuwen, Startpagina, Zoeken, Favorieten, Geschiedenis, Afdrukken) met Luna reliëf.
+- **Adresbalk & Koppelingen**: `Adres` label links, witte invoer met combobox dropdown-pijl en de groene `Ga naar` (Go) knop rechts.
+- **Map-tabbladen onder de Adresbalk**: Klassieke XP tabbladen met lichte gradiënt voor inactieve tabs en zuiver wit verheven actief tabblad.
+- **Statusbalk onderaan**: Vaste balk met status "Gereed" en het blauwe "Internet" zone-icoon.
+
+---
+
+### 🔄 4. Live Discord & Vesktop Integratie via CDP WebSocket
 - **Directe Koppeling met Actieve Vesktop Sessie (`http://127.0.0.1:9222`)**:
   - Haalt live het echte gebruikersprofiel (`! Geoffrey`), avatar en statussen op.
   - Synchroniseert alle vrienden en DMs live inclusief online/offline indicatoren en custom actieve statusberichten.
