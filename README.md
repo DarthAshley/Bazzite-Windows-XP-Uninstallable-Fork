@@ -99,6 +99,13 @@ A complete, authentic recreation of the legendary **MSN Messenger 6.0/7.0 & Wind
 
 ---
 
+### 13. 🌐 Internet Explorer 6 Theme for Firefox
+- **Authentic IE6 Interface**: Classic XP toolbar buttons (*Back*, *Forward*, *Stop*, *Refresh*, *Home*, *Favorites*), 3D embossed address bar combobox, globe icon, and classic status bar.
+- **Modern Firefox Compatibility**: Works with modern Firefox on Linux (both Flatpak and native).
+- **Auto-Configured**: Fully integrated in `installeren.sh` (or install standalone with `bash installeren.sh firefox`). See [FIREFOX-IE6.md](FIREFOX-IE6.md) for full guide and customization.
+
+---
+
 ## ⚡ 1-Command Installation
 
 Open a terminal on your Bazzite KDE machine and run:

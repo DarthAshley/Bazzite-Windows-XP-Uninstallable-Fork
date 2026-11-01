@@ -161,6 +161,19 @@ Item {
 
     function resolveAppInfo(name) {
         let lower = name.toLowerCase().trim()
+        let knownIcon = ""
+        if (lower.indexOf("discord") !== -1 || lower.indexOf("vesktop") !== -1) {
+            knownIcon = "discord"
+        } else if (lower.indexOf("lutris") !== -1) {
+            knownIcon = "lutris"
+        } else if (lower.indexOf("firefox") !== -1) {
+            knownIcon = "firefox"
+        } else if (lower.indexOf("internet explorer") !== -1 || lower === "ie6") {
+            knownIcon = "ie6"
+        } else if (lower.indexOf("steam") !== -1) {
+            knownIcon = "steam"
+        }
+
         // 1. Check favoritesModel
         let fav = menu.rootModel ? menu.rootModel.favoritesModel : null
         if (fav) {
@@ -168,8 +181,8 @@ Item {
                 let idx = fav.index(i, 0)
                 let nm = (fav.data(idx, Qt.DisplayRole) || "").toString().trim()
                 if (nm.toLowerCase() === lower) {
-                    let ic = fav.data(idx, Qt.DecorationRole) || ""
-                    return { icon: ic.toString(), sourceType: "fav", sourceIndex: i, cmd: "" }
+                    let ic = (fav.data(idx, Qt.DecorationRole) || "").toString()
+                    return { icon: (ic !== "" ? ic : (knownIcon !== "" ? knownIcon : lower)), sourceType: "fav", sourceIndex: i, cmd: "" }
                 }
             }
         }
@@ -180,8 +193,8 @@ Item {
                 let idx = um.index(j, 0)
                 let nm = (um.data(idx, Qt.DisplayRole) || "").toString().trim()
                 if (nm.toLowerCase() === lower) {
-                    let ic = um.data(idx, Qt.DecorationRole) || ""
-                    return { icon: ic.toString(), sourceType: "usage", sourceIndex: j, cmd: "" }
+                    let ic = (um.data(idx, Qt.DecorationRole) || "").toString()
+                    return { icon: (ic !== "" ? ic : (knownIcon !== "" ? knownIcon : lower)), sourceType: "usage", sourceIndex: j, cmd: "" }
                 }
             }
         }
@@ -192,12 +205,12 @@ Item {
                 let idx = aam.index(k, 0)
                 let nm = (aam.data(idx, Qt.DisplayRole) || "").toString().trim()
                 if (nm.toLowerCase() === lower) {
-                    let ic = aam.data(idx, Qt.DecorationRole) || ""
-                    return { icon: ic.toString(), sourceType: "allapps", sourceIndex: k, cmd: "" }
+                    let ic = (aam.data(idx, Qt.DecorationRole) || "").toString()
+                    return { icon: (ic !== "" ? ic : (knownIcon !== "" ? knownIcon : lower)), sourceType: "allapps", sourceIndex: k, cmd: "" }
                 }
             }
         }
-        return { icon: lower, sourceType: "cmd", sourceIndex: -1, cmd: lower }
+        return { icon: (knownIcon !== "" ? knownIcon : lower), sourceType: "cmd", sourceIndex: -1, cmd: lower }
     }
 
     function removeItemFromList(name) {
@@ -587,15 +600,13 @@ Item {
                 topLeftRadius: 6
                 topRightRadius: 6
                 gradient: Gradient {
-                    GradientStop { position: 0.0; color: "#559cf6" }
-                    GradientStop { position: 0.05; color: "#1868ce" }
-                    GradientStop { position: 0.14; color: "#0e60cb" }
-                    GradientStop { position: 0.25; color: "#3a8cf0" }
-                    GradientStop { position: 0.78; color: "#2675e0" }
-                    GradientStop { position: 1.0; color: "#1b5fce" }
+                    GradientStop { position: 0.0; color: "#0c58e8" }
+                    GradientStop { position: 0.35; color: "#2471f5" }
+                    GradientStop { position: 0.8; color: "#1f6ce6" }
+                    GradientStop { position: 1.0; color: "#0047cc" }
                 }
 
-                // Subtiele witte glanslijn bovenaan de kopbalk
+                // 1px witte highlightlijn bovenin
                 Rectangle {
                     anchors.top: parent.top
                     anchors.left: parent.left
@@ -604,8 +615,21 @@ Item {
                     anchors.rightMargin: 5
                     anchors.topMargin: 1
                     height: 1
-                    color: "#8abaf8"
-                    opacity: 0.75
+                    color: "#ffffff"
+                    opacity: 0.65
+                }
+
+                // Avatar frame: 48x48, 2px witte border met subtiele schaduw
+                Rectangle {
+                    id: avatarShadow
+                    anchors.centerIn: avatarFrame
+                    anchors.horizontalCenterOffset: 1
+                    anchors.verticalCenterOffset: 1
+                    width: 48
+                    height: 48
+                    radius: 3
+                    color: "#001e66"
+                    opacity: 0.35
                 }
 
                 Rectangle {
@@ -616,7 +640,7 @@ Item {
                     height: 48
                     radius: 3
                     color: "#dfe9f8"
-                    border.color: "#f4f7fc"
+                    border.color: "#ffffff"
                     border.width: 2
 
                     Image {
@@ -633,6 +657,7 @@ Item {
                     }
                 }
 
+                // Gebruikersnaam: Tahoma bold 15px/16px met Text.Raised en #001e66 schaduw
                 XpText {
                     anchors.left: avatarFrame.right
                     anchors.leftMargin: 10
@@ -640,21 +665,28 @@ Item {
                     text: user.fullName || "King Geoffrey"
                     color: "white"
                     style: Text.Raised
-                    styleColor: "#0f3a8c"
+                    styleColor: "#001e66"
                     heavy: true
-                    font.pixelSize: 17
+                    font.pixelSize: 16
                 }
             }
 
-            // Oranje gloedlijn onder de kop
-            Rectangle {
+            // Scheidingslijn onder de kop: volle oranje balk boven linkerkolom, donkerblauw boven rechterkolom
+            RowLayout {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 2
-                gradient: Gradient {
-                    orientation: Gradient.Horizontal
-                    GradientStop { position: 0.0; color: "#2675e0" }
-                    GradientStop { position: 0.5; color: "#f59c2f" }
-                    GradientStop { position: 1.0; color: "#2675e0" }
+                spacing: 0
+
+                Rectangle {
+                    Layout.preferredWidth: Math.round(menu.menuWidth * 0.485)
+                    Layout.preferredHeight: 2
+                    color: "#e5801a"
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 2
+                    color: "#1c5ad1"
                 }
             }
 

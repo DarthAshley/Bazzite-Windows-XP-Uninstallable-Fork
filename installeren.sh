@@ -11,9 +11,11 @@
 #  6. Windows XP Systeemvak met live achtergrond-icoontjes zoals Discord/Steam (nl.steelhull.xptray)
 #  7. Windows XP Deze computer, Configuratiescherm, Systeemeigenschappen,
 #     Beeldscherm, Taakbalk-eigenschappen, Uitvoeren... én Windows Taakbeheer!
+#  8. Windows XP Internet Explorer 6 thema voor Firefox (klassieke werkbalken, iconen & adresbalk)
 #
 # Gebruik:
 #   bash installeren.sh          (Alles installeren en activeren)
+#   bash installeren.sh firefox  (Alleen Firefox IE6 thema installeren)
 #   bash installeren.sh terug    (Originele paneel/Dolphin-instellingen herstellen)
 # ==============================================================================
 set -u
@@ -30,6 +32,87 @@ DOLPHIN_UI="$K/.local/share/kxmlgui5/dolphin/dolphinui.rc"
 KVANTUM_CFG="$K/.config/Kvantum/XPLuna/XPLuna.kvconfig"
 SYS_DESKTOP="$K/.local/share/applications/systemsettings.desktop"
 XP_SHARE="$K/.local/share/xp-startknop"
+
+installeer_firefox_ie6() {
+    local THEME_SRC="$MAP/firefox-ie6-theme/chrome"
+    if [ ! -d "$THEME_SRC" ]; then
+        echo "    Waarschuwing: $THEME_SRC niet gevonden, overslaan."
+        return 0
+    fi
+
+    echo "    Firefox omtoveren naar Windows XP Internet Explorer 6..."
+    local PROFIELEN=()
+    local ZOEKPADEN=(
+        "$K/.mozilla/firefox"
+        "$K/.var/app/org.mozilla.firefox/.mozilla/firefox"
+    )
+
+    for base in "${ZOEKPADEN[@]}"; do
+        if [ -d "$base" ]; then
+            for p in "$base"/*default*; do
+                if [ -d "$p" ]; then
+                    local al_in_lijst=false
+                    if [ ${#PROFIELEN[@]} -gt 0 ]; then
+                        for bestaand in "${PROFIELEN[@]}"; do
+                            if [ "$bestaand" = "$p" ]; then
+                                al_in_lijst=true
+                                break
+                            fi
+                        done
+                    fi
+                    if [ "$al_in_lijst" = false ]; then
+                        PROFIELEN+=("$p")
+                    fi
+                fi
+            done
+        fi
+    done
+
+    # Fallback: controleer mappen met prefs.js als er geen default matches zijn
+    if [ ${#PROFIELEN[@]} -eq 0 ]; then
+        for base in "${ZOEKPADEN[@]}"; do
+            if [ -d "$base" ]; then
+                for p in "$base"/*; do
+                    if [ -d "$p" ] && [ -f "$p/prefs.js" ]; then
+                        PROFIELEN+=("$p")
+                    fi
+                done
+            fi
+        done
+    fi
+
+    if [ ${#PROFIELEN[@]} -eq 0 ]; then
+        echo "    (Geen actieve Firefox profielen gevonden; thema staat klaar in $THEME_SRC)"
+        return 0
+    fi
+
+    for prof in "${PROFIELEN[@]}"; do
+        echo "    -> IE6 thema installeren in profiel: $prof"
+        mkdir -p "$prof/chrome"
+        cp -rf "$THEME_SRC/"* "$prof/chrome/"
+
+        local UJS="$prof/user.js"
+        touch "$UJS"
+        if grep -q '^user_pref("toolkit.legacyUserProfileCustomizations.stylesheets"' "$UJS" 2>/dev/null; then
+            sed -i 's|^user_pref("toolkit.legacyUserProfileCustomizations.stylesheets".*|user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);|' "$UJS"
+        else
+            echo 'user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);' >> "$UJS"
+        fi
+
+        if grep -q '^user_pref("browser.tabs.drawInTitlebar"' "$UJS" 2>/dev/null; then
+            sed -i 's|^user_pref("browser.tabs.drawInTitlebar".*|user_pref("browser.tabs.drawInTitlebar", false);|' "$UJS"
+        else
+            echo 'user_pref("browser.tabs.drawInTitlebar", false);' >> "$UJS"
+        fi
+    done
+    echo "    -> Windows XP Internet Explorer 6 thema succesvol geconfigureerd in Firefox."
+}
+
+if [ "${1:-}" = "firefox" ]; then
+    installeer_firefox_ie6
+    echo "Firefox IE6 thema installatie voltooid."
+    exit 0
+fi
 
 if [ "${1:-}" = "terug" ]; then
     systemctl --user stop plasma-plasmashell 2>/dev/null || true
@@ -380,12 +463,74 @@ X-Flatpak=dev.vencord.Vesktop
 EOF
 cp -f "$K/.local/share/applications/dev.vencord.Vesktop.desktop" "$K/.local/share/applications/discord.desktop" 2>/dev/null || true
 
-# Vesktop MSN Messenger & Windows XP Thema automatisch installeren
-VESKTOP_THEMES="$K/.var/app/dev.vencord.Vesktop/config/vesktop/themes"
-if [ -d "$VESKTOP_THEMES" ] && [ -f "$MAP/vesktop-theme/Windows-XP-MSN-Messenger.theme.css" ]; then
-    echo "    Vesktop MSN Messenger thema installeren in $VESKTOP_THEMES..."
-    cp -f "$MAP/vesktop-theme/Windows-XP-MSN-Messenger.theme.css" "$VESKTOP_THEMES/"
-fi
+installeer_vesktop_msn() {
+    local THEME_SRC="$MAP/vesktop-theme/Windows-XP-MSN-Messenger.theme.css"
+    [ ! -f "$THEME_SRC" ] && return 0
+
+    local CONFIG_DIRS=(
+        "$K/.var/app/dev.vencord.Vesktop/config/vesktop"
+        "$K/.config/vesktop"
+    )
+
+    local GEVONDEN=0
+    for VDIR in "${CONFIG_DIRS[@]}"; do
+        if [ -d "$VDIR" ] || [ -d "$(dirname "$VDIR")" ]; then
+            GEVONDEN=1
+            echo "    Vesktop configuratie gedetecteerd in $VDIR..."
+            mkdir -p "$VDIR/themes" "$VDIR/settings"
+
+            # 1. Thema installeren in themes/
+            cp -f "$THEME_SRC" "$VDIR/themes/Windows-XP-MSN-Messenger.theme.css"
+
+            # 2. OOK direct naar quickCss.css kopiëren voor 100% directe activatie
+            cp -f "$THEME_SRC" "$VDIR/settings/quickCss.css"
+
+            # 3. settings.json veilig bijwerken
+            python3 - "$VDIR/settings/settings.json" "$VDIR/settings.json" << 'PYEOF'
+import sys, json, os
+
+vencord_settings = sys.argv[1]
+vesktop_settings = sys.argv[2]
+
+try:
+    if os.path.exists(vencord_settings):
+        with open(vencord_settings, "r", encoding="utf-8") as f:
+            cfg = json.load(f)
+    else:
+        cfg = {}
+    cfg["useQuickCss"] = True
+    themes = cfg.get("enabledThemes", [])
+    if "Windows-XP-MSN-Messenger.theme.css" not in themes:
+        themes.append("Windows-XP-MSN-Messenger.theme.css")
+    cfg["enabledThemes"] = themes
+    os.makedirs(os.path.dirname(vencord_settings), exist_ok=True)
+    with open(vencord_settings, "w", encoding="utf-8") as f:
+        json.dump(cfg, f, indent=4)
+except Exception as e:
+    print(f"Fout bijwerken Vencord settings: {e}", file=sys.stderr)
+
+try:
+    if os.path.exists(vesktop_settings):
+        with open(vesktop_settings, "r", encoding="utf-8") as f:
+            cfg = json.load(f)
+        cfg["splashBackground"] = "rgb(236, 233, 216)"
+        cfg["splashColor"] = "rgb(0, 25, 97)"
+        with open(vesktop_settings, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, indent=4)
+except Exception as e:
+    pass
+PYEOF
+            echo "    -> Windows XP MSN Messenger thema & QuickCSS geactiveerd in $VDIR."
+        fi
+    done
+
+    if [ "$GEVONDEN" -eq 0 ]; then
+        echo "    (Vesktop configuratiemap nog niet aanwezig; thema staat klaar in $THEME_SRC)"
+    fi
+}
+
+installeer_vesktop_msn
+installeer_firefox_ie6
 kbuildsycoca6 >/dev/null 2>&1 || true
 
 echo "==> [8/9] Plasma 6 Applets installeren (nl.steelhull.xpstart & nl.steelhull.xptray)..."

@@ -2593,13 +2593,17 @@ def sni_menu(svc, path, menu_path="/com/canonical/dbusmenu", target_x=None, targ
     win.show_all()
 
     # Position cleanly in bottom-right corner at tray icon
-    if target_x is None or target_y is None:
-        try:
-            seat = Gdk.Display.get_default().get_default_seat()
-            screen, cx, cy = seat.get_pointer().get_position()
-            target_x, target_y = cx, cy
-        except Exception:
-            target_x, target_y = 1800, 1000
+    try:
+        seat = Gdk.Display.get_default().get_default_seat()
+        if seat:
+            ptr = seat.get_pointer()
+            if ptr:
+                _, cx, cy = ptr.get_position()
+                target_x, target_y = cx, cy
+    except Exception:
+        pass
+    if target_x is None: target_x = 1800
+    if target_y is None: target_y = 1000
 
     alloc = win.get_allocation()
     w = max(175, alloc.width)
@@ -2608,8 +2612,8 @@ def sni_menu(svc, path, menu_path="/com/canonical/dbusmenu", target_x=None, targ
     sw = screen.get_width() if screen else 1920
     sh = screen.get_height() if screen else 1080
 
-    px = min(max(4, target_x - w + 20), sw - w - 4)
-    py = max(4, target_y - h - 6)
+    px = max(4, min(target_x - w // 2, sw - w - 4))
+    py = max(4, target_y - h - 4)
     if py < 4:
         py = min(target_y + 16, sh - h - 4)
 
