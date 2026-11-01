@@ -25,3 +25,4 @@ Execute these steps autonomously:
 - **Explorer & Control Panel**: Full Windows XP Explorer replica with both Category View and Classic View, System Properties, Display Properties, and Task Manager.
 - **Logon & Lock Screen**: Authentic Windows XP Welcome Screen with 3D logo or Classic *Log On to Windows* dialog.
 - **Theme, Sounds & Wallpapers**: High-resolution Bliss wallpaper, authentic Windows XP startup/shutdown/click sound scheme, and Luna Blue color palette.
+

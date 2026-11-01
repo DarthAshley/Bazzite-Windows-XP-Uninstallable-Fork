@@ -59,3 +59,4 @@ cd tray-package && zip -r ../kde-store-pakketten/nl.steelhull.xptray.plasmoid . 
 # Global theme
 tar -czvf kde-store-pakketten/org.magpie.xpluna.desktop.tar.gz -C ~/.local/share/plasma/look-and-feel/ org.magpie.xpluna.desktop
 ```
+

@@ -417,7 +417,7 @@ frame > border {
 
 CLASSIC_ITEMS = [
     ("Accessibility\nOptions", "cat-access.svg", "kcmshell6 kcm_access"),
-    ("Add or Remove\nPrograms", "cat-software.svg", "flatpak run io.github.kolunmi.Bazaar || kcmshell6 kcm_updates"),
+    ("Add or Remove\nPrograms", "cat-software.svg", "bazaar || konsole -e ujust update"),
     ("Administrative\nTools", "cp-admin.svg", "plasma-systemmonitor"),
     ("Appearance and\nThemes", "cat-appearance.svg", "__BEELDSCHERM__"),
     ("Bluetooth\nDevices", "tray-bt.svg", "kcmshell6 kcm_bluetooth"),
@@ -436,7 +436,7 @@ CLASSIC_ITEMS = [
     ("Regional and\nLanguage Options", "defapps.svg", "kcmshell6 kcm_regionandlang"),
     ("Scanners and\nCameras", "pics.svg", "kcmshell6 kcm_kamera"),
     ("Scheduled\nTasks", "cp-updates.svg", "kcmshell6 kcm_autostart"),
-    ("Security\nCenter", "xp-shield.svg", "kcmshell6 kcm_updates"),
+    ("Security\nCenter", "xp-shield.svg", "bazaar || konsole -e ujust update"),
     ("Sounds and\nAudio Devices", "cp-sound.svg", "kcmshell6 kcm_pulseaudio"),
     ("Speech", "cp-speech.svg", "kcmshell6 kcm_soundtheme"),
     ("System", "cp-system.svg", "__SYSTEEM__"),
@@ -502,8 +502,8 @@ CATEGORIES = [
         "cat-software.svg",
         "Install, update, or remove programs and Windows components",
         [
-            ("Change or remove programs", "cat-software.svg", "flatpak run io.github.kolunmi.Bazaar || kcmshell6 kcm_updates"),
-            ("Add new programs", "cat-software.svg", "flatpak run io.github.kolunmi.Bazaar || kcmshell6 kcm_updates"),
+            ("Change or remove programs", "cat-software.svg", "bazaar || konsole -e ujust update"),
+            ("Add new programs", "cat-software.svg", "bazaar || konsole -e ujust update"),
             ("Set Program Access and Defaults", "defapps.svg", "kcmshell6 kcm_componentchooser"),
         ],
     ),
@@ -556,7 +556,7 @@ CATEGORIES = [
         "Check the status of your computer's security settings, firewall, and Automatic Updates",
         [
             ("Windows Firewall", "cp-firewall.svg", "kcmshell6 kcm_netpref"),
-            ("Automatic Updates", "cp-updates.svg", "kcmshell6 kcm_updates"),
+            ("Automatic Updates", "cp-updates.svg", "bazaar || konsole -e ujust update"),
             ("Application Permissions", "xp-shield.svg", "kcmshell6 kcm_app-permissions"),
         ],
     ),
@@ -1997,7 +1997,7 @@ class XpExplorerWindow(Gtk.Window):
                 "System Tasks",
                 [
                     ("cp-admin.svg", "View system information", lambda: self.execute_action("__SYSTEEM__")),
-                    ("cat-software.svg", "Add or remove programs", lambda: run_cmd("flatpak run io.github.kolunmi.Bazaar || kcmshell6 kcm_updates")),
+                    ("cat-software.svg", "Add or remove programs", lambda: run_cmd("bazaar || konsole -e ujust update")),
                     ("controlpanel.svg", "Change a setting", lambda: self.navigate("configuratiescherm")),
                 ],
             ),
@@ -2123,7 +2123,7 @@ class XpExplorerWindow(Gtk.Window):
             self._make_card(
                 "See Also",
                 [
-                    ("cp-updates.svg", "Windows Update", lambda: run_cmd("kcmshell6 kcm_updates")),
+                    ("cp-updates.svg", "Windows Update", lambda: run_cmd("bazaar || konsole -e ujust update")),
                     ("help.svg", "Help and Support", lambda: run_cmd("khelpcenter")),
                     ("controlpanel.svg", "KDE System Settings", lambda: run_cmd([REAL_SYSTEMSETTINGS])),
                 ],
@@ -2239,7 +2239,7 @@ class XpExplorerWindow(Gtk.Window):
             self._make_card(
                 "See Also",
                 [
-                    ("cp-updates.svg", "Windows Update", lambda: run_cmd("kcmshell6 kcm_updates")),
+                    ("cp-updates.svg", "Windows Update", lambda: run_cmd("bazaar || konsole -e ujust update")),
                     ("help.svg", "Help and Support", lambda: run_cmd("khelpcenter")),
                 ],
             ),

@@ -961,7 +961,7 @@ Item {
                 width: parent.width; height: 28; iconSize: 20; fontSize: 11
                 label: "Windows Update"; iconFile: "cp-updates.svg"
                 onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
-                onActivated: menu.run("kcmshell6 kcm_updates")
+                onActivated: menu.run("bazaar || konsole -e ujust update")
             }
 
             Separator { width: parent.width; lineColor: "#808080" }
@@ -1110,7 +1110,7 @@ Item {
                     width: parent.width; height: 24; iconSize: 16; fontSize: 11
                     label: "Windows Update"; iconFile: "cp-updates.svg"
                     onHovered: menu.requestCol2Change(-1, "", 160)
-                    onActivated: menu.run("kcmshell6 kcm_updates")
+                    onActivated: menu.run("bazaar || konsole -e ujust update")
                 }
 
                 Rectangle {
@@ -1376,7 +1376,7 @@ Item {
                         width: parent.width; height: 24; iconSize: 16; fontSize: 11
                         label: "Synchronize"; iconFile: "cp-updates.svg"
                         onHovered: menu.activeSubFolder = ""
-                        onActivated: menu.run("kcmshell6 kcm_updates")
+                        onActivated: menu.run("bazaar || konsole -e ujust update")
                     }
                     AppEntry {
                         width: parent.width; height: 24; iconSize: 16; fontSize: 11
@@ -1486,7 +1486,7 @@ Item {
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16
                     label: "Security Center"; iconFile: "xp-shield.svg"
-                    onActivated: menu.run("kcmshell6 kcm_updates")
+                    onActivated: menu.run("bazaar || konsole -e ujust update")
                 }
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16
