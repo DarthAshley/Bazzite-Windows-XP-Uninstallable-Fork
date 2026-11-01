@@ -400,10 +400,11 @@ cat > "$DOLPHIN_UI" << 'EOF'
 EOF
 
 echo "==> [7/9] Snelkoppelingen voor Windows XP Apps, MSN Messenger & Vesktop configureren..."
-mkdir -p "$K/.local/share/applications" "$XP_SHARE/sounds"
+mkdir -p "$K/.local/share/applications" "$XP_SHARE/sounds" "$XP_SHARE/avatars"
 cp -f "$MAP/xp-verkenner.py" "$XP_SHARE/xp-verkenner.py"
 cp -f "$MAP/xp-msn.py" "$XP_SHARE/xp-msn.py" 2>/dev/null || true
 [ -d "$MAP/sounds" ] && cp -rf "$MAP/sounds/"* "$XP_SHARE/sounds/" 2>/dev/null || true
+[ -d "$MAP/avatars" ] && cp -rf "$MAP/avatars/"* "$XP_SHARE/avatars/" 2>/dev/null || true
 
 cat > "$SYS_DESKTOP" << EOF
 [Desktop Entry]

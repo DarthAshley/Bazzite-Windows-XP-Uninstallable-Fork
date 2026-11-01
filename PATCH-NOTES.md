@@ -1,3 +1,40 @@
+# 📝 Patch Notes — Bazzite Windows XP Suite v1.3.2
+
+Welkom bij versie **1.3.2** van de Windows XP Suite voor Bazzite & KDE Plasma 6! Deze release introduceert de volledige **MSN Messenger Multi-Window Suite** met live Discord/Vesktop-integratie en brengt het authentieke MSN van 2004 met losse vensters, live chat en de legendarische Nudge terug op je desktop!
+
+---
+
+### 💬 1. Echte Multi-Window Architectuur voor MSN Messenger & Discord
+- **Standalone Buddy List (Contactpersonenlijst)**: Een verticaal venster met profielkaart, statusselector, persoonlijk bericht en categorische vriendenlijsten (`Online`, `Away`, `Busy`, `Offline`).
+- **Losse Gespreksvensters per Contact**: Dubbelklikken op een contactpersoon opent een ECHT LOS VENSTER (`[Contact] - Conversation`). Meerdere vensters kunnen gelijktijdig openstaan en hebben elk hun eigen venstertitel en knop op de KDE Plasma taakbalk!
+- **100% Replica van de Originele MSN 2004 Gespreksinterface (`media_1793540755051_35913dea.jpg`)**:
+  - Luna Blue titelbalk met MSN-icoon en vensterknoppen.
+  - Menubalk: `File  Edit  Actions  Tools  Help`.
+  - Actiewerkbalk met grote iconen voor `👥 Invite`, `📁 Send Files`, `📹 Webcam`, `🎧 Audio`, `🎲 Fun & Games`, circulaire actieknoppen en het klassieke 4-kleuren `msn` vlinderlogo.
+  - Koptekst met `To: [Contact]` en beveiligingsmelding: *"Never give out your password or credit card number in an instant message conversation."*
+  - Witte gesprekshistorie met Luna 3D inset border, Tahoma-lettertype en `[Contact] says:` layout.
+  - Twee avatarboxen aan de rechterkant (Contact boven met lade-icoontje `>` en de authentieke voetbal op gras; Gebruiker onder met lade-icoontje `>` en de authentieke schaakstukken).
+  - Opmaakbalk met `A Font`, `😊 ▾` (emoticon popup met 16 retro smilies), `🖼️ Backgrounds ▾` en de legendarische `⚡ Nudge!`.
+  - Tekstinvoer met knipperende cursor en de klassieke Luna `Send` knop.
+
+---
+
+### ⚡ 2. De Legendarische MSN Nudge & Audio Chimes
+- **Echte Schuddende Vensters**: Klikken op `⚡ Nudge!` of het ontvangen van een nudge schudt het gespreksvenster met authentieke dempende fysica over het beeldscherm en toont *"--- You have just sent a nudge! ---"*.
+- **Originele MSN Geluiden**: Speelt `online.wav` bij aanmelden, `msg.wav` bij inkomende berichten en de legendarische `nudge.wav` zoemer!
+
+---
+
+### 🔄 3. Live Discord & Vesktop Integratie via CDP WebSocket
+- **Directe Koppeling met Actieve Vesktop Sessie (`http://127.0.0.1:9222`)**:
+  - Haalt live het echte gebruikersprofiel (`! Geoffrey`), avatar en statussen op.
+  - Synchroniseert alle vrienden en DMs live inclusief online/offline indicatoren en custom actieve statusberichten.
+  - Verzenden vanuit het MSN Gespreksvenster verstuurt het bericht direct via Discord (`sendMessage`).
+  - Inkomende berichten via Discord worden live binnengehaald via `FluxDispatcher` (`MESSAGE_CREATE`) en getoond in het venster.
+  - Buiten actieve vensters verschijnen authentieke slide-up **MSN Toast-meldingen** in de rechterbenedenhoek.
+
+---
+
 # 📝 Patch Notes — Bazzite Windows XP Suite v1.3.1
 
 Welkom bij versie **1.3.1** van de Windows XP Suite voor Bazzite & KDE Plasma 6! Deze release perfectioneert de browser-shell van Firefox (pure IE6 look zonder webpagina's aan te tasten), lost vensterranden op in de afmeld- en afsluitdialogen, perfectioneert de systeemvak-contextmenu positie en zorgt dat Vesktop Vencord-instellingen direct bovenaan toont.

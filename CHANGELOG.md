@@ -2,6 +2,36 @@
 
 All notable changes to the Windows XP Suite for Bazzite / KDE Plasma 6 will be documented in this file.
 
+## [v1.3.2] — 2026-11-01
+
+### 💬 MSN Messenger Multi-Window & Discord Live Integration
+- **Echte Multi-Window Architectuur**:
+  - Standalone **Contactpersonenlijst venster (Buddy List)** met live gebruikersprofielkaart, statusselector, bewerkbaar persoonlijk bericht en categorische groepen (`Online`, `Away`, `Busy`, `Offline`).
+  - **Echte losse gespreksvensters (`[Contact] - Conversation`)**: Dubbelklikken op een contact opent een zelfstandig top-level X11/KDE venster. Meerdere gesprekken kunnen gelijktijdig openstaan en hebben elk een eigen knop op de taakbalk.
+- **Authentieke Gespreksvenster Details (100% replica van `media_1793540755051_35913dea.jpg`)**:
+  - **Titelbalk**: Luna Blue met `[Contact] - Conversation` en MSN Messenger venstericoon.
+  - **Menubalk**: `File  Edit  Actions  Tools  Help` met klassieke beige Luna styling en blauwe hover-highlight.
+  - **Actiebalk**: Grote iconen voor `👥 Invite`, `📁 Send Files`, `📹 Webcam`, `🎧 Audio`, `🎲 Fun & Games`, circulaire actieknoppen en het klassieke 4-kleuren `msn` vlinderlogo.
+  - **Header & Beveiliging**: `To: [Contact]` met de authentieke waarschuwingsbanner: *"Never give out your password or credit card number in an instant message conversation."*
+  - **Gesprekshistorie**: Witte achtergrond met Luna 3D inset border, Tahoma typografie, kleurgecodeerde afzendernamen (`[Contact] says:`) en geïndenteerde berichtteksten.
+  - **Dubbele Avatarboxen rechts**:
+    - Bovenste avatarbox (Contact): Afgerond venster met lade-icoontje (`>`) rechts, toont contactavatar (zoals de klassieke voetbal uit de referentiefoto of echte Discord avatar).
+    - Onderste avatarbox (Gebruiker): Afgerond venster met lade-icoontje (`>`) rechts, toont gebruikersavatar (zoals de klassieke schaakstukken uit de referentiefoto of echte Discord avatar).
+  - **Onderkant Invoer**:
+    - Opmaakbalk met `A Font`, `😊 ▾` (emoticon picker met 16 retro MSN smilies), `🖼️ Backgrounds ▾` en de legendarische `⚡ Nudge!`.
+    - Witte tekstinvoer met knipperende cursor en klassieke Windows XP Luna `Send` knop.
+  - **MSN Audio Chimes & Nudge**:
+    - Speelt authentieke `online.wav`, `msg.wav`, `nudge.wav` en klikgeluiden.
+    - Bij `⚡ Nudge!` schudt het gespreksvenster realistisch over het beeldscherm met dempende fysica en toont *"--- You have just sent a nudge! ---"*.
+- **Discord / Vesktop Live Koppeling via Chrome DevTools Protocol (CDP)**:
+  - Verbindt automatisch via WebSocket met Vesktop op `http://127.0.0.1:9222`.
+  - Haalt live de echte gebruikersnaam (`! Geoffrey`), avatar en status op.
+  - Haalt live vrienden en DMs op inclusief online/offline statussen en custom actieve statusberichten.
+  - Verzenden van een bericht in het MSN Gespreksvenster stuurt het bericht direct via Discord (`sendMessage`).
+  - Inkomende Discord-berichten worden direct live getoond in het venster (`MESSAGE_CREATE`).
+  - Inkomende berichten buiten actieve vensters tonen een authentieke slide-up **MSN Toast-notificatie** rechtsonderin boven de taakbalk.
+  - Zelfstandige offline modus met persistente simulatie indien Discord gesloten is.
+
 ## [v1.3.1] — 2026-11-01
 
 ### 🌐 Firefox Internet Explorer 6 Shell Perfection
