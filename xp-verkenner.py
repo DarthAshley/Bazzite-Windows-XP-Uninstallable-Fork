@@ -8,8 +8,8 @@ Gebruik:
 import os
 import sys
 
-# Force X11 backend for popup context menu and tray menus so KWin doesn't decorate with Aurorae
-if len(sys.argv) > 1 and sys.argv[1].lower() in ("sni-menu",) and os.environ.get("GDK_BACKEND") != "x11":
+# Force X11 backend for popup context menu, logoff, and shutdown dialogs so KWin doesn't decorate with Aurorae
+if len(sys.argv) > 1 and sys.argv[1].lower() in ("sni-menu", "afmelden", "logoff", "shutdown", "turnoff", "afsluiten") and os.environ.get("GDK_BACKEND") != "x11":
     os.environ["GDK_BACKEND"] = "x11"
     try:
         os.execv(sys.executable, [sys.executable] + sys.argv)
@@ -2592,28 +2592,33 @@ def sni_menu(svc, path, menu_path="/com/canonical/dbusmenu", target_x=None, targ
     win.connect("destroy", Gtk.main_quit)
     win.show_all()
 
-    # Position cleanly in bottom-right corner at tray icon
+    screen = Gdk.Screen.get_default()
+    sw = screen.get_width() if screen else 2560
+    sh = screen.get_height() if screen else 1440
+
+    # Position directly above the clicked tray icon using live xdotool cursor position
+    mx, my = None, None
     try:
-        seat = Gdk.Display.get_default().get_default_seat()
-        if seat:
-            ptr = seat.get_pointer()
-            if ptr:
-                _, cx, cy = ptr.get_position()
-                target_x, target_y = cx, cy
+        out = subprocess.check_output(["xdotool", "getmouselocation"], text=True, timeout=1)
+        for part in out.strip().split():
+            if part.startswith("x:"): mx = int(part[2:])
+            elif part.startswith("y:"): my = int(part[2:])
     except Exception:
         pass
-    if target_x is None: target_x = 1800
-    if target_y is None: target_y = 1000
+
+    if mx is not None and mx > 100:
+        target_x = mx
+        target_y = my
+    elif target_x is None or target_x < 100:
+        target_x = sw - 140
+        target_y = sh - 36
 
     alloc = win.get_allocation()
     w = max(175, alloc.width)
     h = max(35, alloc.height)
-    screen = Gdk.Screen.get_default()
-    sw = screen.get_width() if screen else 1920
-    sh = screen.get_height() if screen else 1080
 
     px = max(4, min(target_x - w // 2, sw - w - 4))
-    py = max(4, target_y - h - 4)
+    py = max(4, target_y - h - 6)
     if py < 4:
         py = min(target_y + 16, sh - h - 4)
 
@@ -2627,79 +2632,220 @@ class XpLogoffDialog(Gtk.Window):
 
     def __init__(self):
         super().__init__(title="Log Off Windows")
-        self.set_default_size(340, 200)
+        self.set_default_size(320, 204)
         self.set_resizable(False)
         self.set_position(Gtk.WindowPosition.CENTER)
         self.set_decorated(False)
+        self.set_type_hint(Gdk.WindowTypeHint.DIALOG)
+        self.set_skip_taskbar_hint(True)
+        self.set_skip_pager_hint(True)
+        self.set_keep_above(True)
 
-        outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-        self.add(outer)
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        self.add(box)
 
-        # Dark blue XP bar at top with Windows XP flag
-        top = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        top.set_size_request(-1, 44)
+        # 1. Top bar (#001961) with Windows flag
+        top = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        top.set_size_request(-1, 38)
         top.override_background_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0.0, 0.19, 0.61, 1.0))
-        lbl_top = Gtk.Label()
-        lbl_top.set_markup("<span foreground='white' font_desc='Tahoma Bold 12'>  Log Off Windows</span>")
-        lbl_top.set_xalign(0.0)
-        top.pack_start(lbl_top, True, True, 8)
-        top.pack_end(make_icon("xp-flag.svg", 28), False, False, 12)
-        outer.pack_start(top, False, False, 0)
+        lbl_title = Gtk.Label()
+        lbl_title.set_markup("<span foreground='white' font_desc='Tahoma Bold 13'> Log Off Windows</span>")
+        lbl_title.set_xalign(0.0)
+        top.pack_start(lbl_title, True, True, 12)
 
-        # Orange highlight line
-        sep = Gtk.Box()
-        sep.set_size_request(-1, 2)
-        sep.override_background_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(1.0, 0.60, 0.20, 1.0))
-        outer.pack_start(sep, False, False, 0)
+        flag = make_icon("xp-flag.svg", 28)
+        flag.set_margin_end(10)
+        top.pack_end(flag, False, False, 0)
+        box.pack_start(top, False, False, 0)
 
-        # Center blue area with Switch User & Log Off buttons
-        mid = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=36)
-        mid.set_halign(Gtk.Align.CENTER)
-        mid.set_valign(Gtk.Align.CENTER)
-        mid.set_margin_top(22)
-        mid.set_margin_bottom(22)
-        mid_wrap = Gtk.EventBox()
-        mid_wrap.override_background_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0.35, 0.49, 0.86, 1.0))
-        mid_wrap.add(mid)
-        outer.pack_start(mid_wrap, True, True, 0)
+        # 2. Middle band (Luna gradient + Switch User & Log Off buttons)
+        mid_da = Gtk.DrawingArea()
+        mid_da.set_size_request(320, 126)
+        mid_da.add_events(Gdk.EventMask.POINTER_MOTION_MASK | Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.BUTTON_RELEASE_MASK | Gdk.EventMask.LEAVE_NOTIFY_MASK)
 
-        def make_choice(icon_file, title_str, cb):
-            col = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-            btn = Gtk.Button()
-            btn.set_size_request(44, 44)
-            btn.add(make_icon(icon_file, 32))
-            btn.connect("clicked", cb)
-            lbl = Gtk.Label()
-            lbl.set_markup(f"<span foreground='white' font_desc='Tahoma Bold 9.5'>{title_str}</span>")
-            col.pack_start(btn, False, False, 0)
-            col.pack_start(lbl, False, False, 0)
-            return col
+        self.hover_btn = -1
+        self.pressed_btn = -1
 
-        def on_switch_user(_):
-            play_xp_sound("klick.wav")
-            run_cmd(["loginctl", "lock-session"])
-            Gtk.main_quit()
+        centers_x = [105, 215]
+        btn_y = 20
+        btn_size = 38
+        rad = 6
 
-        def on_logoff(_):
-            play_xp_sound("klick.wav")
-            run_cmd(["qdbus-qt6", "org.kde.Shutdown", "/Shutdown", "logout"])
-            Gtk.main_quit()
+        def draw_mid(widget, cr):
+            w = widget.get_allocated_width()
+            h = widget.get_allocated_height()
 
-        mid.pack_start(make_choice("cat-users.svg", "Switch User", on_switch_user), False, False, 0)
-        mid.pack_start(make_choice("logout.svg", "Log Off", on_logoff), False, False, 0)
+            # Luna gradient exactly from original XP
+            pat = cairo.LinearGradient(0, 0, 0, h)
+            pat.add_color_stop_rgb(0.0, 0.44, 0.60, 0.88)
+            pat.add_color_stop_rgb(0.4, 0.53, 0.68, 0.93)
+            pat.add_color_stop_rgb(1.0, 0.38, 0.53, 0.82)
+            cr.set_source(pat)
+            cr.rectangle(0, 0, w, h)
+            cr.fill()
 
-        # Bottom bar with Cancel button
-        bot = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        bot.set_size_request(-1, 42)
+            # Top white highlight line
+            cr.set_source_rgba(1, 1, 1, 0.45)
+            cr.set_line_width(1)
+            cr.move_to(0, 0.5); cr.line_to(w, 0.5); cr.stroke()
+
+            # Bottom dark shadow line
+            cr.set_source_rgba(0, 0.1, 0.4, 0.4)
+            cr.move_to(0, h - 0.5); cr.line_to(w, h - 0.5); cr.stroke()
+
+            btns = [
+                ("Switch User", (0.45, 0.72, 0.95), (0.18, 0.45, 0.82), (0.08, 0.28, 0.65), "switch"),
+                ("Log Off", (1.0, 0.88, 0.35), (0.98, 0.62, 0.0), (0.80, 0.42, 0.0), "logoff"),
+            ]
+
+            for idx, (lbl, col_top, col_mid, col_bot, btype) in enumerate(btns):
+                cx = centers_x[idx]
+                bx = cx - btn_size // 2
+                by = btn_y
+                is_hov = (self.hover_btn == idx)
+                is_prs = (self.pressed_btn == idx)
+
+                # Soft drop shadow
+                for s_off, s_alpha in [(3, 0.08), (2, 0.15), (1, 0.25)]:
+                    cr.new_sub_path()
+                    cr.arc(bx + rad, by + rad + s_off, rad, 3.14, 4.71)
+                    cr.arc(bx + btn_size - rad, by + rad + s_off, rad, 4.71, 6.28)
+                    cr.arc(bx + btn_size - rad, by + btn_size - rad + s_off, rad, 0, 1.57)
+                    cr.arc(bx + rad, by + btn_size - rad + s_off, rad, 1.57, 3.14)
+                    cr.close_path()
+                    cr.set_source_rgba(0, 0.08, 0.3, s_alpha)
+                    cr.fill()
+
+                # Button body
+                cr.new_sub_path()
+                cr.arc(bx + rad, by + rad, rad, 3.14, 4.71)
+                cr.arc(bx + btn_size - rad, by + rad, rad, 4.71, 6.28)
+                cr.arc(bx + btn_size - rad, by + btn_size - rad, rad, 0, 1.57)
+                cr.arc(bx + rad, by + btn_size - rad, rad, 1.57, 3.14)
+                cr.close_path()
+
+                b_pat = cairo.LinearGradient(bx, by, bx, by + btn_size)
+                if is_prs:
+                    b_pat.add_color_stop_rgb(0.0, *col_bot)
+                    b_pat.add_color_stop_rgb(0.5, *col_mid)
+                    b_pat.add_color_stop_rgb(1.0, *col_top)
+                elif is_hov:
+                    b_pat.add_color_stop_rgb(0.0, min(1.0, col_top[0]+0.1), min(1.0, col_top[1]+0.1), min(1.0, col_top[2]+0.1))
+                    b_pat.add_color_stop_rgb(0.48, *col_mid)
+                    b_pat.add_color_stop_rgb(1.0, *col_bot)
+                else:
+                    b_pat.add_color_stop_rgb(0.0, *col_top)
+                    b_pat.add_color_stop_rgb(0.48, *col_mid)
+                    b_pat.add_color_stop_rgb(1.0, *col_bot)
+                cr.set_source(b_pat)
+                cr.fill_preserve()
+
+                # Outer crisp white/light bevel border
+                cr.set_source_rgba(1, 1, 1, 0.95 if is_hov else 0.85)
+                cr.set_line_width(1.2 if is_hov else 1.0)
+                cr.stroke()
+
+                # Top glossy highlight
+                cr.save()
+                cr.new_sub_path()
+                cr.arc(bx + rad + 0.5, by + rad + 0.5, rad - 0.5, 3.14, 4.71)
+                cr.arc(bx + btn_size - rad - 0.5, by + rad + 0.5, rad - 0.5, 4.71, 6.28)
+                cr.line_to(bx + btn_size - 1.5, by + btn_size * 0.45)
+                cr.curve_to(bx + btn_size * 0.5, by + btn_size * 0.35, bx + btn_size * 0.5, by + btn_size * 0.35, bx + 1.5, by + btn_size * 0.45)
+                cr.close_path()
+                cr.set_source_rgba(1, 1, 1, 0.45)
+                cr.fill()
+                cr.restore()
+
+                # Inner symbols in pure white
+                cr.set_source_rgb(1, 1, 1)
+                cr.set_line_width(2.4)
+                cr.set_line_cap(cairo.LINE_CAP_ROUND)
+
+                if btype == "switch":
+                    # Two user avatars icon
+                    cr.arc(cx - 4, by + 14, 4.5, 0, 6.28); cr.stroke()
+                    cr.arc(cx - 4, by + 28, 8, 3.14, 6.28); cr.stroke()
+                    cr.arc(cx + 6, by + 16, 3.5, 0, 6.28); cr.stroke()
+                    cr.arc(cx + 6, by + 29, 6.5, 3.14, 6.28); cr.stroke()
+                elif btype == "logoff":
+                    # Key icon
+                    cr.arc(cx - 4, by + btn_size // 2, 6, 0, 6.28); cr.stroke()
+                    cr.move_to(cx + 2, by + btn_size // 2)
+                    cr.line_to(cx + 12, by + btn_size // 2); cr.stroke()
+                    cr.move_to(cx + 8, by + btn_size // 2)
+                    cr.line_to(cx + 8, by + btn_size // 2 + 5); cr.stroke()
+                    cr.move_to(cx + 12, by + btn_size // 2)
+                    cr.line_to(cx + 12, by + btn_size // 2 + 4); cr.stroke()
+
+                # Label below
+                cr.select_font_face("Tahoma", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+                cr.set_font_size(11)
+                ext = cr.text_extents(lbl)
+                lx = cx - ext.width / 2
+                ly = by + btn_size + 24
+                # Drop shadow
+                cr.set_source_rgba(0, 0.1, 0.35, 0.8)
+                cr.move_to(lx + 1, ly + 1); cr.show_text(lbl)
+                # Text
+                cr.set_source_rgb(1, 1, 1)
+                cr.move_to(lx, ly); cr.show_text(lbl)
+
+            return False
+
+        def on_motion(w, ev):
+            idx = -1
+            for i, cx in enumerate(centers_x):
+                if abs(ev.x - cx) <= btn_size // 2 + 4 and abs(ev.y - (btn_y + btn_size // 2)) <= btn_size // 2 + 4:
+                    idx = i
+                    break
+            if idx != self.hover_btn:
+                self.hover_btn = idx
+                w.queue_draw()
+
+        def on_leave(w, _):
+            if self.hover_btn != -1:
+                self.hover_btn = -1
+                w.queue_draw()
+
+        def on_btn_press(w, ev):
+            if ev.button == 1 and self.hover_btn != -1:
+                self.pressed_btn = self.hover_btn
+                w.queue_draw()
+
+        def on_btn_release(w, ev):
+            if ev.button == 1 and self.pressed_btn != -1:
+                idx = self.pressed_btn
+                self.pressed_btn = -1
+                w.queue_draw()
+                play_xp_sound("klick.wav")
+                if idx == 0:
+                    run_cmd(["loginctl", "lock-session"])
+                    Gtk.main_quit()
+                elif idx == 1:
+                    run_cmd(["qdbus-qt6", "org.kde.Shutdown", "/Shutdown", "logout"])
+                    Gtk.main_quit()
+
+        mid_da.connect("draw", draw_mid)
+        mid_da.connect("motion-notify-event", on_motion)
+        mid_da.connect("leave-notify-event", on_leave)
+        mid_da.connect("button-press-event", on_btn_press)
+        mid_da.connect("button-release-event", on_btn_release)
+        box.pack_start(mid_da, True, True, 0)
+
+        # 3. Bottom bar (#001961) with Cancel button
+        bot = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        bot.set_size_request(-1, 40)
         bot.override_background_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0.0, 0.19, 0.61, 1.0))
+
         cancel_btn = Gtk.Button(label="Cancel")
         cancel_btn.get_style_context().add_class("xp-push-btn")
-        cancel_btn.set_margin_end(14)
-        cancel_btn.set_margin_top(8)
-        cancel_btn.set_margin_bottom(8)
+        cancel_btn.set_size_request(76, 26)
+        cancel_btn.set_margin_end(12)
+        cancel_btn.set_valign(Gtk.Align.CENTER)
         cancel_btn.connect("clicked", lambda *_: Gtk.main_quit())
         bot.pack_end(cancel_btn, False, False, 0)
-        outer.pack_start(bot, False, False, 0)
+        box.pack_start(bot, False, False, 0)
 
 
 class XpTurnOffDialog(Gtk.Window):
@@ -2711,6 +2857,10 @@ class XpTurnOffDialog(Gtk.Window):
         self.set_resizable(False)
         self.set_position(Gtk.WindowPosition.CENTER)
         self.set_decorated(False)
+        self.set_type_hint(Gdk.WindowTypeHint.DIALOG)
+        self.set_skip_taskbar_hint(True)
+        self.set_skip_pager_hint(True)
+        self.set_keep_above(True)
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         self.add(box)

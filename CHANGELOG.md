@@ -40,3 +40,4 @@ All notable changes to the Windows XP Suite for Bazzite / KDE Plasma 6 will be d
 
 ## [v1.0.0] — 2026-10-31
 - Initial release of Windows XP Professional SP3 Luna & Classic Suite for Bazzite KDE Plasma 6.
+

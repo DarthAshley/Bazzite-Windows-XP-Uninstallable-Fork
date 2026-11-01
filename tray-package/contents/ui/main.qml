@@ -363,8 +363,7 @@ PlasmoidItem {
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
                             onClicked: mouse => {
                                 if (mouse.button === Qt.RightButton) {
-                                    let pt = mapToGlobal(mouse.x, mouse.y)
-                                    root.runCmd("GDK_BACKEND=x11 python3 '" + root.xpScript + "' sni-menu '" + sniService + "' '" + sniPath + "' '" + sniMenu + "' " + Math.round(pt.x) + " " + Math.round(pt.y))
+                                    root.runCmd("env GDK_BACKEND=x11 python3 '" + root.xpScript + "' sni-menu '" + sniService + "' '" + sniPath + "' '" + sniMenu + "'")
                                 } else {
                                     root.runCmd("python3 '" + root.xpScript + "' sni-activate '" + sniService + "' '" + sniPath + "' '" + sniMenu + "'")
                                 }

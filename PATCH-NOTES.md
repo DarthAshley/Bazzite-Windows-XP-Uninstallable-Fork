@@ -43,3 +43,4 @@ Of herstel op elk gewenst moment de standaardinstellingen via:
 ```bash
 bash installeren.sh terug
 ```
+
