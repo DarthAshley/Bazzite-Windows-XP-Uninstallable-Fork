@@ -86,19 +86,23 @@ if [ -d "$MAP/xp-login-screen" ]; then
     fi
     mkdir -p "$K/.local/share/plasma/shells/org.kde.plasma.desktop/contents/lockscreen/images"
     cp -f "$MAP/xp-login-screen/LockScreenUi.qml" "$K/.local/share/plasma/shells/org.kde.plasma.desktop/contents/lockscreen/LockScreenUi.qml"
+    cp -f "$MAP/xp-login-screen/xpConfig.js" "$K/.local/share/plasma/shells/org.kde.plasma.desktop/contents/lockscreen/xpConfig.js"
     cp -f "$MAP/xp-login-screen/images/"* "$K/.local/share/plasma/shells/org.kde.plasma.desktop/contents/lockscreen/images/"
 
     mkdir -p "$K/.local/share/plasma/look-and-feel/org.magpie.xpluna.desktop/contents/lockscreen/images"
     [ -f "/usr/share/plasma/shells/org.kde.plasma.desktop/contents/lockscreen/LockScreen.qml" ] && cp -f "/usr/share/plasma/shells/org.kde.plasma.desktop/contents/lockscreen/LockScreen.qml" "$K/.local/share/plasma/look-and-feel/org.magpie.xpluna.desktop/contents/lockscreen/LockScreen.qml"
     cp -f "$MAP/xp-login-screen/LockScreenUi.qml" "$K/.local/share/plasma/look-and-feel/org.magpie.xpluna.desktop/contents/lockscreen/LockScreenUi.qml"
+    cp -f "$MAP/xp-login-screen/xpConfig.js" "$K/.local/share/plasma/look-and-feel/org.magpie.xpluna.desktop/contents/lockscreen/xpConfig.js"
     cp -f "$MAP/xp-login-screen/images/"* "$K/.local/share/plasma/look-and-feel/org.magpie.xpluna.desktop/contents/lockscreen/images/"
 
     mkdir -p "$K/.local/share/plasma/look-and-feel/org.magpie.xpluna.desktop/contents/splash/images"
     cp -f "$MAP/xp-login-screen/Splash.qml" "$K/.local/share/plasma/look-and-feel/org.magpie.xpluna.desktop/contents/splash/Splash.qml"
+    cp -f "$MAP/xp-login-screen/xpConfig.js" "$K/.local/share/plasma/look-and-feel/org.magpie.xpluna.desktop/contents/splash/xpConfig.js"
     cp -f "$MAP/xp-login-screen/images/"* "$K/.local/share/plasma/look-and-feel/org.magpie.xpluna.desktop/contents/splash/images/"
 
     mkdir -p "$K/.local/share/sddm/themes/XPLuna/assets"
     cp -f "$MAP/xp-login-screen/SddmMain.qml" "$K/.local/share/sddm/themes/XPLuna/Main.qml"
+    cp -f "$MAP/xp-login-screen/xpConfig.js" "$K/.local/share/sddm/themes/XPLuna/xpConfig.js"
     cp -f "$MAP/xp-login-screen/images/"* "$K/.local/share/sddm/themes/XPLuna/assets/"
 fi
 

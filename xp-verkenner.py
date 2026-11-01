@@ -374,7 +374,7 @@ CLASSIC_ITEMS = [
     ("Bluetooth-apparaten", "tray-bt.svg", "kcmshell6 kcm_bluetooth"),
     ("Datum en tijd", "cat-datetime.svg", "kcmshell6 kcm_clock"),
     ("Energiebeheer", "cp-power.svg", "kcmshell6 kcm_powerdevilprofilesconfig"),
-    ("Gebruikersaccounts", "cat-users.svg", "kcmshell6 kcm_users"),
+    ("Gebruikersaccounts", "cat-users.svg", "__LOGON__"),
     ("Geluiden en\naudioapparaten", "cp-sound.svg", "kcmshell6 kcm_pulseaudio"),
     ("Geplande taken", "cp-updates.svg", "kcmshell6 kcm_autostart"),
     ("Internetopties", "cat-network.svg", "kcmshell6 kcm_proxy"),
@@ -442,8 +442,9 @@ CATEGORIES = [
     (
         "Gebruikersaccounts",
         "cat-users.svg",
-        "Gebruikersaccounts, wachtwoorden en aanmeldingsopties wijzigen",
+        "Gebruikersaccounts, wachtwoorden en aanmeldingsopties (XP Welkomstscherm vs Klassiek Logon) wijzigen",
         [
+            ("De manier waarop gebruikers zich aan- of afmelden wijzigen (XP Welkomstscherm / Klassiek Logon)", "cat-users.svg", "__LOGON__"),
             ("Een account wijzigen", "cat-users.svg", "kcmshell6 kcm_users"),
             ("Een nieuwe account maken", "cat-users.svg", "kcmshell6 kcm_users"),
             ("Aanmeldingsbeheer (SDDM)", "cat-users.svg", "kcmshell6 kcm_plasmalogin"),
@@ -716,6 +717,8 @@ class DisplayPropertiesDialog(Gtk.Window):
         left_col = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
         left_col.set_hexpand(True)
 
+        cur_cfg = load_xp_settings()
+        self.disp_combos = []
         for label_txt, options in [
             ("Vensters en knoppen:", ["Windows XP-stijl", "Klassieke Windows-stijl"]),
             ("Kleurenschema:", ["Standaard (blauw)", "Olijfgroen", "Zilver"]),
@@ -727,7 +730,11 @@ class DisplayPropertiesDialog(Gtk.Window):
             for opt in options:
                 combo.append_text(opt)
             combo.set_active(0)
+            self.disp_combos.append(combo)
             left_col.pack_start(combo, False, False, 2)
+
+        if cur_cfg.get("taskbarStyle") == "classic":
+            self.disp_combos[0].set_active(1)
 
         bottom_row.pack_start(left_col, True, True, 0)
 
@@ -746,26 +753,162 @@ class DisplayPropertiesDialog(Gtk.Window):
         right_col.pack_start(btn_adv, False, False, 0)
         bottom_row.pack_start(right_col, False, False, 0)
 
+        def apply_disp(close_after=False):
+            c = load_xp_settings()
+            is_cl = self.disp_combos[0].get_active() == 1
+            c["taskbarStyle"] = "classic" if is_cl else "xp"
+            c["startMenuStyle"] = "classic" if is_cl else "xp"
+            save_xp_settings(c, restart_plasma=True)
+            if close_after:
+                self.destroy()
+
         btn_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         btn_row.set_margin_top(8)
         btn_row.set_halign(Gtk.Align.END)
-        for label, close_win in [("OK", True), ("Annuleren", True), ("Toepassen", False)]:
+        for label, close_win in [("OK", True), ("Annuleren", None), ("Toepassen", False)]:
             btn = Gtk.Button(label=label)
             btn.get_style_context().add_class("xp-push-btn")
-            if not close_win:
-                btn.set_sensitive(False)
-            else:
+            if close_win is None:
                 btn.connect("clicked", lambda *_: self.destroy())
+            elif close_win:
+                btn.connect("clicked", lambda *_: apply_disp(True))
+            else:
+                btn.connect("clicked", lambda *_: apply_disp(False))
             btn_row.pack_start(btn, False, False, 0)
         vbox.pack_start(btn_row, False, False, 0)
 
 
-class TaskbarPropertiesDialog(Gtk.Window):
-    """Exacte replica van 'Eigenschappen voor Taakbalk en menu Start'."""
+XP_SETTINGS_FILE = os.path.expanduser("~/.config/xp-instellingen.json")
 
-    def __init__(self, parent=None):
-        super().__init__(title="Eigenschappen voor Taakbalk en menu Start")
-        self.set_default_size(390, 420)
+DEFAULT_XP_SETTINGS = {
+    "taskbarStyle": "xp",
+    "taskbarHeight": 30,
+    "showQuickLaunch": True,
+    "showClock": True,
+    "startMenuStyle": "xp",
+    "startIconSize": "large",
+    "startItemsCount": 6,
+    "startItemsMode": "both",
+    "customItems": [
+        "Firefox|firefox|firefox",
+        "Steam|steam|steam",
+        "Discord|discord|flatpak run com.discordapp.Discord",
+        "Lutris|lutris|lutris",
+        "Windows Verkenner|computer|dolphin",
+        "Configuratiescherm|preferences-system|python3 $HOME/.local/share/xp-startknop/xp-verkenner.py configuratiescherm",
+    ],
+    "logonStyle": "welcome",
+}
+
+
+def load_xp_settings():
+    cfg = dict(DEFAULT_XP_SETTINGS)
+    try:
+        if os.path.exists(XP_SETTINGS_FILE):
+            with open(XP_SETTINGS_FILE, "r", encoding="utf-8") as f:
+                loaded = json.load(f)
+                if isinstance(loaded, dict):
+                    cfg.update(loaded)
+    except Exception:
+        pass
+    return cfg
+
+
+def save_xp_settings(cfg, restart_plasma=True):
+    try:
+        os.makedirs(os.path.dirname(XP_SETTINGS_FILE), exist_ok=True)
+        with open(XP_SETTINGS_FILE, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, indent=2, ensure_ascii=False)
+    except Exception:
+        pass
+
+    js_content = (
+        ".pragma library\n\n"
+        f'var taskbarStyle = {json.dumps(cfg.get("taskbarStyle", "xp"))};\n'
+        f'var taskbarHeight = {int(cfg.get("taskbarHeight", 30))};\n'
+        f'var showQuickLaunch = {"true" if cfg.get("showQuickLaunch", True) else "false"};\n'
+        f'var showClock = {"true" if cfg.get("showClock", True) else "false"};\n'
+        f'var startMenuStyle = {json.dumps(cfg.get("startMenuStyle", "xp"))};\n'
+        f'var startIconSize = {json.dumps(cfg.get("startIconSize", "large"))};\n'
+        f'var startItemsCount = {int(cfg.get("startItemsCount", 6))};\n'
+        f'var startItemsMode = {json.dumps(cfg.get("startItemsMode", "both"))};\n'
+        f'var customItems = {json.dumps(cfg.get("customItems", DEFAULT_XP_SETTINGS["customItems"]), ensure_ascii=False)};\n'
+        f'var logonStyle = {json.dumps(cfg.get("logonStyle", "welcome"))};\n'
+    )
+
+    home = os.path.expanduser("~")
+    targets = [
+        os.path.join(home, ".local/share/plasma/plasmoids/nl.steelhull.xpstart/contents/ui/xpConfig.js"),
+        os.path.join(home, ".local/share/plasma/plasmoids/nl.steelhull.xptray/contents/ui/xpConfig.js"),
+        os.path.join(home, ".local/share/plasma/shells/org.kde.plasma.desktop/contents/lockscreen/xpConfig.js"),
+        os.path.join(home, ".local/share/plasma/look-and-feel/org.magpie.xpluna.desktop/contents/lockscreen/xpConfig.js"),
+        os.path.join(home, ".local/share/plasma/look-and-feel/org.magpie.xpluna.desktop/contents/splash/xpConfig.js"),
+        "/var/mnt/schijven/1TB SSD/AI Assistent/Github Repos/Bazzite-Windows-XP/xp-login-screen/xpConfig.js",
+        "/var/mnt/schijven/1TB SSD/AI Assistent/Github Repos/Bazzite-Windows-XP/package/contents/ui/xpConfig.js",
+        "/var/mnt/schijven/1TB SSD/AI Assistent/Github Repos/Bazzite-Windows-XP/tray-package/contents/ui/xpConfig.js",
+    ]
+    for t_path in targets:
+        try:
+            t_dir = os.path.dirname(t_path)
+            if os.path.isdir(t_dir):
+                with open(t_path, "w", encoding="utf-8") as f:
+                    f.write(js_content)
+        except Exception:
+            pass
+
+    # Pas de taakbalkhoogte (panel thickness) direct aan in plasmashellrc én via qdbus
+    tb_height = int(cfg.get("taskbarHeight", 30))
+    plasmashellrc = os.path.join(home, ".config/plasmashellrc")
+    try:
+        if os.path.exists(plasmashellrc):
+            with open(plasmashellrc, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+            new_lines = []
+            for ln in lines:
+                if ln.strip().startswith("thickness="):
+                    new_lines.append(f"thickness={tb_height}\n")
+                else:
+                    new_lines.append(ln)
+            with open(plasmashellrc, "w", encoding="utf-8") as f:
+                f.writelines(new_lines)
+    except Exception:
+        pass
+
+    try:
+        subprocess.run(
+            [
+                "qdbus-qt6",
+                "org.kde.plasmashell",
+                "/PlasmaShell",
+                "org.kde.PlasmaShell.evaluateScript",
+                f"panels().forEach(p => {{ p.height = {tb_height}; }});",
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=2,
+        )
+    except Exception:
+        pass
+
+    if restart_plasma:
+        subprocess.Popen(
+            ["systemctl", "--user", "restart", "plasma-plasmashell.service"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+
+
+class TaskbarPropertiesDialog(Gtk.Window):
+    """
+    Uitgebreide 'Eigenschappen voor Taakbalk, menu Start en Aanmeldscherm' met 3 werkende tabbladen:
+    1. Taakbalk (XP Luna vs Classic, Hoogte 30/36/42/48 px voor grotere knoppen, Snel starten, Klok)
+    2. Menu Start (XP vs Klassiek menu Start, Grote/Kleine iconen, Aantal items, Bron: Favorieten / Meest gebruikt / Vaste eigen lijst)
+    3. Aanmeldscherm (Windows XP Welkomstscherm met gebruikerstegels vs Klassiek 'Log On to Windows' venster)
+    """
+
+    def __init__(self, parent=None, initial_tab=0):
+        super().__init__(title="Eigenschappen voor Taakbalk, menu Start en Aanmeldscherm")
+        self.set_default_size(465, 530)
         self.set_resizable(False)
         self.set_position(Gtk.WindowPosition.CENTER)
         if parent:
@@ -774,6 +917,8 @@ class TaskbarPropertiesDialog(Gtk.Window):
         if icon_pb:
             self.set_icon(icon_pb)
 
+        self.cfg = load_xp_settings()
+
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         vbox.set_margin_top(8)
         vbox.set_margin_bottom(8)
@@ -781,67 +926,278 @@ class TaskbarPropertiesDialog(Gtk.Window):
         vbox.set_margin_end(8)
         self.add(vbox)
 
-        tabs = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=1)
-        for idx, t_label in enumerate(["Taakbalk", "Menu Start"]):
+        # Tabknoppen bovenaan
+        self.tab_btns = []
+        tabs_bar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
+        for idx, t_label in enumerate(["Taakbalk", "Menu Start", "Aanmeldscherm (Logon)"]):
             b = Gtk.Button(label=t_label)
             b.get_style_context().add_class("xp-tab-btn")
-            if idx == 0:
-                b.get_style_context().add_class("xp-tab-active")
-            tabs.pack_start(b, False, False, 0)
-        vbox.pack_start(tabs, False, False, 0)
+            b.connect("clicked", lambda _, i=idx: self._switch_tab(i))
+            self.tab_btns.append(b)
+            tabs_bar.pack_start(b, False, False, 0)
+        vbox.pack_start(tabs_bar, False, False, 0)
 
-        page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        page.get_style_context().add_class("xp-tab-page")
-        vbox.pack_start(page, True, True, 0)
+        self.stack = Gtk.Stack()
+        self.stack.get_style_context().add_class("xp-tab-page")
+        vbox.pack_start(self.stack, True, True, 0)
+
+        # === TAB 0: TAAKBALK ===
+        page_tb = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=7)
+        self.stack.add_named(page_tb, "tab0")
+
+        grp_tb_style = Gtk.Label(xalign=0)
+        grp_tb_style.set_markup("<span foreground='#1f4fd5' weight='bold'>Stijl en grootte van de taakbalk</span>")
+        page_tb.pack_start(grp_tb_style, False, False, 2)
+
+        lbl_tb_style = Gtk.Label(label="Weergavestijl van taakbalk en Start-knop:", xalign=0)
+        page_tb.pack_start(lbl_tb_style, False, False, 0)
+
+        self.combo_tb_style = Gtk.ComboBoxText()
+        self.combo_tb_style.append_text("Windows XP-stijl (Blauwe Luna-balk met groene Start-knop)")
+        self.combo_tb_style.append_text("Klassieke Windows-stijl (Grijze 3D-balk met klassieke Start-knop)")
+        self.combo_tb_style.set_active(1 if self.cfg.get("taskbarStyle") == "classic" else 0)
+        page_tb.pack_start(self.combo_tb_style, False, False, 2)
+
+        lbl_tb_height = Gtk.Label(label="Hoogte van de taakbalk en grootte van taakbalkknoppen:", xalign=0)
+        page_tb.pack_start(lbl_tb_height, False, False, 0)
+
+        self.height_values = [30, 36, 42, 48]
+        self.combo_tb_height = Gtk.ComboBoxText()
+        self.combo_tb_height.append_text("Standaard Windows XP (30 pixels)")
+        self.combo_tb_height.append_text("Middelgroot — Iets hogere balk & grotere knoppen (36 pixels)")
+        self.combo_tb_height.append_text("Groot — Hoge taakbalk & grote knoppen (42 pixels)")
+        self.combo_tb_height.append_text("Extra groot — Dubbele hoogte (48 pixels)")
+        cur_h = int(self.cfg.get("taskbarHeight", 30))
+        h_idx = self.height_values.index(cur_h) if cur_h in self.height_values else 0
+        self.combo_tb_height.set_active(h_idx)
+        page_tb.pack_start(self.combo_tb_height, False, False, 2)
+
+        sep_tb1 = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+        page_tb.pack_start(sep_tb1, False, False, 4)
 
         grp1 = Gtk.Label(xalign=0)
-        grp1.set_markup("<span foreground='#1f4fd5' weight='bold'>Vormgeving van de taakbalk</span>")
-        page.pack_start(grp1, False, False, 2)
+        grp1.set_markup("<span foreground='#1f4fd5' weight='bold'>Opties voor de taakbalk</span>")
+        page_tb.pack_start(grp1, False, False, 2)
 
-        for txt, checked in [
-            ("De taakbalk vergrendelen", True),
-            ("De taakbalk automatisch verbergen", False),
-            ("De taakbalk altijd op de voorgrond weergeven", True),
-            ("Gelijksoortige taakbalkknoppen groeperen", True),
-            ("Werkbalk Snel starten weergeven", False),
-        ]:
-            chk = Gtk.CheckButton(label=txt)
-            chk.set_active(checked)
-            page.pack_start(chk, False, False, 0)
+        self.chk_lock = Gtk.CheckButton(label="De taakbalk vergrendelen")
+        self.chk_lock.set_active(True)
+        page_tb.pack_start(self.chk_lock, False, False, 0)
 
-        sep = Gtk.Box()
-        sep.set_size_request(-1, 8)
-        page.pack_start(sep, False, False, 0)
+        self.chk_top = Gtk.CheckButton(label="De taakbalk altijd op de voorgrond weergeven")
+        self.chk_top.set_active(True)
+        page_tb.pack_start(self.chk_top, False, False, 0)
+
+        self.chk_group = Gtk.CheckButton(label="Gelijksoortige taakbalkknoppen groeperen")
+        self.chk_group.set_active(True)
+        page_tb.pack_start(self.chk_group, False, False, 0)
+
+        self.chk_ql = Gtk.CheckButton(label="Werkbalk Snel starten weergeven (Bureaublad tonen, Firefox, Verkenner)")
+        self.chk_ql.set_active(bool(self.cfg.get("showQuickLaunch", True)))
+        page_tb.pack_start(self.chk_ql, False, False, 0)
+
+        sep_tb2 = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+        page_tb.pack_start(sep_tb2, False, False, 4)
 
         grp2 = Gtk.Label(xalign=0)
-        grp2.set_markup("<span foreground='#1f4fd5' weight='bold'>Systeemvak</span>")
-        page.pack_start(grp2, False, False, 2)
+        grp2.set_markup("<span foreground='#1f4fd5' weight='bold'>Systeemvak (Rechtsonder)</span>")
+        page_tb.pack_start(grp2, False, False, 2)
 
-        for txt, checked in [
-            ("De klok weergeven", True),
-            ("Niet-actieve pictogrammen opruimen", True),
-        ]:
-            chk = Gtk.CheckButton(label=txt)
-            chk.set_active(checked)
-            page.pack_start(chk, False, False, 0)
+        self.chk_clock = Gtk.CheckButton(label="De klok weergeven")
+        self.chk_clock.set_active(bool(self.cfg.get("showClock", True)))
+        page_tb.pack_start(self.chk_clock, False, False, 0)
 
-        tip = Gtk.Label(
-            label="Tip: u kunt het menu Start ook direct vergroten of verkleinen door aan de boven- of rechterrand van het menu Start te slepen.",
+        self.chk_clean = Gtk.CheckButton(label="Achtergrond-apps (Discord, Steam, etc.) en systeem-iconen tonen")
+        self.chk_clean.set_active(True)
+        page_tb.pack_start(self.chk_clean, False, False, 0)
+
+        # === TAB 1: MENU START ===
+        page_sm = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        self.stack.add_named(page_sm, "tab1")
+
+        grp_sm_style = Gtk.Label(xalign=0)
+        grp_sm_style.set_markup("<span foreground='#1f4fd5' weight='bold'>Stijl van het menu Start</span>")
+        page_sm.pack_start(grp_sm_style, False, False, 1)
+
+        self.rb_sm_xp = Gtk.RadioButton.new_with_label_from_widget(
+            None, "Menu Start van Windows XP (2 kolommen met avatar, favorieten en plaatsen)"
+        )
+        self.rb_sm_classic = Gtk.RadioButton.new_with_label_from_widget(
+            self.rb_sm_xp, "Klassiek menu Start (Klassieke 3D-weergave met 1 kolom en XP-zijbalk)"
+        )
+        if self.cfg.get("startMenuStyle") == "classic":
+            self.rb_sm_classic.set_active(True)
+        else:
+            self.rb_sm_xp.set_active(True)
+        page_sm.pack_start(self.rb_sm_xp, False, False, 0)
+        page_sm.pack_start(self.rb_sm_classic, False, False, 0)
+
+        sep_sm1 = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+        page_sm.pack_start(sep_sm1, False, False, 3)
+
+        grp_sm_items = Gtk.Label(xalign=0)
+        grp_sm_items.set_markup("<span foreground='#1f4fd5' weight='bold'>Programma's en pictogrammen in het menu Start aanpassen</span>")
+        page_sm.pack_start(grp_sm_items, False, False, 1)
+
+        row_ic_cnt = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+        lbl_ic = Gtk.Label(label="Pictogrammen:", xalign=0)
+        self.combo_sm_icons = Gtk.ComboBoxText()
+        self.combo_sm_icons.append_text("Grote pictogrammen (30 px)")
+        self.combo_sm_icons.append_text("Kleine pictogrammen (20 px)")
+        self.combo_sm_icons.set_active(1 if self.cfg.get("startIconSize") == "small" else 0)
+
+        lbl_cnt = Gtk.Label(label="Aantal items:", xalign=0)
+        adj = Gtk.Adjustment(value=float(self.cfg.get("startItemsCount", 6)), lower=3, upper=14, step_increment=1, page_increment=2, page_size=0)
+        self.spin_sm_count = Gtk.SpinButton(adjustment=adj, climb_rate=1, digits=0)
+
+        row_ic_cnt.pack_start(lbl_ic, False, False, 0)
+        row_ic_cnt.pack_start(self.combo_sm_icons, True, True, 0)
+        row_ic_cnt.pack_start(lbl_cnt, False, False, 0)
+        row_ic_cnt.pack_start(self.spin_sm_count, False, False, 0)
+        page_sm.pack_start(row_ic_cnt, False, False, 2)
+
+        lbl_mode = Gtk.Label(label="Welke programma's op de linkerlijst van het menu Start tonen:", xalign=0)
+        page_sm.pack_start(lbl_mode, False, False, 0)
+
+        self.mode_keys = ["both", "favorites", "recent", "custom"]
+        self.combo_sm_mode = Gtk.ComboBoxText()
+        self.combo_sm_mode.append_text("Favorieten + Meest gebruikte programma's (Standaard XP)")
+        self.combo_sm_mode.append_text("Alleen Favorieten (Vastgemaakte programma's)")
+        self.combo_sm_mode.append_text("Alleen Meest gebruikte programma's")
+        self.combo_sm_mode.append_text("Vaste eigen lijst (Hieronder zelf samenstellen)")
+        cur_m = self.cfg.get("startItemsMode", "both")
+        self.combo_sm_mode.set_active(self.mode_keys.index(cur_m) if cur_m in self.mode_keys else 0)
+        page_sm.pack_start(self.combo_sm_mode, False, False, 2)
+
+        lbl_custom = Gtk.Label(
+            label="Vaste eigen lijst (1 programma per regel als: Naam|icoon|commando):",
             xalign=0,
         )
-        tip.set_line_wrap(True)
-        tip.set_max_width_chars(46)
-        page.pack_start(tip, False, False, 6)
+        page_sm.pack_start(lbl_custom, False, False, 0)
 
+        sc_custom = Gtk.ScrolledWindow()
+        sc_custom.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        sc_custom.set_size_request(-1, 115)
+        sc_custom.set_shadow_type(Gtk.ShadowType.IN)
+        self.txt_custom = Gtk.TextView()
+        self.txt_custom.set_monospace(True)
+        custom_lines = self.cfg.get("customItems", DEFAULT_XP_SETTINGS["customItems"])
+        self.txt_custom.get_buffer().set_text("\n".join(custom_lines))
+        sc_custom.add(self.txt_custom)
+        page_sm.pack_start(sc_custom, True, True, 0)
+
+        # === TAB 2: AANMELDSCHERM (LOGON) ===
+        page_lg = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        self.stack.add_named(page_lg, "tab2")
+
+        grp_lg = Gtk.Label(xalign=0)
+        grp_lg.set_markup("<span foreground='#1f4fd5' weight='bold'>Manier waarop gebruikers zich aanmelden kiezen</span>")
+        page_lg.pack_start(grp_lg, False, False, 2)
+
+        self.rb_lg_welcome = Gtk.RadioButton.new_with_label_from_widget(
+            None, "Het welkomstscherm gebruiken (Standaard Windows XP Blauw scherm)"
+        )
+        desc_w = Gtk.Label(
+            label="   Toont het blauwe Windows XP aanmeldscherm met het echte 3D Windows XP-logo,\n   gebruikerstegels, wachtwoordveld en het 'welcome' scherm.",
+            xalign=0,
+        )
+        desc_w.get_style_context().add_class("xp-cat-desc")
+
+        self.rb_lg_classic = Gtk.RadioButton.new_with_label_from_widget(
+            self.rb_lg_welcome, "Het klassieke aanmeldingsvenster gebruiken ('Log On to Windows')"
+        )
+        desc_c = Gtk.Label(
+            label="   Toont het klassieke Windows XP Professional x64 'Log On to Windows' venster\n   met User name, Password en de knoppen OK, Cancel, Shut Down... en Options <<.",
+            xalign=0,
+        )
+        desc_c.get_style_context().add_class("xp-cat-desc")
+
+        if self.cfg.get("logonStyle") == "classic":
+            self.rb_lg_classic.set_active(True)
+        else:
+            self.rb_lg_welcome.set_active(True)
+
+        page_lg.pack_start(self.rb_lg_welcome, False, False, 0)
+        page_lg.pack_start(desc_w, False, False, 2)
+        page_lg.pack_start(self.rb_lg_classic, False, False, 4)
+        page_lg.pack_start(desc_c, False, False, 2)
+
+        sep_lg = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+        page_lg.pack_start(sep_lg, False, False, 6)
+
+        btn_test_lock = Gtk.Button(label="Aanmeldscherm nu testen (Sla op & vergrendel scherm)")
+        btn_test_lock.get_style_context().add_class("xp-push-btn")
+        btn_test_lock.connect("clicked", self._on_test_logon)
+        page_lg.pack_start(btn_test_lock, False, False, 4)
+
+        # Onderste knoppenrij: OK / Annuleren / Toepassen
         btn_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         btn_row.set_margin_top(8)
         btn_row.set_halign(Gtk.Align.END)
-        for label in ["OK", "Annuleren", "Toepassen"]:
-            btn = Gtk.Button(label=label)
-            btn.get_style_context().add_class("xp-push-btn")
-            btn.connect("clicked", lambda *_: self.destroy())
-            btn_row.pack_start(btn, False, False, 0)
+
+        btn_ok = Gtk.Button(label="OK")
+        btn_ok.get_style_context().add_class("xp-push-btn")
+        btn_ok.connect("clicked", lambda *_: self._apply_settings(close_after=True))
+
+        btn_cancel = Gtk.Button(label="Annuleren")
+        btn_cancel.get_style_context().add_class("xp-push-btn")
+        btn_cancel.connect("clicked", lambda *_: self.destroy())
+
+        btn_apply = Gtk.Button(label="Toepassen")
+        btn_apply.get_style_context().add_class("xp-push-btn")
+        btn_apply.connect("clicked", lambda *_: self._apply_settings(close_after=False))
+
+        btn_row.pack_start(btn_ok, False, False, 0)
+        btn_row.pack_start(btn_cancel, False, False, 0)
+        btn_row.pack_start(btn_apply, False, False, 0)
         vbox.pack_start(btn_row, False, False, 0)
+
+        self.connect("realize", lambda *_: self._switch_tab(initial_tab))
+
+    def _switch_tab(self, idx):
+        for i, b in enumerate(self.tab_btns):
+            ctx = b.get_style_context()
+            if i == idx:
+                ctx.add_class("xp-tab-active")
+            else:
+                ctx.remove_class("xp-tab-active")
+        self.stack.set_visible_child_name(f"tab{idx}")
+
+    def _collect_cfg(self):
+        new_cfg = dict(self.cfg)
+        new_cfg["taskbarStyle"] = "classic" if self.combo_tb_style.get_active() == 1 else "xp"
+        h_idx = self.combo_tb_height.get_active()
+        new_cfg["taskbarHeight"] = self.height_values[h_idx] if 0 <= h_idx < len(self.height_values) else 30
+        new_cfg["showQuickLaunch"] = bool(self.chk_ql.get_active())
+        new_cfg["showClock"] = bool(self.chk_clock.get_active())
+        new_cfg["startMenuStyle"] = "classic" if self.rb_sm_classic.get_active() else "xp"
+        new_cfg["startIconSize"] = "small" if self.combo_sm_icons.get_active() == 1 else "large"
+        new_cfg["startItemsCount"] = int(self.spin_sm_count.get_value_as_int())
+        m_idx = self.combo_sm_mode.get_active()
+        new_cfg["startItemsMode"] = self.mode_keys[m_idx] if 0 <= m_idx < len(self.mode_keys) else "both"
+
+        buf = self.txt_custom.get_buffer()
+        raw_txt = buf.get_text(buf.get_start_iter(), buf.get_end_iter(), False)
+        lines = [ln.strip() for ln in raw_txt.splitlines() if ln.strip()]
+        if lines:
+            new_cfg["customItems"] = lines
+
+        new_cfg["logonStyle"] = "classic" if self.rb_lg_classic.get_active() else "welcome"
+        return new_cfg
+
+    def _apply_settings(self, close_after=False):
+        play_xp_click()
+        old_cfg = dict(self.cfg)
+        self.cfg = self._collect_cfg()
+        # Alleen plasmashell herstarten als taakbalk of startmenu gewijzigd is
+        plasma_keys = ("taskbarStyle", "taskbarHeight", "showQuickLaunch", "showClock", "startMenuStyle", "startIconSize", "startItemsCount", "startItemsMode", "customItems")
+        need_restart = any(old_cfg.get(k) != self.cfg.get(k) for k in plasma_keys)
+        save_xp_settings(self.cfg, restart_plasma=need_restart)
+        if close_after:
+            self.destroy()
+
+    def _on_test_logon(self, *_):
+        self._apply_settings(close_after=False)
+        run_cmd(["loginctl", "lock-session"])
 
 
 class RunDialog(Gtk.Window):
@@ -1547,7 +1903,10 @@ class XpExplorerWindow(Gtk.Window):
             dlg = DisplayPropertiesDialog(self)
             dlg.show_all()
         elif cmd == "__TAAKBALK__":
-            dlg = TaskbarPropertiesDialog(self)
+            dlg = TaskbarPropertiesDialog(self, initial_tab=0)
+            dlg.show_all()
+        elif cmd == "__LOGON__":
+            dlg = TaskbarPropertiesDialog(self, initial_tab=2)
             dlg.show_all()
         else:
             run_cmd(cmd)
@@ -2256,7 +2615,11 @@ def main():
     elif mode in ("beeldscherm", "desk.cpl", "display", "vormgeving"):
         win = DisplayPropertiesDialog()
     elif mode in ("taakbalk", "eigenschappen", "taskbar"):
-        win = TaskbarPropertiesDialog()
+        win = TaskbarPropertiesDialog(initial_tab=0)
+    elif mode in ("startmenu", "menu-start"):
+        win = TaskbarPropertiesDialog(initial_tab=1)
+    elif mode in ("logon", "aanmelden", "gebruikersaccounts"):
+        win = TaskbarPropertiesDialog(initial_tab=2)
     elif mode in ("taakbeheer", "taskmgr", "taskmanager"):
         win = TaskManagerWindow()
     elif mode in ("uitvoeren", "run"):

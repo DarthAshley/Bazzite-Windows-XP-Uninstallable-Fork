@@ -7,6 +7,7 @@ import org.kde.kirigami as Kirigami
 import org.kde.plasma.plasmoid
 import org.kde.plasma.plasma5support as P5Support
 import org.kde.plasma.private.sessions as Sessions
+import "xpConfig.js" as XpConfig
 
 Item {
     id: menu
@@ -15,6 +16,24 @@ Item {
     required property var catRootModel
     required property var usageModel
     required property var recentDocsModel
+
+    readonly property string effectiveStartStyle: (Plasmoid.configuration.startMenuStyle && Plasmoid.configuration.startMenuStyle !== "")
+        ? Plasmoid.configuration.startMenuStyle
+        : (XpConfig.startMenuStyle || "xp")
+    readonly property bool isClassicStart: effectiveStartStyle === "classic"
+
+    readonly property string effectiveIconSize: (Plasmoid.configuration.startIconSize && Plasmoid.configuration.startIconSize !== "")
+        ? Plasmoid.configuration.startIconSize
+        : (XpConfig.startIconSize || "large")
+    readonly property bool isSmallIcons: effectiveIconSize === "small"
+
+    readonly property string effectiveItemsMode: (Plasmoid.configuration.startItemsMode && Plasmoid.configuration.startItemsMode !== "")
+        ? Plasmoid.configuration.startItemsMode
+        : (XpConfig.startItemsMode || "both")
+
+    readonly property int effectiveItemsCount: (Plasmoid.configuration.startItemsCount > 0)
+        ? Plasmoid.configuration.startItemsCount
+        : (XpConfig.startItemsCount || 0)
 
     property int menuWidth: Plasmoid.configuration.menuWidth > 390 ? Plasmoid.configuration.menuWidth : 430
     property int menuHeight: Plasmoid.configuration.menuHeight > 400 ? Plasmoid.configuration.menuHeight : 535
@@ -229,13 +248,38 @@ Item {
 
     function rebuildLeftItems() {
         leftAppsModel.clear()
+        let rowH = menu.isSmallIcons ? 26 : 38
         let availHeight = menu.menuHeight - 60 - 2 - 42 - 96 - 16 - 36
-        let maxSlots = Math.max(4, Math.floor(availHeight / 38))
+        let autoSlots = Math.max(4, Math.floor(availHeight / rowH))
+        let maxSlots = (menu.effectiveItemsCount > 0) ? Math.min(autoSlots, menu.effectiveItemsCount) : autoSlots
         let seen = {}
+        let mode = menu.effectiveItemsMode
 
-        // 1. Eerst door de gebruiker vastgemaakte items + favorieten
+        // Modus: Vaste eigen lijst ("custom")
+        if (mode === "custom") {
+            let customArr = (Plasmoid.configuration.customItemsList && Plasmoid.configuration.customItemsList.length > 0)
+                ? Plasmoid.configuration.customItemsList
+                : (XpConfig.customItems || [])
+            for (let c = 0; c < customArr.length && leftAppsModel.count < maxSlots; ++c) {
+                let parts = (customArr[c] || "").split("|")
+                let cTitle = (parts[0] || "").trim()
+                let cIcon = (parts[1] || "application-x-executable").trim()
+                let cCmd = (parts[2] || cTitle.toLowerCase()).trim()
+                if (cTitle !== "" && !isRemoved(cTitle)) {
+                    leftAppsModel.append({
+                        "appTitle": cTitle,
+                        "iconName": cIcon,
+                        "sourceType": "custom:" + cCmd,
+                        "sourceIndex": c
+                    })
+                }
+            }
+            return
+        }
+
+        // 1. Eerst door de gebruiker vastgemaakte items + favorieten (indien mode === "both" of "favorites")
         let favModel = menu.rootModel ? menu.rootModel.favoritesModel : null
-        if (favModel) {
+        if (favModel && (mode === "both" || mode === "favorites")) {
             for (let i = 0; i < favModel.count && leftAppsModel.count < maxSlots; ++i) {
                 let idx = favModel.index(i, 0)
                 let name = (favModel.data(idx, Qt.DisplayRole) || "").toString().trim()
@@ -255,8 +299,8 @@ Item {
             }
         }
 
-        // 2. Aanvullen met meest gebruikte programma's
-        if (menu.usageModel) {
+        // 2. Aanvullen met meest gebruikte programma's (indien mode === "both" of "recent")
+        if (menu.usageModel && (mode === "both" || mode === "recent")) {
             for (let j = 0; j < menu.usageModel.count && leftAppsModel.count < maxSlots; ++j) {
                 let idx2 = menu.usageModel.index(j, 0)
                 let name2 = (menu.usageModel.data(idx2, Qt.DisplayRole) || "").toString().trim()
@@ -278,7 +322,10 @@ Item {
     }
 
     function triggerLeftItem(sourceType, sourceIndex) {
-        if (sourceType === "fav" && menu.rootModel && menu.rootModel.favoritesModel) {
+        if (sourceType && sourceType.startsWith("custom:")) {
+            let cmd = sourceType.substring(7)
+            menu.run(cmd)
+        } else if (sourceType === "fav" && menu.rootModel && menu.rootModel.favoritesModel) {
             menu.rootModel.favoritesModel.trigger(sourceIndex, "", null)
             menu.closeRequested()
         } else if (sourceType === "usage" && menu.usageModel) {
@@ -326,9 +373,10 @@ Item {
         }
     }
 
-    // Het daadwerkelijke Windows XP Startmenu linksonder
+    // Het daadwerkelijke Windows XP Startmenu linksonder (XP Luna modus)
     Item {
         id: startBox
+        visible: !menu.isClassicStart
         x: 0
         anchors.bottom: parent.bottom
         width: menu.menuWidth
@@ -517,10 +565,10 @@ Item {
                                 required property int sourceIndex
 
                                 width: ListView.view.width
-                                height: 38
+                                height: menu.isSmallIcons ? 26 : 38
                                 label: appTitle
                                 icon: iconName
-                                iconSize: 30
+                                iconSize: menu.isSmallIcons ? 20 : 30
                                 bold: menu.isPinned(appTitle)
                                 onHovered: {
                                     menu.showRecentDocs = false
@@ -827,14 +875,181 @@ Item {
         }
     }
 
+    // === KLASSIEK WINDOWS XP MENU START ("Classic Start Menu" - 1 kolom #d4d0c8 met verticale zijbalk) ===
+    Rectangle {
+        id: classicBox
+        visible: menu.isClassicStart
+        x: 0
+        anchors.bottom: parent.bottom
+        width: 244
+        height: classicCol.implicitHeight + 10
+        color: "#d4d0c8"
+
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+        }
+
+        // Buitenste 3D randen
+        Rectangle { anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right; height: 1; color: "#ffffff" }
+        Rectangle { anchors.top: parent.top; anchors.bottom: parent.bottom; anchors.left: parent.left; width: 1; color: "#ffffff" }
+        Rectangle { anchors.bottom: parent.bottom; anchors.left: parent.left; anchors.right: parent.right; height: 1; color: "#404040" }
+        Rectangle { anchors.top: parent.top; anchors.bottom: parent.bottom; anchors.right: parent.right; width: 1; color: "#404040" }
+
+        // Binnenste 3D randen
+        Rectangle { anchors.top: parent.top; anchors.topMargin: 1; anchors.left: parent.left; anchors.leftMargin: 1; anchors.right: parent.right; anchors.rightMargin: 1; height: 1; color: "#dfdfdf" }
+        Rectangle { anchors.top: parent.top; anchors.topMargin: 1; anchors.bottom: parent.bottom; anchors.bottomMargin: 1; anchors.left: parent.left; anchors.leftMargin: 1; width: 1; color: "#dfdfdf" }
+        Rectangle { anchors.bottom: parent.bottom; anchors.bottomMargin: 1; anchors.left: parent.left; anchors.leftMargin: 1; anchors.right: parent.right; anchors.rightMargin: 1; height: 1; color: "#808080" }
+        Rectangle { anchors.top: parent.top; anchors.topMargin: 1; anchors.bottom: parent.bottom; anchors.bottomMargin: 1; anchors.right: parent.right; anchors.rightMargin: 1; width: 1; color: "#808080" }
+
+        // Verticale blauwe "Windows XP Professional" zijbalk links
+        Rectangle {
+            id: classicSidebar
+            anchors.top: parent.top; anchors.bottom: parent.bottom; anchors.left: parent.left
+            anchors.margins: 3
+            width: 26
+            clip: true
+            gradient: Gradient {
+                GradientStop { position: 0.00; color: "#000080" }
+                GradientStop { position: 0.65; color: "#08389c" }
+                GradientStop { position: 1.00; color: "#1084d0" }
+            }
+
+            Row {
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 10
+                anchors.horizontalCenter: parent.horizontalCenter
+                rotation: -90
+                transformOrigin: Item.BottomLeft
+                x: 20
+                spacing: 4
+
+                Text {
+                    text: "Windows"
+                    color: "#ffffff"
+                    font.family: "Franklin Gothic Medium, Arial, Tahoma, sans-serif"
+                    font.pixelSize: 16
+                    font.bold: true
+                }
+                Text {
+                    text: "XP"
+                    color: "#ffffff"
+                    font.family: "Arial, Tahoma, sans-serif"
+                    font.pixelSize: 11
+                    font.bold: true
+                }
+                Text {
+                    text: "Professional"
+                    color: "#dce8ff"
+                    font.family: "Tahoma, sans-serif"
+                    font.pixelSize: 14
+                }
+            }
+        }
+
+        Column {
+            id: classicCol
+            anchors.left: classicSidebar.right
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.leftMargin: 2
+            anchors.rightMargin: 4
+            anchors.topMargin: 4
+            spacing: 1
+
+            AppEntry {
+                width: parent.width; height: 28; iconSize: 20; fontSize: 11
+                label: "Windows Update"; iconFile: "cp-updates.svg"
+                onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
+                onActivated: menu.run("kcmshell6 kcm_updates")
+            }
+
+            Separator { width: parent.width; lineColor: "#808080" }
+
+            AppEntry {
+                width: parent.width; height: 30; iconSize: 22; fontSize: 11; arrow: true
+                activeHighlight: menu.allPrograms
+                label: "Programma's"; iconFile: "progfolder.svg"
+                onHovered: {
+                    closeAllProgsTimer.stop()
+                    menu.showRecentDocs = false
+                    menu.allProgramsOpenedAt = Date.now()
+                    menu.allPrograms = true
+                }
+                onActivated: {
+                    closeAllProgsTimer.stop()
+                    menu.allPrograms = true
+                }
+            }
+
+            AppEntry {
+                width: parent.width; height: 30; iconSize: 22; fontSize: 11; arrow: true
+                activeHighlight: menu.showRecentDocs
+                label: "Documenten"; iconFile: "docs.svg"
+                onHovered: {
+                    menu.scheduleCloseAllPrograms()
+                    menu.showRecentDocs = true
+                }
+                onActivated: menu.openFolder(StandardPaths.writableLocation(StandardPaths.DocumentsLocation))
+            }
+
+            AppEntry {
+                width: parent.width; height: 30; iconSize: 22; fontSize: 11; arrow: true
+                label: "Instellingen"; iconFile: "controlpanel.svg"
+                onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
+                onActivated: menu.runXpMode("configuratiescherm")
+            }
+
+            AppEntry {
+                width: parent.width; height: 30; iconSize: 22; fontSize: 11
+                label: "Zoeken"; iconFile: "search.svg"
+                onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
+                onActivated: menu.run("krunner")
+            }
+
+            AppEntry {
+                width: parent.width; height: 30; iconSize: 22; fontSize: 11
+                label: "Help en ondersteuning"; iconFile: "help.svg"
+                onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
+                onActivated: menu.run("khelpcenter")
+            }
+
+            AppEntry {
+                width: parent.width; height: 30; iconSize: 22; fontSize: 11
+                label: "Uitvoeren..."; iconFile: "run.svg"
+                onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
+                onActivated: menu.runXpMode("uitvoeren")
+            }
+
+            Separator { width: parent.width; lineColor: "#808080" }
+
+            AppEntry {
+                width: parent.width; height: 30; iconSize: 22; fontSize: 11
+                label: "Afmelden " + (user.fullName || "King Geoffrey") + "..."; iconFile: "logout.svg"
+                onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
+                onActivated: menu.runXpMode("afmelden")
+            }
+
+            AppEntry {
+                width: parent.width; height: 30; iconSize: 22; fontSize: 11
+                label: "Computer uitschakelen..."; iconFile: "shutdown.svg"
+                onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
+                onActivated: {
+                    menu.closeRequested()
+                    session.requestShutdown()
+                }
+            }
+        }
+    }
+
     // === UITKLAPMENU: ALLE PROGRAMMA'S (Authentiek Windows XP Cascade Flyout Menu) ===
     // Kolom 1: Hoofdmenu van Alle programma's (opent rechts naast de Alle programma's-knop zodat de linkerkolom vrij blijft!)
     Rectangle {
         id: allProgramsCol1
         visible: menu.allPrograms
-        x: Math.round(menu.menuWidth * 0.36)
-        anchors.bottom: startBox.bottom
-        anchors.bottomMargin: 42
+        x: menu.isClassicStart ? (classicBox.width - 2) : Math.round(menu.menuWidth * 0.36)
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: menu.isClassicStart ? 32 : 42
         width: 268
         height: Math.min(menu.menuHeight - 44, col1Layout.implicitHeight + 8)
         color: "#ffffff"
@@ -1370,8 +1585,8 @@ Item {
     Rectangle {
         id: recentDocsPopup
         visible: menu.showRecentDocs
-        x: menu.menuWidth - 4
-        y: startBox.y + 92
+        x: menu.isClassicStart ? (classicBox.width - 2) : (menu.menuWidth - 4)
+        y: menu.isClassicStart ? (classicBox.y + 60) : (startBox.y + 92)
         width: 240
         height: Math.min(340, Math.max(32, recentDocsCol.implicitHeight + 8))
         color: "#ffffff"

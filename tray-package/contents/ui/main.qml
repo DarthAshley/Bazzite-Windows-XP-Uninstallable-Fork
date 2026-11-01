@@ -5,6 +5,7 @@ import org.kde.kirigami as Kirigami
 import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
 import org.kde.plasma.plasma5support as P5Support
+import "xpConfig.js" as XpConfig
 
 PlasmoidItem {
     id: root
@@ -13,6 +14,9 @@ PlasmoidItem {
     property bool muted: false
     property string timeString: "00:00"
     property string dateString: ""
+
+    readonly property bool isClassicTaskbar: (XpConfig.taskbarStyle || "xp") === "classic"
+    readonly property bool showClockSetting: XpConfig.showClock !== false
 
     readonly property string xpScript: StandardPaths.writableLocation(StandardPaths.GenericDataLocation) + "/xp-startknop/xp-verkenner.py"
     readonly property string sniListCmd: "python3 '" + xpScript + "' sni-list"
@@ -67,7 +71,6 @@ PlasmoidItem {
             if (out === "") return
             try {
                 let parsed = JSON.parse(out)
-                // Alleen bijwerken als de lijst veranderd is om knipperen te voorkomen
                 let same = (parsed.length === sniAppsModel.count)
                 if (same) {
                     for (let k = 0; k < parsed.length; ++k) {
@@ -123,7 +126,7 @@ PlasmoidItem {
             isSeparator: true
         },
         PlasmaCore.Action {
-            text: "Eigenschappen"
+            text: "Eigenschappen (Taakbalk, Startmenu & Logon)"
             icon.name: "configure"
             onTriggered: root.runCmd("python3 \"$HOME/.local/share/xp-startknop/xp-verkenner.py\" taakbalk")
         }
@@ -138,8 +141,8 @@ PlasmoidItem {
     fullRepresentation: Item {
         id: trayItem
 
-        // Paneel heeft rechts 10px marge; we trekken het lichtblauwe XP-systeemvak door tot de rechterrand
         readonly property int panelRightMargin: 10
+        readonly property int iconSz: Math.max(16, Math.min(22, Math.round(height * 0.53)))
         readonly property int contentWidth: trayRow.implicitWidth + 24
 
         Layout.minimumWidth: contentWidth - panelRightMargin
@@ -147,23 +150,52 @@ PlasmoidItem {
         Layout.maximumWidth: contentWidth - panelRightMargin
         Layout.fillHeight: true
 
-        // Het lichtblauwe verzonken Windows XP Systeemvak (Notification Area)
+        // Het Systeemvak (Notification Area): Lichtblauw XP Luna OF Klassiek Grijs 3D verzonken
         Rectangle {
             x: 0
-            y: 0
+            y: root.isClassicTaskbar ? 3 : 0
             width: trayItem.contentWidth
-            height: trayItem.height
+            height: root.isClassicTaskbar ? (trayItem.height - 5) : trayItem.height
+            color: root.isClassicTaskbar ? "#d4d0c8" : "#0f85e4"
 
-            gradient: Gradient {
-                GradientStop { position: 0.0; color: "#1aa9f8" }
-                GradientStop { position: 0.08; color: "#0d84e3" }
-                GradientStop { position: 0.22; color: "#1597ef" }
-                GradientStop { position: 0.82; color: "#0f85e4" }
-                GradientStop { position: 1.0; color: "#0a69c2" }
+            // Alleen in XP Luna-modus: de blauwe glans-gradient
+            Rectangle {
+                anchors.fill: parent
+                visible: !root.isClassicTaskbar
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: "#1aa9f8" }
+                    GradientStop { position: 0.08; color: "#0d84e3" }
+                    GradientStop { position: 0.22; color: "#1597ef" }
+                    GradientStop { position: 0.82; color: "#0f85e4" }
+                    GradientStop { position: 1.0; color: "#0a69c2" }
+                }
             }
 
-            // Lichtblauwe bovenste highlight-lijn
+            // Klassieke 3D verzonken randen wanneer Classic-modus actief is
             Rectangle {
+                visible: root.isClassicTaskbar
+                anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
+                height: 1; color: "#808080"
+            }
+            Rectangle {
+                visible: root.isClassicTaskbar
+                anchors.top: parent.top; anchors.bottom: parent.bottom; anchors.left: parent.left
+                width: 1; color: "#808080"
+            }
+            Rectangle {
+                visible: root.isClassicTaskbar
+                anchors.bottom: parent.bottom; anchors.left: parent.left; anchors.right: parent.right
+                height: 1; color: "#ffffff"
+            }
+            Rectangle {
+                visible: root.isClassicTaskbar
+                anchors.top: parent.top; anchors.bottom: parent.bottom; anchors.right: parent.right
+                width: 1; color: "#ffffff"
+            }
+
+            // Lichtblauwe bovenste highlight-lijn (XP Luna)
+            Rectangle {
+                visible: !root.isClassicTaskbar
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.right: parent.right
@@ -172,8 +204,9 @@ PlasmoidItem {
                 opacity: 0.85
             }
 
-            // Linker 3D scheidingsrand tussen donkerblauwe taakbalk en lichtblauw systeemvak
+            // Linker 3D scheidingsrand tussen donkerblauwe taakbalk en lichtblauw systeemvak (XP Luna)
             Rectangle {
+                visible: !root.isClassicTaskbar
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
@@ -185,6 +218,7 @@ PlasmoidItem {
                 }
             }
             Rectangle {
+                visible: !root.isClassicTaskbar
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 x: 2
@@ -200,29 +234,26 @@ PlasmoidItem {
                 anchors.verticalCenter: parent.verticalCenter
                 width: 18
                 height: 18
-                radius: 9
-                border.color: "#093c8c"
+                radius: root.isClassicTaskbar ? 2 : 9
+                border.color: root.isClassicTaskbar ? "#404040" : "#093c8c"
                 border.width: 1
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: chevronMouse.containsMouse ? "#7cd2ff" : "#5cbcff" }
-                    GradientStop { position: 0.5; color: chevronMouse.containsMouse ? "#2894f4" : "#1682e8" }
-                    GradientStop { position: 1.0; color: "#0a58b8" }
-                }
+                color: root.isClassicTaskbar ? "#d4d0c8" : "#1682e8"
 
                 Rectangle {
                     anchors.fill: parent
-                    anchors.margins: 1
-                    radius: 8
-                    color: "transparent"
-                    border.color: "#b8e6ff"
-                    border.width: 1
-                    opacity: 0.65
+                    radius: parent.radius
+                    visible: !root.isClassicTaskbar
+                    gradient: Gradient {
+                        GradientStop { position: 0.0; color: chevronMouse.containsMouse ? "#7cd2ff" : "#5cbcff" }
+                        GradientStop { position: 0.5; color: chevronMouse.containsMouse ? "#2894f4" : "#1682e8" }
+                        GradientStop { position: 1.0; color: "#0a58b8" }
+                    }
                 }
 
                 Text {
                     anchors.centerIn: parent
                     text: root.expanded ? "›" : "‹"
-                    color: "white"
+                    color: root.isClassicTaskbar ? "#000000" : "white"
                     font.family: "Tahoma"
                     font.pixelSize: 13
                     font.bold: true
@@ -248,9 +279,8 @@ PlasmoidItem {
                     spacing: 5
                     anchors.verticalCenter: parent.verticalCenter
 
-                    // Hardware veilig verwijderen / Schijven
                     Item {
-                        width: 16; height: 16
+                        width: trayItem.iconSz; height: trayItem.iconSz
                         Image {
                             anchors.fill: parent
                             source: Qt.resolvedUrl("../images/tray-usb.svg")
@@ -262,9 +292,8 @@ PlasmoidItem {
                         }
                     }
 
-                    // Bluetooth
                     Item {
-                        width: 16; height: 16
+                        width: trayItem.iconSz; height: trayItem.iconSz
                         Image {
                             anchors.fill: parent
                             source: Qt.resolvedUrl("../images/tray-bt.svg")
@@ -276,9 +305,8 @@ PlasmoidItem {
                         }
                     }
 
-                    // Beeldscherminstellingen
                     Item {
-                        width: 16; height: 16
+                        width: trayItem.iconSz; height: trayItem.iconSz
                         Image {
                             anchors.fill: parent
                             source: Qt.resolvedUrl("../images/cp-display.svg")
@@ -303,8 +331,8 @@ PlasmoidItem {
                         required property string sniIcon
                         required property string sniMenu
 
-                        width: 16
-                        height: 16
+                        width: trayItem.iconSz
+                        height: trayItem.iconSz
                         anchors.verticalCenter: parent.verticalCenter
 
                         Image {
@@ -342,9 +370,9 @@ PlasmoidItem {
                     }
                 }
 
-                // 1. Netwerkverbinding (Twee lichtgevende XP-monitortjes)
+                // 1. Netwerkverbinding
                 Item {
-                    width: 16; height: 16
+                    width: trayItem.iconSz; height: trayItem.iconSz
                     anchors.verticalCenter: parent.verticalCenter
                     Image {
                         anchors.fill: parent
@@ -364,7 +392,7 @@ PlasmoidItem {
 
                 // 2. Windows XP Beveiligingscentrum Schildje
                 Item {
-                    width: 16; height: 16
+                    width: trayItem.iconSz; height: trayItem.iconSz
                     anchors.verticalCenter: parent.verticalCenter
                     Image {
                         anchors.fill: parent
@@ -381,9 +409,9 @@ PlasmoidItem {
                     }
                 }
 
-                // 3. Volume / Geluid (grijs XP-luidsprekertje; scrollen regelt volume!)
+                // 3. Volume / Geluid
                 Item {
-                    width: 16; height: 16
+                    width: trayItem.iconSz; height: trayItem.iconSz
                     anchors.verticalCenter: parent.verticalCenter
                     Image {
                         anchors.fill: parent
@@ -416,8 +444,9 @@ PlasmoidItem {
                     }
                 }
 
-                // 4. Enkele-regel witte Tahoma Klok (zoals in origineel Windows XP!)
+                // 4. Klok (indien ingeschakeld in XP Eigenschappen)
                 Item {
+                    visible: root.showClockSetting
                     width: clockText.implicitWidth + 8
                     height: 22
                     anchors.verticalCenter: parent.verticalCenter
@@ -426,10 +455,10 @@ PlasmoidItem {
                         id: clockText
                         anchors.centerIn: parent
                         text: root.timeString
-                        color: "white"
+                        color: root.isClassicTaskbar ? "#000000" : "white"
                         renderType: Text.NativeRendering
                         font.family: "Tahoma"
-                        font.pixelSize: 12
+                        font.pixelSize: Math.max(12, Math.min(14, Math.round(trayItem.height * 0.38)))
                     }
 
                     PlasmaCore.ToolTipArea {

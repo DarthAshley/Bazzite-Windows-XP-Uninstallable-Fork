@@ -1,15 +1,22 @@
 {
     "KPackageStructure": "Plasma/Applet",
     "KPlugin": {
-        "Authors": [{ "Name": "King Geoffrey" }],
+        "Authors": [
+            {
+                "Name": "King Geoffrey (RuisSoftware / Steel Hull Studio)"
+            }
+        ],
         "Category": "Application Launchers",
-        "Description": "Windows XP startknop en startmenu",
+        "Description": "Authentieke Windows XP Professional (Luna & Classic) Startknop, Startmenu en Snel starten voor KDE Plasma 6",
         "Icon": "start-here-kde",
         "Id": "nl.steelhull.xpstart",
         "License": "GPL-2.0+",
-        "Name": "XP Start",
-        "Version": "1.0"
+        "Name": "Windows XP Start & Quick Launch",
+        "Version": "2.0",
+        "Website": "https://github.com/RuisSoftware/Bazzite-Windows-XP"
     },
     "X-Plasma-API-Minimum-Version": "6.0",
-    "X-Plasma-Provides": ["org.kde.plasma.launchermenu"]
+    "X-Plasma-Provides": [
+        "org.kde.plasma.launchermenu"
+    ]
 }

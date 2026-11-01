@@ -5,6 +5,7 @@ import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
 import org.kde.plasma.private.kicker as Kicker
 import org.kde.plasma.plasma5support as P5Support
+import "xpConfig.js" as XpConfig
 
 PlasmoidItem {
     id: root
@@ -26,7 +27,6 @@ PlasmoidItem {
     }
 
     function triggerQuickLaunchApp(appName) {
-        // Zoek het programma in favorieten of meest gebruikt en start het
         let favModel = kickerModel.favoritesModel
         if (favModel) {
             for (let i = 0; i < favModel.count; ++i) {
@@ -92,7 +92,7 @@ PlasmoidItem {
             isSeparator: true
         },
         PlasmaCore.Action {
-            text: "Eigenschappen"
+            text: "Eigenschappen (Taakbalk, Startmenu & Logon)"
             icon.name: "configure"
             onTriggered: root.runCmd("python3 \"$HOME/.local/share/xp-startknop/xp-verkenner.py\" taakbalk")
         }
@@ -163,11 +163,19 @@ PlasmoidItem {
         id: button
 
         readonly property int frame: mouse.pressed || startMenu.visible ? 2 : (mouse.containsMouse ? 1 : 0)
+        readonly property string effectiveTaskbarStyle: (Plasmoid.configuration.taskbarStyle && Plasmoid.configuration.taskbarStyle !== "")
+            ? Plasmoid.configuration.taskbarStyle
+            : (XpConfig.taskbarStyle || "xp")
+        readonly property bool isClassicTaskbar: effectiveTaskbarStyle === "classic"
 
         // De paneelachtergrond houdt links 9 pixels vrij; de knop moet in de hoek zitten
         readonly property int panelMargin: 9
-        readonly property int startBtnWidth: Math.round(height * 97 / 30) - panelMargin
-        readonly property bool showQL: Plasmoid.configuration.showQuickLaunch !== false
+        readonly property int startBtnWidth: isClassicTaskbar
+            ? Math.max(62, Math.round(height * 2.35)) - panelMargin
+            : Math.round(height * 97 / 30) - panelMargin
+        readonly property bool showQL: (Plasmoid.configuration.showQuickLaunch !== false) && (XpConfig.showQuickLaunch !== false)
+        readonly property int qlBtnSize: Math.max(23, Math.min(36, height - 7))
+        readonly property int qlIconSize: Math.max(17, Math.min(28, height - 13))
         readonly property int qlWidth: showQL ? (quickLaunchRow.implicitWidth + 10) : 0
 
         Layout.minimumWidth: startBtnWidth + qlWidth
@@ -177,20 +185,123 @@ PlasmoidItem {
 
         Component.onCompleted: startMenu.visualParent = button
 
-        // De groene Windows XP Start-knop helemaal links in de hoek
+        // Als Classic Taakbalk-modus actief is: teken ook het klassieke #d4d0c8 paneelvlak achter Start & Snel starten
+        Rectangle {
+            visible: button.isClassicTaskbar
+            x: -button.panelMargin
+            y: 0
+            width: button.width + button.panelMargin + 2000
+            height: button.height
+            color: "#d4d0c8"
+            z: -2
+
+            Rectangle {
+                anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
+                height: 1; color: "#ffffff"
+            }
+            Rectangle {
+                anchors.top: parent.top; anchors.topMargin: 1; anchors.left: parent.left; anchors.right: parent.right
+                height: 1; color: "#dfdfdf"
+            }
+        }
+
+        // De Start-knop helemaal links in de hoek (Windows XP Groen OF Klassiek Grijs 3D)
         Item {
             id: startBtnBox
             x: -button.panelMargin
             width: button.startBtnWidth + button.panelMargin
             height: button.height
 
-            Repeater {
-                model: ["start-normaal.png", "start-zweven.png", "start-ingedrukt.png"]
-                Image {
-                    anchors.fill: parent
-                    source: Qt.resolvedUrl("../images/" + modelData)
-                    smooth: true
-                    visible: button.frame === index
+            // 1. Windows XP Luna Groene Startknop
+            Item {
+                anchors.fill: parent
+                visible: !button.isClassicTaskbar
+
+                Repeater {
+                    model: ["start-normaal.png", "start-zweven.png", "start-ingedrukt.png"]
+                    Image {
+                        anchors.fill: parent
+                        source: Qt.resolvedUrl("../images/" + modelData)
+                        smooth: true
+                        visible: button.frame === index
+                    }
+                }
+            }
+
+            // 2. Klassieke Windows Startknop (3D grijs #d4d0c8 met 4-kleuren vlaggetje en vette "Start")
+            Rectangle {
+                anchors.fill: parent
+                anchors.leftMargin: 2
+                anchors.rightMargin: 2
+                anchors.topMargin: 3
+                anchors.bottomMargin: 3
+                visible: button.isClassicTaskbar
+                color: "#d4d0c8"
+
+                readonly property bool sunken: button.frame === 2
+
+                // Buitenste 3D rand
+                Rectangle {
+                    anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
+                    height: 1; color: parent.sunken ? "#404040" : "#ffffff"
+                }
+                Rectangle {
+                    anchors.top: parent.top; anchors.bottom: parent.bottom; anchors.left: parent.left
+                    width: 1; color: parent.sunken ? "#404040" : "#ffffff"
+                }
+                Rectangle {
+                    anchors.bottom: parent.bottom; anchors.left: parent.left; anchors.right: parent.right
+                    height: 1; color: parent.sunken ? "#ffffff" : "#404040"
+                }
+                Rectangle {
+                    anchors.top: parent.top; anchors.bottom: parent.bottom; anchors.right: parent.right
+                    width: 1; color: parent.sunken ? "#ffffff" : "#404040"
+                }
+
+                // Binnenste 3D rand
+                Rectangle {
+                    anchors.top: parent.top; anchors.topMargin: 1; anchors.left: parent.left; anchors.leftMargin: 1; anchors.right: parent.right; anchors.rightMargin: 1
+                    height: 1; color: parent.sunken ? "#808080" : "#dfdfdf"
+                }
+                Rectangle {
+                    anchors.top: parent.top; anchors.topMargin: 1; anchors.bottom: parent.bottom; anchors.bottomMargin: 1; anchors.left: parent.left; anchors.leftMargin: 1
+                    width: 1; color: parent.sunken ? "#808080" : "#dfdfdf"
+                }
+                Rectangle {
+                    anchors.bottom: parent.bottom; anchors.bottomMargin: 1; anchors.left: parent.left; anchors.leftMargin: 1; anchors.right: parent.right; anchors.rightMargin: 1
+                    height: 1; color: parent.sunken ? "#dfdfdf" : "#808080"
+                }
+                Rectangle {
+                    anchors.top: parent.top; anchors.topMargin: 1; anchors.bottom: parent.bottom; anchors.bottomMargin: 1; anchors.right: parent.right; anchors.rightMargin: 1
+                    width: 1; color: parent.sunken ? "#dfdfdf" : "#808080"
+                }
+
+                Row {
+                    anchors.centerIn: parent
+                    anchors.horizontalCenterOffset: parent.sunken ? 1 : 0
+                    anchors.verticalCenterOffset: parent.sunken ? 1 : 0
+                    spacing: 4
+
+                    // Klassiek 4-kleuren Windows-icoontje
+                    Grid {
+                        anchors.verticalCenter: parent.verticalCenter
+                        columns: 2
+                        spacing: 1
+                        Rectangle { width: Math.max(6, Math.round(button.height * 0.20)); height: width; color: "#ff3300"; border.color: "#801800"; border.width: 1 }
+                        Rectangle { width: Math.max(6, Math.round(button.height * 0.20)); height: width; color: "#33cc33"; border.color: "#146614"; border.width: 1 }
+                        Rectangle { width: Math.max(6, Math.round(button.height * 0.20)); height: width; color: "#0066ff"; border.color: "#002b80"; border.width: 1 }
+                        Rectangle { width: Math.max(6, Math.round(button.height * 0.20)); height: width; color: "#ffcc00"; border.color: "#806600"; border.width: 1 }
+                    }
+
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "Start"
+                        color: "#000000"
+                        font.family: "Tahoma"
+                        font.pixelSize: Math.max(11, Math.min(16, Math.round(button.height * 0.40)))
+                        font.bold: true
+                        renderType: Text.NativeRendering
+                    }
                 }
             }
 
@@ -213,21 +324,25 @@ PlasmoidItem {
 
             // 1. Bureaublad weergeven (Show Desktop)
             Rectangle {
-                width: 23
-                height: 23
-                radius: 2
+                width: button.qlBtnSize
+                height: button.qlBtnSize
+                radius: button.isClassicTaskbar ? 0 : 2
                 anchors.verticalCenter: parent.verticalCenter
-                color: sdMouse.pressed ? "#184ea8" : (sdMouse.containsMouse ? "#3880eb" : "transparent")
-                border.color: sdMouse.pressed ? "#0c3278" : (sdMouse.containsMouse ? "#72b2ff" : "transparent")
+                color: button.isClassicTaskbar
+                    ? (sdMouse.pressed ? "#c6c2ba" : "transparent")
+                    : (sdMouse.pressed ? "#184ea8" : (sdMouse.containsMouse ? "#3880eb" : "transparent"))
+                border.color: button.isClassicTaskbar
+                    ? (sdMouse.containsMouse || sdMouse.pressed ? "#808080" : "transparent")
+                    : (sdMouse.pressed ? "#0c3278" : (sdMouse.containsMouse ? "#72b2ff" : "transparent"))
                 border.width: 1
 
                 Image {
                     anchors.centerIn: parent
-                    width: 17
-                    height: 17
+                    width: button.qlIconSize
+                    height: button.qlIconSize
                     source: Qt.resolvedUrl("../images/icons/show-desktop.svg")
-                    sourceSize.width: 34
-                    sourceSize.height: 34
+                    sourceSize.width: button.qlIconSize * 2
+                    sourceSize.height: button.qlIconSize * 2
                     smooth: true
                 }
 
@@ -247,21 +362,25 @@ PlasmoidItem {
 
             // 2. Snelkoppeling: Mozilla Firefox
             Rectangle {
-                width: 23
-                height: 23
-                radius: 2
+                width: button.qlBtnSize
+                height: button.qlBtnSize
+                radius: button.isClassicTaskbar ? 0 : 2
                 anchors.verticalCenter: parent.verticalCenter
-                color: ffMouse.pressed ? "#184ea8" : (ffMouse.containsMouse ? "#3880eb" : "transparent")
-                border.color: ffMouse.pressed ? "#0c3278" : (ffMouse.containsMouse ? "#72b2ff" : "transparent")
+                color: button.isClassicTaskbar
+                    ? (ffMouse.pressed ? "#c6c2ba" : "transparent")
+                    : (ffMouse.pressed ? "#184ea8" : (ffMouse.containsMouse ? "#3880eb" : "transparent"))
+                border.color: button.isClassicTaskbar
+                    ? (ffMouse.containsMouse || ffMouse.pressed ? "#808080" : "transparent")
+                    : (ffMouse.pressed ? "#0c3278" : (ffMouse.containsMouse ? "#72b2ff" : "transparent"))
                 border.width: 1
 
                 Image {
                     anchors.centerIn: parent
-                    width: 17
-                    height: 17
+                    width: button.qlIconSize
+                    height: button.qlIconSize
                     source: Qt.resolvedUrl("../images/icons/firefox.svg")
-                    sourceSize.width: 34
-                    sourceSize.height: 34
+                    sourceSize.width: button.qlIconSize * 2
+                    sourceSize.height: button.qlIconSize * 2
                     smooth: true
                 }
 
@@ -281,21 +400,25 @@ PlasmoidItem {
 
             // 3. Snelkoppeling: Windows Verkenner (Dolphin)
             Rectangle {
-                width: 23
-                height: 23
-                radius: 2
+                width: button.qlBtnSize
+                height: button.qlBtnSize
+                radius: button.isClassicTaskbar ? 0 : 2
                 anchors.verticalCenter: parent.verticalCenter
-                color: exMouse.pressed ? "#184ea8" : (exMouse.containsMouse ? "#3880eb" : "transparent")
-                border.color: exMouse.pressed ? "#0c3278" : (exMouse.containsMouse ? "#72b2ff" : "transparent")
+                color: button.isClassicTaskbar
+                    ? (exMouse.pressed ? "#c6c2ba" : "transparent")
+                    : (exMouse.pressed ? "#184ea8" : (exMouse.containsMouse ? "#3880eb" : "transparent"))
+                border.color: button.isClassicTaskbar
+                    ? (exMouse.containsMouse || exMouse.pressed ? "#808080" : "transparent")
+                    : (exMouse.pressed ? "#0c3278" : (exMouse.containsMouse ? "#72b2ff" : "transparent"))
                 border.width: 1
 
                 Image {
                     anchors.centerIn: parent
-                    width: 17
-                    height: 17
+                    width: button.qlIconSize
+                    height: button.qlIconSize
                     source: Qt.resolvedUrl("../images/icons/folder.svg")
-                    sourceSize.width: 34
-                    sourceSize.height: 34
+                    sourceSize.width: button.qlIconSize * 2
+                    sourceSize.height: button.qlIconSize * 2
                     smooth: true
                 }
 
@@ -324,18 +447,22 @@ PlasmoidItem {
                     readonly property string itemTitle: parts.length > 0 ? parts[0] : ""
                     readonly property string itemIcon: parts.length > 1 ? parts[1] : "application-x-executable"
 
-                    width: 23
-                    height: 23
-                    radius: 2
+                    width: button.qlBtnSize
+                    height: button.qlBtnSize
+                    radius: button.isClassicTaskbar ? 0 : 2
                     anchors.verticalCenter: parent.verticalCenter
-                    color: qlItemMouse.pressed ? "#184ea8" : (qlItemMouse.containsMouse ? "#3880eb" : "transparent")
-                    border.color: qlItemMouse.pressed ? "#0c3278" : (qlItemMouse.containsMouse ? "#72b2ff" : "transparent")
+                    color: button.isClassicTaskbar
+                        ? (qlItemMouse.pressed ? "#c6c2ba" : "transparent")
+                        : (qlItemMouse.pressed ? "#184ea8" : (qlItemMouse.containsMouse ? "#3880eb" : "transparent"))
+                    border.color: button.isClassicTaskbar
+                        ? (qlItemMouse.containsMouse || qlItemMouse.pressed ? "#808080" : "transparent")
+                        : (qlItemMouse.pressed ? "#0c3278" : (qlItemMouse.containsMouse ? "#72b2ff" : "transparent"))
                     border.width: 1
 
                     Kirigami.Icon {
                         anchors.centerIn: parent
-                        width: 17
-                        height: 17
+                        width: button.qlIconSize
+                        height: button.qlIconSize
                         source: itemIcon
                     }
 
@@ -361,25 +488,25 @@ PlasmoidItem {
                 }
             }
 
-            // Authentieke 3D verticale Windows XP scheidingslijn achter Snel starten
+            // Authentieke 3D verticale Windows XP / Classic scheidingslijn achter Snel starten
             Item {
                 width: 6
-                height: 20
+                height: Math.max(20, button.height - 8)
                 anchors.verticalCenter: parent.verticalCenter
 
                 Rectangle {
                     x: 2
                     y: 1
                     width: 1
-                    height: 18
-                    color: "#103f91"
+                    height: parent.height - 2
+                    color: button.isClassicTaskbar ? "#808080" : "#103f91"
                 }
                 Rectangle {
                     x: 3
                     y: 1
                     width: 1
-                    height: 18
-                    color: "#4a90f0"
+                    height: parent.height - 2
+                    color: button.isClassicTaskbar ? "#ffffff" : "#4a90f0"
                     opacity: 0.85
                 }
             }

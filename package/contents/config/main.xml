@@ -23,6 +23,23 @@
     <entry name="showQuickLaunch" type="Bool">
       <default>true</default>
     </entry>
+    <entry name="taskbarStyle" type="String">
+      <default></default>
+    </entry>
+    <entry name="startMenuStyle" type="String">
+      <default></default>
+    </entry>
+    <entry name="startIconSize" type="String">
+      <default></default>
+    </entry>
+    <entry name="startItemsCount" type="Int">
+      <default>0</default>
+    </entry>
+    <entry name="startItemsMode" type="String">
+      <default></default>
+    </entry>
+    <entry name="customItemsList" type="StringList">
+      <default></default>
+    </entry>
   </group>
 </kcfg>
-
