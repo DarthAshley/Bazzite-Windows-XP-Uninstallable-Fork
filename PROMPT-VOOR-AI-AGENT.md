@@ -40,8 +40,9 @@ Voer zelfstandig de volgende stappen uit zonder mij om tussenstappen te vragen:
    - Zorg dat helemaal rechts op het onderste taakbalk-paneel `nl.steelhull.xptray` staat (en verwijder eventuele losse `org.kde.plasma.systemtray` of `org.kde.plasma.digitalclock` zodat ze niet dubbel naast het XP-systeemvak staan).
    - Zet de paneelhoogte op `30` pixels (originele Windows XP taakbalkhoogte).
 
-4. Herstart de desktop-shell netjes op de achtergrond zodat alles direct zichtbaar is:
-   `nohup plasmashell --replace >/dev/null 2>&1 &`
+4. Herstart de desktop-shell netjes via systemd zodat de taakbalk altijd actief blijft:
+   `systemctl --user restart plasma-plasmashell.service`
 
 5. Verifieer dat `plasmashell` draait en dat `python3 ~/.local/share/xp-startknop/xp-verkenner.py sni-list` JSON-uitvoer geeft. Geef mij daarna een kort overzicht van wat er is ingesteld!
 ```
+

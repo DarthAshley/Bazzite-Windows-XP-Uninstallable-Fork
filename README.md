@@ -77,6 +77,7 @@ Gebruik je een AI-assistent op Bazzite? Geef je AI-agent simpelweg de onderstaan
 > 1. Als je de zip hebt gekregen, pak deze dan uit. Als je de GitHub link gebruikt, clone dan https://github.com/RuisSoftware/Bazzite-Windows-XP naar een lokale map.
 > 2. Controleer of `zstd`, `tar` en `python3-gobject` aanwezig zijn (standaard aanwezig op Bazzite KDE).
 > 3. Voer `bash installeren.sh` uit vanuit de Bazzite-Windows-XP map.
-> 4. Controleer of het onderste KDE-paneel aan de linkerkant de Windows XP Startknop + Werkbalk Snel starten (`nl.steelhull.xpstart`) heeft en aan de rechterkant het Windows XP Systeemvak (`nl.steelhull.xptray`). Als er op het paneel nog een oude `org.kde.plasma.kickoff`, `org.kde.plasma.kicker` of dubbele `org.kde.plasma.systemtray` staat, vervang die dan netjes in `~/.config/plasma-org.kde.plasma.desktop-appletsrc` door `nl.steelhull.xpstart` (links) en `nl.steelhull.xptray` (rechts) en herstart `plasmashell --replace`.
+> 4. Controleer of het onderste KDE-paneel aan de linkerkant de Windows XP Startknop + Werkbalk Snel starten (`nl.steelhull.xpstart`) heeft en aan de rechterkant het Windows XP Systeemvak (`nl.steelhull.xptray`). Als er op het paneel nog een oude `org.kde.plasma.kickoff`, `org.kde.plasma.kicker` of dubbele `org.kde.plasma.systemtray` staat, vervang die dan netjes in `~/.config/plasma-org.kde.plasma.desktop-appletsrc` door `nl.steelhull.xpstart` (links) en `nl.steelhull.xptray` (rechts) en herstart `systemctl --user restart plasma-plasmashell.service`.
 > 5. Test of `python3 ~/.local/share/xp-startknop/xp-verkenner.py sni-list` werkt en meld mij zodra mijn volledige Windows XP omgeving klaar is!
 > ```
+
