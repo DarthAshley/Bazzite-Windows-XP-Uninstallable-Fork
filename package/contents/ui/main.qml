@@ -66,12 +66,12 @@ PlasmoidItem {
 
     Plasmoid.contextualActions: [
         PlasmaCore.Action {
-            text: "Verkennen (Deze computer)"
+            text: "Explore (My Computer)"
             icon.name: "computer"
             onTriggered: root.runCmd("python3 \"$HOME/.local/share/xp-startknop/xp-verkenner.py\" computer")
         },
         PlasmaCore.Action {
-            text: "Zoeken..."
+            text: "Search..."
             icon.name: "edit-find"
             onTriggered: root.runCmd("krunner")
         },
@@ -79,12 +79,12 @@ PlasmoidItem {
             isSeparator: true
         },
         PlasmaCore.Action {
-            text: "Het bureaublad weergeven"
+            text: "Show the Desktop"
             icon.name: "user-desktop"
             onTriggered: root.runCmd(root.toggleDesktopCmd)
         },
         PlasmaCore.Action {
-            text: "Taakbeheer"
+            text: "Task Manager"
             icon.name: "utilities-system-monitor"
             onTriggered: root.runCmd("python3 \"$HOME/.local/share/xp-startknop/xp-verkenner.py\" taakbeheer")
         },
@@ -92,7 +92,7 @@ PlasmoidItem {
             isSeparator: true
         },
         PlasmaCore.Action {
-            text: "Eigenschappen (Taakbalk, Startmenu & Logon)"
+            text: "Properties (Taskbar, Start Menu & Logon)"
             icon.name: "configure"
             onTriggered: root.runCmd("python3 \"$HOME/.local/share/xp-startknop/xp-verkenner.py\" taakbalk")
         }
@@ -348,8 +348,8 @@ PlasmoidItem {
 
                 PlasmaCore.ToolTipArea {
                     anchors.fill: parent
-                    mainText: "Bureaublad weergeven"
-                    subText: "Alle vensters minimaliseren of herstellen"
+                    mainText: "Show Desktop"
+                    subText: "Minimize or restore all open windows"
                 }
 
                 MouseArea {
@@ -387,14 +387,14 @@ PlasmoidItem {
                 PlasmaCore.ToolTipArea {
                     anchors.fill: parent
                     mainText: "Mozilla Firefox"
-                    subText: "Op het internet surfen"
+                    subText: "Browse the Internet"
                 }
 
                 MouseArea {
                     id: ffMouse
                     anchors.fill: parent
                     hoverEnabled: true
-                    onClicked: root.runCmd("firefox || xdg-open https://www.google.nl")
+                    onClicked: root.runCmd("firefox || xdg-open https://www.google.com")
                 }
             }
 
@@ -424,8 +424,8 @@ PlasmoidItem {
 
                 PlasmaCore.ToolTipArea {
                     anchors.fill: parent
-                    mainText: "Windows Verkenner (Dolphin)"
-                    subText: "Mappen en bestanden weergeven"
+                    mainText: "Windows Explorer (Dolphin)"
+                    subText: "Display the files and folders on your computer"
                 }
 
                 MouseArea {
@@ -469,7 +469,7 @@ PlasmoidItem {
                     PlasmaCore.ToolTipArea {
                         anchors.fill: parent
                         mainText: itemTitle
-                        subText: "Klik om te starten, middelklik om te verwijderen uit Snel starten"
+                        subText: "Click to launch, middle-click to remove from Quick Launch"
                     }
 
                     MouseArea {

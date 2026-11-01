@@ -264,7 +264,7 @@ Item {
         color: "#004e98"
 
         Rectangle {
-            width: 436; height: 258
+            width: 456; height: 288
             anchors.centerIn: parent; anchors.verticalCenterOffset: -20
             color: "#ece9d8"
             border.color: "#00195c"; border.width: 1; radius: 5
@@ -370,6 +370,32 @@ Item {
                     Text {
                         anchors.verticalCenter: parent.verticalCenter; x: 5
                         text: "●●●●●●●●"; color: "#000000"; font.family: "Tahoma, sans-serif"; font.pixelSize: 11
+                    }
+                }
+
+                Row {
+                    x: 84; y: 92; spacing: 7
+                    visible: !root.showWelcome
+                    Repeater {
+                        model: [
+                            { t: "OK", w: 72 },
+                            { t: "Cancel", w: 72 },
+                            { t: "Shut Down...", w: 88 },
+                            { t: "Options <<", w: 78 }
+                        ]
+                        delegate: Rectangle {
+                            width: modelData.w; height: 23; radius: 3
+                            gradient: Gradient {
+                                GradientStop { position: 0.0; color: "#ffffff" }
+                                GradientStop { position: 1.0; color: "#ece9d8" }
+                            }
+                            border.color: "#003c74"; border.width: 1
+                            Text {
+                                anchors.centerIn: parent
+                                text: modelData.t; color: "#000000"
+                                font.family: "Tahoma, sans-serif"; font.pixelSize: 11
+                            }
+                        }
                     }
                 }
                 Text {

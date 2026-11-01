@@ -7,11 +7,11 @@
             }
         ],
         "Category": "Application Launchers",
-        "Description": "Authentieke Windows XP Professional (Luna & Classic) Startknop, Startmenu en Snel starten voor KDE Plasma 6",
+        "Description": "Authentic Windows XP Professional (Luna Blue & Classic) Start Button, Start Menu, and Quick Launch Toolbar for KDE Plasma 6",
         "Icon": "start-here-kde",
         "Id": "nl.steelhull.xpstart",
         "License": "GPL-2.0+",
-        "Name": "Windows XP Start & Quick Launch",
+        "Name": "Windows XP Start Menu & Quick Launch",
         "Version": "2.0",
         "Website": "https://github.com/RuisSoftware/Bazzite-Windows-XP"
     },

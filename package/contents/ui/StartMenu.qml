@@ -106,7 +106,7 @@ Item {
     property var pinnedList: Plasmoid.configuration.pinnedItems || []
 
     readonly property var allAppsModel: rootModel.count > 0 ? rootModel.modelForRow(0) : null
-    readonly property string xpScript: StandardPaths.writableLocation(StandardPaths.GenericDataLocation) + "/xp-startknop/xp-verkenner.py"
+    readonly property string xpScript: (StandardPaths.writableLocation(StandardPaths.GenericDataLocation) + "/xp-startknop/xp-verkenner.py").replace(/^file:\/\//, "")
 
     signal closeRequested()
 
@@ -604,7 +604,7 @@ Item {
 
                                 XpText {
                                     anchors.verticalCenter: parent.verticalCenter
-                                    text: "Alle programma's"
+                                    text: "All Programs"
                                     color: allProgramsBar.activeState ? "white" : "black"
                                     heavy: true
                                     font.pixelSize: 12
@@ -671,7 +671,7 @@ Item {
 
                         AppEntry {
                             width: parent.width; height: 32; iconSize: 24; fontSize: 11; bold: true; light: true
-                            label: "Mijn documenten"; iconFile: "docs.svg"
+                            label: "My Documents"; iconFile: "docs.svg"
                             onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                             onActivated: menu.openFolder(StandardPaths.writableLocation(StandardPaths.DocumentsLocation))
                         }
@@ -679,7 +679,7 @@ Item {
                             id: recentDocsEntry
                             width: parent.width; height: 32; iconSize: 24; fontSize: 11; bold: true; light: true; arrow: true
                             activeHighlight: menu.showRecentDocs
-                            label: "Mijn recente documenten"; iconFile: "recent.svg"
+                            label: "My Recent Documents"; iconFile: "recent.svg"
                             onHovered: {
                                 menu.scheduleCloseAllPrograms()
                                 menu.showRecentDocs = true
@@ -688,65 +688,65 @@ Item {
                         }
                         AppEntry {
                             width: parent.width; height: 32; iconSize: 24; fontSize: 11; bold: true; light: true
-                            label: "Mijn afbeeldingen"; iconFile: "pics.svg"
+                            label: "My Pictures"; iconFile: "pics.svg"
                             onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                             onActivated: menu.openFolder(StandardPaths.writableLocation(StandardPaths.PicturesLocation))
                         }
                         AppEntry {
                             width: parent.width; height: 32; iconSize: 24; fontSize: 11; bold: true; light: true
-                            label: "Mijn muziek"; iconFile: "music.svg"
+                            label: "My Music"; iconFile: "music.svg"
                             onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                             onActivated: menu.openFolder(StandardPaths.writableLocation(StandardPaths.MusicLocation))
                         }
                         AppEntry {
                             width: parent.width; height: 32; iconSize: 24; fontSize: 11; bold: true; light: true
-                            label: "Deze computer"; iconFile: "computer.svg"
+                            label: "My Computer"; iconFile: "computer.svg"
                             onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                             onActivated: menu.runXpMode("computer")
                             onRightClicked: (gx, gy) => {
                                 let p = mapToItem(menu, gx, gy)
-                                ctxMenu.openForItem(p.x, p.y, "Deze computer", "computer", "", -1)
+                                ctxMenu.openForItem(p.x, p.y, "My Computer", "computer", "", -1)
                             }
                         }
                         Separator { width: parent.width; lineColor: "#95bdee" }
                         AppEntry {
                             width: parent.width; height: 32; iconSize: 24; fontSize: 11; light: true
-                            label: "Configuratiescherm"; iconFile: "controlpanel.svg"
+                            label: "Control Panel"; iconFile: "controlpanel.svg"
                             onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                             onActivated: menu.runXpMode("configuratiescherm")
                             onRightClicked: (gx, gy) => {
                                 let p = mapToItem(menu, gx, gy)
-                                ctxMenu.openForItem(p.x, p.y, "Configuratiescherm", "controlpanel", "", -1)
+                                ctxMenu.openForItem(p.x, p.y, "Control Panel", "controlpanel", "", -1)
                             }
                         }
                         AppEntry {
                             width: parent.width; height: 38; iconSize: 24; fontSize: 11; light: true; allowWrap: true
-                            label: "Programmatoegang en -standaarden"; iconFile: "defapps.svg"
+                            label: "Set Program Access and Defaults"; iconFile: "defapps.svg"
                             onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                             onActivated: menu.run("kcmshell6 kcm_componentchooser")
                         }
                         AppEntry {
                             width: parent.width; height: 32; iconSize: 24; fontSize: 11; light: true
-                            label: "Printers en faxen"; iconFile: "printers.svg"
+                            label: "Printers and Faxes"; iconFile: "printers.svg"
                             onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                             onActivated: menu.run("kcmshell6 kcm_printer_manager")
                         }
                         Separator { width: parent.width; lineColor: "#95bdee" }
                         AppEntry {
                             width: parent.width; height: 32; iconSize: 24; fontSize: 11; light: true
-                            label: "Help en ondersteuning"; iconFile: "help.svg"
+                            label: "Help and Support"; iconFile: "help.svg"
                             onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                             onActivated: menu.run("khelpcenter")
                         }
                         AppEntry {
                             width: parent.width; height: 32; iconSize: 24; fontSize: 11; light: true
-                            label: "Zoeken"; iconFile: "search.svg"
+                            label: "Search"; iconFile: "search.svg"
                             onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                             onActivated: menu.run("krunner")
                         }
                         AppEntry {
                             width: parent.width; height: 32; iconSize: 24; fontSize: 11; light: true
-                            label: "Uitvoeren..."; iconFile: "run.svg"
+                            label: "Run..."; iconFile: "run.svg"
                             onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                             onActivated: menu.runXpMode("uitvoeren")
                         }
@@ -774,12 +774,12 @@ Item {
                     spacing: 4
 
                     SessionButton {
-                        label: "Afmelden"
+                        label: "Log Off"
                         iconFile: "logout.svg"
                         onActivated: menu.runXpMode("afmelden")
                     }
                     SessionButton {
-                        label: "Computer uitschakelen"
+                        label: "Turn Off Computer"
                         iconFile: "shutdown.svg"
                         onActivated: {
                             menu.closeRequested()
@@ -969,7 +969,7 @@ Item {
             AppEntry {
                 width: parent.width; height: 30; iconSize: 22; fontSize: 11; arrow: true
                 activeHighlight: menu.allPrograms
-                label: "Programma's"; iconFile: "progfolder.svg"
+                label: "Programs"; iconFile: "progfolder.svg"
                 onHovered: {
                     closeAllProgsTimer.stop()
                     menu.showRecentDocs = false
@@ -985,7 +985,7 @@ Item {
             AppEntry {
                 width: parent.width; height: 30; iconSize: 22; fontSize: 11; arrow: true
                 activeHighlight: menu.showRecentDocs
-                label: "Documenten"; iconFile: "docs.svg"
+                label: "Documents"; iconFile: "docs.svg"
                 onHovered: {
                     menu.scheduleCloseAllPrograms()
                     menu.showRecentDocs = true
@@ -995,28 +995,28 @@ Item {
 
             AppEntry {
                 width: parent.width; height: 30; iconSize: 22; fontSize: 11; arrow: true
-                label: "Instellingen"; iconFile: "controlpanel.svg"
+                label: "Settings"; iconFile: "controlpanel.svg"
                 onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                 onActivated: menu.runXpMode("configuratiescherm")
             }
 
             AppEntry {
                 width: parent.width; height: 30; iconSize: 22; fontSize: 11
-                label: "Zoeken"; iconFile: "search.svg"
+                label: "Search"; iconFile: "search.svg"
                 onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                 onActivated: menu.run("krunner")
             }
 
             AppEntry {
                 width: parent.width; height: 30; iconSize: 22; fontSize: 11
-                label: "Help en ondersteuning"; iconFile: "help.svg"
+                label: "Help and Support"; iconFile: "help.svg"
                 onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                 onActivated: menu.run("khelpcenter")
             }
 
             AppEntry {
                 width: parent.width; height: 30; iconSize: 22; fontSize: 11
-                label: "Uitvoeren..."; iconFile: "run.svg"
+                label: "Run..."; iconFile: "run.svg"
                 onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                 onActivated: menu.runXpMode("uitvoeren")
             }
@@ -1025,14 +1025,14 @@ Item {
 
             AppEntry {
                 width: parent.width; height: 30; iconSize: 22; fontSize: 11
-                label: "Afmelden " + (user.fullName || "King Geoffrey") + "..."; iconFile: "logout.svg"
+                label: "Log Off " + (user.fullName || "King Geoffrey") + "..."; iconFile: "logout.svg"
                 onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                 onActivated: menu.runXpMode("afmelden")
             }
 
             AppEntry {
                 width: parent.width; height: 30; iconSize: 22; fontSize: 11
-                label: "Computer uitschakelen..."; iconFile: "shutdown.svg"
+                label: "Turn Off Computer..."; iconFile: "shutdown.svg"
                 onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                 onActivated: {
                     menu.closeRequested()
@@ -1096,13 +1096,13 @@ Item {
                 // Bovenste 3 vaste XP items boven de scheidingslijn
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16; fontSize: 11
-                    label: "Programmatoegang en standaardinstellingen"; iconFile: "defapps.svg"
+                    label: "Set Program Access and Defaults"; iconFile: "defapps.svg"
                     onHovered: menu.requestCol2Change(-1, "", 160)
                     onActivated: menu.run("kcmshell6 kcm_componentchooser")
                 }
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16; fontSize: 11
-                    label: "Windows Catalogus"; iconFile: "cp-folderopts.svg"
+                    label: "Windows Catalog"; iconFile: "cp-folderopts.svg"
                     onHovered: menu.requestCol2Change(-1, "", 160)
                     onActivated: menu.run("xdg-open https://flathub.org")
                 }
@@ -1120,11 +1120,11 @@ Item {
                     color: "#d4d0c8"
                 }
 
-                // Ingebouwde Windows XP mappen (Bureau-accessoires, Opstarten)
+                // Ingebouwde Windows XP mappen (Accessories, Startup)
                 AppEntry {
                     id: accEntry
                     width: parent.width; height: 24; iconSize: 18; fontSize: 11; arrow: true
-                    label: "Bureau-accessoires"; iconFile: "progfolder.svg"
+                    label: "Accessories"; iconFile: "progfolder.svg"
                     activeHighlight: menu.activeBuiltinFolder === "accessories"
                     onHovered: {
                         menu.requestCol2Change(-1, "accessories", accEntry.mapToItem(menu, 0, 0).y)
@@ -1140,7 +1140,7 @@ Item {
                 AppEntry {
                     id: startupEntry
                     width: parent.width; height: 24; iconSize: 18; fontSize: 11; arrow: true
-                    label: "Opstarten"; iconFile: "progfolder.svg"
+                    label: "Startup"; iconFile: "progfolder.svg"
                     activeHighlight: menu.activeBuiltinFolder === "startup"
                     onHovered: {
                         menu.requestCol2Change(-1, "startup", startupEntry.mapToItem(menu, 0, 0).y)
@@ -1202,7 +1202,7 @@ Item {
                 }
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16; fontSize: 11
-                    label: "Windows Verkenner"; iconFile: "computer.svg"
+                    label: "Windows Explorer"; iconFile: "computer.svg"
                     onHovered: menu.requestCol2Change(-1, "", 160)
                     onActivated: menu.run("dolphin")
                 }
@@ -1301,7 +1301,7 @@ Item {
                     AppEntry {
                         id: subAccEntry
                         width: parent.width; height: 24; iconSize: 18; fontSize: 11; arrow: true
-                        label: "Toegankelijkheid"; iconFile: "progfolder.svg"
+                        label: "Accessibility"; iconFile: "progfolder.svg"
                         activeHighlight: menu.activeSubFolder === "accessibility"
                         onHovered: {
                             menu.col3TargetY = subAccEntry.mapToItem(menu, 0, 0).y
@@ -1312,7 +1312,7 @@ Item {
                     AppEntry {
                         id: subCommEntry
                         width: parent.width; height: 24; iconSize: 18; fontSize: 11; arrow: true
-                        label: "Communicatie"; iconFile: "progfolder.svg"
+                        label: "Communications"; iconFile: "progfolder.svg"
                         activeHighlight: menu.activeSubFolder === "communications"
                         onHovered: {
                             menu.col3TargetY = subCommEntry.mapToItem(menu, 0, 0).y
@@ -1323,7 +1323,7 @@ Item {
                     AppEntry {
                         id: subEntEntry
                         width: parent.width; height: 24; iconSize: 18; fontSize: 11; arrow: true
-                        label: "Ontspanning"; iconFile: "progfolder.svg"
+                        label: "Entertainment"; iconFile: "progfolder.svg"
                         activeHighlight: menu.activeSubFolder === "entertainment"
                         onHovered: {
                             menu.col3TargetY = subEntEntry.mapToItem(menu, 0, 0).y
@@ -1334,7 +1334,7 @@ Item {
                     AppEntry {
                         id: subSysEntry
                         width: parent.width; height: 24; iconSize: 18; fontSize: 11; arrow: true
-                        label: "Systeemwerkset"; iconFile: "progfolder.svg"
+                        label: "System Tools"; iconFile: "progfolder.svg"
                         activeHighlight: menu.activeSubFolder === "systools"
                         onHovered: {
                             menu.col3TargetY = subSysEntry.mapToItem(menu, 0, 0).y
@@ -1344,19 +1344,19 @@ Item {
                     }
                     AppEntry {
                         width: parent.width; height: 24; iconSize: 16; fontSize: 11
-                        label: "Adresboek"; iconFile: "addressbook.svg"
+                        label: "Address Book"; iconFile: "addressbook.svg"
                         onHovered: menu.activeSubFolder = ""
                         onActivated: menu.runXpMode("configuratiescherm")
                     }
                     AppEntry {
                         width: parent.width; height: 24; iconSize: 16; fontSize: 11
-                        label: "Kladblok"; iconFile: "notepad.svg"
+                        label: "Notepad"; iconFile: "notepad.svg"
                         onHovered: menu.activeSubFolder = ""
                         onActivated: menu.run("kwrite || kate")
                     }
                     AppEntry {
                         width: parent.width; height: 24; iconSize: 16; fontSize: 11
-                        label: "Opdrachtprompt"; iconFile: "cmd.svg"
+                        label: "Command Prompt"; iconFile: "cmd.svg"
                         onHovered: menu.activeSubFolder = ""
                         onActivated: menu.run("ptyxis || konsole")
                     }
@@ -1368,19 +1368,19 @@ Item {
                     }
                     AppEntry {
                         width: parent.width; height: 24; iconSize: 16; fontSize: 11
-                        label: "Rekenmachine"; iconFile: "calc.svg"
+                        label: "Calculator"; iconFile: "calc.svg"
                         onHovered: menu.activeSubFolder = ""
                         onActivated: menu.run("kcalc || gnome-calculator || ptyxis -e python3")
                     }
                     AppEntry {
                         width: parent.width; height: 24; iconSize: 16; fontSize: 11
-                        label: "Synchroniseren"; iconFile: "cp-updates.svg"
+                        label: "Synchronize"; iconFile: "cp-updates.svg"
                         onHovered: menu.activeSubFolder = ""
                         onActivated: menu.run("kcmshell6 kcm_updates")
                     }
                     AppEntry {
                         width: parent.width; height: 24; iconSize: 16; fontSize: 11
-                        label: "Windows Verkenner"; iconFile: "folder.svg"
+                        label: "Windows Explorer"; iconFile: "folder.svg"
                         onHovered: menu.activeSubFolder = ""
                         onActivated: menu.run("dolphin")
                     }
@@ -1394,7 +1394,7 @@ Item {
 
                     AppEntry {
                         width: parent.width; height: 24; iconSize: 16; fontSize: 11
-                        label: "Opstartprogramma's beheren"; iconFile: "cp-updates.svg"
+                        label: "Manage Startup Programs"; iconFile: "cp-updates.svg"
                         onActivated: menu.run("kcmshell6 kcm_autostart")
                     }
                 }
@@ -1472,7 +1472,7 @@ Item {
             anchors.topMargin: 3
             spacing: 1
 
-            // Systeemwerkset (System Tools — exact zoals in media_1793487400177_35c5c685.jpg!)
+            // System Tools
             Column {
                 width: parent.width
                 visible: menu.activeSubFolder === "systools"
@@ -1480,47 +1480,47 @@ Item {
 
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16
-                    label: "Back-up"; iconFile: "hdd.svg"
+                    label: "Backup"; iconFile: "hdd.svg"
                     onActivated: menu.run("kcmshell6 kcm_disks")
                 }
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16
-                    label: "Beveiligingscentrum"; iconFile: "xp-shield.svg"
+                    label: "Security Center"; iconFile: "xp-shield.svg"
                     onActivated: menu.run("kcmshell6 kcm_updates")
                 }
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16
-                    label: "Geplande taken"; iconFile: "cp-updates.svg"
+                    label: "Scheduled Tasks"; iconFile: "cp-updates.svg"
                     onActivated: menu.run("kcmshell6 kcm_autostart")
                 }
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16
-                    label: "Schijfdefragmentatie"; iconFile: "cp-defrag.svg"
+                    label: "Disk Defragmenter"; iconFile: "cp-defrag.svg"
                     onActivated: menu.run("kcmshell6 kcm_disks")
                 }
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16
-                    label: "Schijfopruiming"; iconFile: "cp-clean.svg"
+                    label: "Disk Cleanup"; iconFile: "cp-clean.svg"
                     onActivated: menu.run("plasma-systemmonitor")
                 }
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16
-                    label: "Speciale tekens"; iconFile: "cp-fonts.svg"
+                    label: "Character Map"; iconFile: "cp-fonts.svg"
                     onActivated: menu.run("plasma-emojier")
                 }
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16
-                    label: "Systeemherstel"; iconFile: "cp-system.svg"
+                    label: "System Restore"; iconFile: "cp-system.svg"
                     onActivated: menu.runXpMode("systeem")
                 }
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16
-                    label: "Systeeminformatie"; iconFile: "cp-admin.svg"
+                    label: "System Information"; iconFile: "cp-admin.svg"
                     onActivated: menu.runXpMode("systeem")
                 }
             }
 
-            // Toegankelijkheid
+            // Accessibility
             Column {
                 width: parent.width
                 visible: menu.activeSubFolder === "accessibility"
@@ -1528,17 +1528,17 @@ Item {
 
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16
-                    label: "Toegankelijkheidsopties"; iconFile: "cat-access.svg"
+                    label: "Accessibility Wizard"; iconFile: "cat-access.svg"
                     onActivated: menu.run("kcmshell6 kcm_access")
                 }
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16
-                    label: "Schermtoetsenbord"; iconFile: "cp-keyboard.svg"
+                    label: "On-Screen Keyboard"; iconFile: "cp-keyboard.svg"
                     onActivated: menu.run("kcmshell6 kcm_virtualkeyboard")
                 }
             }
 
-            // Communicatie
+            // Communications
             Column {
                 width: parent.width
                 visible: menu.activeSubFolder === "communications"
@@ -1546,22 +1546,22 @@ Item {
 
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16
-                    label: "Netwerkverbindingen"; iconFile: "cp-network.svg"
+                    label: "Network Connections"; iconFile: "cp-network.svg"
                     onActivated: menu.run("kcmshell6 kcm_networkmanagement")
                 }
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16
-                    label: "Draadloos netwerk instellen"; iconFile: "cp-wireless.svg"
+                    label: "Wireless Network Setup Wizard"; iconFile: "cp-wireless.svg"
                     onActivated: menu.run("kcmshell6 kcm_networkmanagement")
                 }
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16
-                    label: "Verbinding met extern bureaublad"; iconFile: "computer.svg"
+                    label: "Remote Desktop Connection"; iconFile: "computer.svg"
                     onActivated: menu.run("krdc || kcmshell6 kcm_krdpserver")
                 }
             }
 
-            // Ontspanning
+            // Entertainment
             Column {
                 width: parent.width
                 visible: menu.activeSubFolder === "entertainment"
@@ -1569,12 +1569,12 @@ Item {
 
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16
-                    label: "Volumeregeling"; iconFile: "cp-sound.svg"
+                    label: "Volume Control"; iconFile: "cp-sound.svg"
                     onActivated: menu.run("kcmshell6 kcm_pulseaudio")
                 }
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16
-                    label: "Geluiden en audioapparaten"; iconFile: "cat-sound.svg"
+                    label: "Sound Recorder & Audio"; iconFile: "cat-sound.svg"
                     onActivated: menu.run("kcmshell6 kcm_soundtheme")
                 }
             }
@@ -1669,10 +1669,10 @@ Item {
             anchors.margins: 3
             spacing: 1
 
-            // 1. Openen (Vetgedrukt)
+            // 1. Open (Bold)
             AppEntry {
                 width: parent.width; height: 22; iconSize: 14; bold: true
-                label: "Openen"; iconFile: "run.svg"
+                label: "Open"; iconFile: "run.svg"
                 onActivated: {
                     ctxMenu.visible = false
                     if (ctxMenu.targetType === "cmd") {
@@ -1690,12 +1690,12 @@ Item {
                 }
             }
 
-            // Extra optie voor Deze computer: Openen in Dolphin
+            // Extra option for My Computer: Explore in Dolphin
             AppEntry {
                 width: parent.width; height: ctxMenu.targetType === "computer" ? 22 : 0
                 visible: ctxMenu.targetType === "computer"
                 iconSize: 14
-                label: "Verkennen in Dolphin"; iconFile: "folder.svg"
+                label: "Explore in Dolphin"; iconFile: "folder.svg"
                 onActivated: {
                     ctxMenu.visible = false
                     menu.run("dolphin \"$HOME\"")
@@ -1704,10 +1704,10 @@ Item {
 
             Rectangle { width: parent.width - 6; x: 3; height: 1; color: "#d4d0c8" }
 
-            // 2. Vastmaken / Losmaken van het menu Start
+            // 2. Pin to / Unpin from Start menu
             AppEntry {
                 width: parent.width; height: 22; iconSize: 14
-                label: menu.isPinned(ctxMenu.targetLabel) ? "Losmaken van het menu Start" : "Vastmaken aan het menu Start"
+                label: menu.isPinned(ctxMenu.targetLabel) ? "Unpin from Start menu" : "Pin to Start menu"
                 iconFile: "progfolder.svg"
                 onActivated: {
                     ctxMenu.visible = false
@@ -1715,10 +1715,10 @@ Item {
                 }
             }
 
-            // 2b. Toevoegen aan / Verwijderen uit Snel starten (rechts naast Start-knop)
+            // 2b. Add to / Remove from Quick Launch
             AppEntry {
                 width: parent.width; height: 22; iconSize: 14
-                label: menu.isInQuickLaunch(ctxMenu.targetLabel) ? "Verwijderen uit Snel starten" : "Toevoegen aan Snel starten"
+                label: menu.isInQuickLaunch(ctxMenu.targetLabel) ? "Remove from Quick Launch" : "Add to Quick Launch"
                 iconFile: "show-desktop.svg"
                 onActivated: {
                     ctxMenu.visible = false
@@ -1726,10 +1726,10 @@ Item {
                 }
             }
 
-            // 3. Uit deze lijst verwijderen
+            // 3. Remove from This List
             AppEntry {
                 width: parent.width; height: 22; iconSize: 14
-                label: "Uit deze lijst verwijderen"
+                label: "Remove from This List"
                 iconFile: "cp-clean.svg"
                 onActivated: {
                     ctxMenu.visible = false
@@ -1737,13 +1737,13 @@ Item {
                 }
             }
 
-            // 4. Verborgen items herstellen (indien er items verwijderd zijn)
+            // 4. Restore removed items
             AppEntry {
                 width: parent.width
                 height: menu.removedList.length > 0 ? 22 : 0
                 visible: menu.removedList.length > 0
                 iconSize: 14
-                label: "Verwijderde items herstellen (" + menu.removedList.length + ")"
+                label: "Restore Removed Items (" + menu.removedList.length + ")"
                 iconFile: "cp-updates.svg"
                 onActivated: {
                     ctxMenu.visible = false
@@ -1753,10 +1753,10 @@ Item {
 
             Rectangle { width: parent.width - 6; x: 3; height: 1; color: "#d4d0c8" }
 
-            // 5. Standaardgrootte herstellen
+            // 5. Reset Start Menu Size
             AppEntry {
                 width: parent.width; height: 22; iconSize: 14
-                label: "Standaardgrootte menu Start"
+                label: "Reset Start Menu Size"
                 iconFile: "cp-display.svg"
                 onActivated: {
                     ctxMenu.visible = false
@@ -1764,10 +1764,10 @@ Item {
                 }
             }
 
-            // 6. Eigenschappen
+            // 6. Properties
             AppEntry {
                 width: parent.width; height: 22; iconSize: 14
-                label: "Eigenschappen"
+                label: "Properties"
                 iconFile: "controlpanel.svg"
                 onActivated: {
                     ctxMenu.visible = false

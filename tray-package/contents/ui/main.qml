@@ -18,8 +18,9 @@ PlasmoidItem {
     readonly property bool isClassicTaskbar: (XpConfig.taskbarStyle || "xp") === "classic"
     readonly property bool showClockSetting: XpConfig.showClock !== false
 
-    readonly property string xpScript: StandardPaths.writableLocation(StandardPaths.GenericDataLocation) + "/xp-startknop/xp-verkenner.py"
-    readonly property string sniListCmd: "python3 '" + xpScript + "' sni-list"
+    readonly property string xpScript: (StandardPaths.writableLocation(StandardPaths.GenericDataLocation) + "/xp-startknop/xp-verkenner.py").replace(/^file:\/\//, "")
+    readonly property string sniListCmd: "python3 \"" + xpScript + "\" sni-list"
+    property int _pollSeq: 0
 
     ListModel {
         id: sniAppsModel
@@ -34,7 +35,8 @@ PlasmoidItem {
     }
 
     function refreshSni() {
-        sniSource.connectSource(root.sniListCmd)
+        root._pollSeq = (root._pollSeq + 1) % 1000000
+        sniSource.connectSource(root.sniListCmd + " #" + root._pollSeq)
     }
 
     function runCmd(cmd) {
@@ -47,7 +49,7 @@ PlasmoidItem {
     }
 
     Timer {
-        interval: 2500
+        interval: 2000
         running: true
         repeat: true
         onTriggered: {
@@ -66,8 +68,8 @@ PlasmoidItem {
         id: sniSource
         engine: "executable"
         onNewData: (source, data) => {
-            let out = (data["stdout"] || "").trim()
             disconnectSource(source)
+            let out = (data["stdout"] || "").trim()
             if (out === "") return
             try {
                 let parsed = JSON.parse(out)
@@ -75,7 +77,7 @@ PlasmoidItem {
                 if (same) {
                     for (let k = 0; k < parsed.length; ++k) {
                         let cur = sniAppsModel.get(k)
-                        if (cur.sniService !== parsed[k].service || cur.sniIcon !== parsed[k].icon) {
+                        if (cur.sniService !== parsed[k].service || cur.sniIcon !== parsed[k].icon || cur.sniId !== parsed[k].id) {
                             same = false
                             break
                         }
@@ -100,12 +102,12 @@ PlasmoidItem {
 
     Plasmoid.contextualActions: [
         PlasmaCore.Action {
-            text: "Datum en tijd aanpassen"
+            text: "Adjust Date/Time"
             icon.name: "preferences-system-time"
             onTriggered: root.runCmd("kcmshell6 kcm_clock")
         },
         PlasmaCore.Action {
-            text: "Meldingen aanpassen..."
+            text: "Customize Notifications..."
             icon.name: "preferences-desktop-notification"
             onTriggered: root.runCmd("kcmshell6 kcm_notifications")
         },
@@ -113,12 +115,12 @@ PlasmoidItem {
             isSeparator: true
         },
         PlasmaCore.Action {
-            text: "Het bureaublad weergeven"
+            text: "Show the Desktop"
             icon.name: "user-desktop"
             onTriggered: root.runCmd("if [ \"$(qdbus-qt6 org.kde.KWin /KWin org.kde.KWin.showingDesktop)\" = \"true\" ]; then qdbus-qt6 org.kde.KWin /KWin org.kde.KWin.showDesktop false; else qdbus-qt6 org.kde.KWin /KWin org.kde.KWin.showDesktop true; fi")
         },
         PlasmaCore.Action {
-            text: "Taakbeheer"
+            text: "Task Manager"
             icon.name: "utilities-system-monitor"
             onTriggered: root.runCmd("python3 \"$HOME/.local/share/xp-startknop/xp-verkenner.py\" taakbeheer")
         },
@@ -126,7 +128,7 @@ PlasmoidItem {
             isSeparator: true
         },
         PlasmaCore.Action {
-            text: "Eigenschappen (Taakbalk, Startmenu & Logon)"
+            text: "Properties (Taskbar, Start Menu & Logon)"
             icon.name: "configure"
             onTriggered: root.runCmd("python3 \"$HOME/.local/share/xp-startknop/xp-verkenner.py\" taakbalk")
         }
@@ -141,21 +143,19 @@ PlasmoidItem {
     fullRepresentation: Item {
         id: trayItem
 
-        readonly property int panelRightMargin: 10
         readonly property int iconSz: Math.max(16, Math.min(22, Math.round(height * 0.53)))
-        readonly property int contentWidth: trayRow.implicitWidth + 24
+        readonly property int contentWidth: Math.max(120, trayRow.implicitWidth + 24)
 
-        Layout.minimumWidth: contentWidth - panelRightMargin
-        Layout.preferredWidth: contentWidth - panelRightMargin
-        Layout.maximumWidth: contentWidth - panelRightMargin
+        Layout.minimumWidth: contentWidth
+        Layout.preferredWidth: contentWidth
+        Layout.maximumWidth: contentWidth
         Layout.fillHeight: true
 
         // Het Systeemvak (Notification Area): Lichtblauw XP Luna OF Klassiek Grijs 3D verzonken
         Rectangle {
-            x: 0
+            anchors.fill: parent
             y: root.isClassicTaskbar ? 3 : 0
-            width: trayItem.contentWidth
-            height: root.isClassicTaskbar ? (trayItem.height - 5) : trayItem.height
+            height: root.isClassicTaskbar ? (parent.height - 5) : parent.height
             color: root.isClassicTaskbar ? "#d4d0c8" : "#0f85e4"
 
             // Alleen in XP Luna-modus: de blauwe glans-gradient
@@ -342,18 +342,20 @@ PlasmoidItem {
                             sourceSize.width: 32
                             sourceSize.height: 32
                             smooth: true
+                            cache: false
                         }
 
                         Kirigami.Icon {
                             anchors.fill: parent
                             visible: !sniIcon.startsWith("file://")
                             source: !sniIcon.startsWith("file://") ? sniIcon : ""
+                            fallback: "application-x-executable"
                         }
 
                         PlasmaCore.ToolTipArea {
                             anchors.fill: parent
                             mainText: sniTitle
-                            subText: "Klik om te openen, rechtsklik voor opties"
+                            subText: "Click to open, right-click for options"
                         }
 
                         MouseArea {
@@ -381,8 +383,8 @@ PlasmoidItem {
                     }
                     PlasmaCore.ToolTipArea {
                         anchors.fill: parent
-                        mainText: "LAN-verbinding"
-                        subText: "Verbonden"
+                        mainText: "Local Area Connection"
+                        subText: "Connected"
                     }
                     MouseArea {
                         anchors.fill: parent
@@ -401,7 +403,7 @@ PlasmoidItem {
                     }
                     PlasmaCore.ToolTipArea {
                         anchors.fill: parent
-                        mainText: "Windows XP Beveiligingscentrum"
+                        mainText: "Windows XP Security Center"
                     }
                     MouseArea {
                         anchors.fill: parent
@@ -421,7 +423,7 @@ PlasmoidItem {
                     PlasmaCore.ToolTipArea {
                         anchors.fill: parent
                         mainText: "Volume"
-                        subText: "Scroll om volume aan te passen"
+                        subText: "Scroll to adjust volume"
                     }
                     MouseArea {
                         anchors.fill: parent
@@ -464,7 +466,7 @@ PlasmoidItem {
                     PlasmaCore.ToolTipArea {
                         anchors.fill: parent
                         mainText: root.dateString
-                        subText: "Klik om Datum en tijd te openen"
+                        subText: "Click to open Date and Time Properties"
                     }
 
                     MouseArea {

@@ -1,55 +1,83 @@
-# 🪟 Bazzite KDE — Windows XP Professional (Luna Blue & Classic) Complete Omgeving
+# 🪟 Bazzite KDE — Windows XP Professional (Luna Blue & Classic) Complete Suite
 
-Welkom bij het **Bazzite Windows XP Professional (Service Pack 3 - Luna Blue & Classic)** totaalpakket voor **Bazzite KDE Plasma 6**!
+Transform your **Bazzite KDE Plasma 6** desktop into an authentic, pixel-perfect **Windows XP Professional (Service Pack 3)** experience with a single command — including full support for switching between **Windows XP Luna Blue** and **Windows Classic 3D**!
 
-Dit pakket transformeert een standaard Bazzite KDE Plasma 6 installatie met **één commando** (of via je AI-assistent) naar een authentieke, volledig functionele **Windows XP Professional** omgeving — inclusief uitgebreide instellingen om te schakelen tussen **Windows XP Luna** en **Windows Classic**.
-
----
-
-## ✨ Wat zit er allemaal in dit pakket?
-
-1. **Authentiek Windows XP Startmenu (`nl.steelhull.xpstart`) — Luna Blue én Classic!**
-   - **Windows XP Luna-stijl**: Groene glanzende **start**-knop met originele Windows XP vlag, twee-koloms XP Luna Startmenu met avatar, vastgepinde apps (*Internet*, *E-mail*), je favoriete/meest gebruikte apps (of een vaste eigen lijst!) en de blauwe rechterkolom met alle XP-systeemplaatsen.
-   - **Klassieke Windows-stijl (*Classic*)**: Schakel met één klik over naar de klassieke grijze 3D `[ 🪟 Start ]`-knop en het klassieke 1-koloms menu Start met de verticale blauwe **Windows XP Professional** zijbalk!
-   - **Alle programma's** met authentiek groen driehoekje en drielaags uitschuifmenu (*Bureau-accessoires*, *Systeemwerkset*, *Ontspanning*, *Communicatie*, + al je geïnstalleerde Linux/Flatpak/Steam programma's) met slimme diagonale muistimers zodat submenu's nooit per ongeluk sluiten.
-   - **Schaalbaar vanaf de randen**: sleep de boven- of rechterrand (of de rechterbovenhoek) van het Startmenu om het groter of kleiner te maken.
-
-2. **Uitgebreide Instellingen voor Taakbalk, Menu Start & Aanmeldscherm**
-   - Open via **Rechtermuisknop op de Startknop -> Eigenschappen** (of via *Configuratiescherm -> Taakbalk en menu Start* / *Gebruikersaccounts*):
-     - **Tabblad `Taakbalk`**:
-       - Kies tussen **Windows XP-stijl (Blauw Luna)** en **Klassieke Windows-stijl (Grijs 3D)**.
-       - Stel de **taakbalkhoogte & knopgrootte** in: `30 px (Standaard)`, `36 px (Middelgroot)`, `42 px (Groot)` of `48 px (Extra groot)` voor grotere taakbalkknoppen en grotere Snel starten-iconen!
-       - Schakel de **Werkbalk Snel starten** en de **Klok** naar wens in of uit.
-     - **Tabblad `Menu Start`**:
-       - Kies tussen **Menu Start van Windows XP (2 kolommen)** en **Klassiek menu Start (1 kolom met XP-zijbalk)**.
-       - Kies tussen **Grote pictogrammen (30 px)** en **Kleine pictogrammen (20 px)** en stel het **aantal getoonde programma's** (`3` t/m `14`) in.
-       - Kies welke programma's op de linkerlijst staan:
-         1. *Favorieten + Meest gebruikte programma's*
-         2. *Alleen Favorieten*
-         3. *Alleen Meest gebruikte programma's*
-         4. *Vaste eigen lijst* (direct te bewerken in het tekstvak!).
-     - **Tabblad `Aanmeldscherm (Logon)`**:
-       - Kies tussen het **Windows XP Welkomstscherm** (blauw scherm met het echte 3D Microsoft Windows XP-logo, gebruikerstegels, wachtwoordveld en *welcome*-scherm) en het **Klassieke Aanmeldingsvenster (`Log On to Windows`)** (met de *Microsoft Windows XP Professional x64 Edition* banner, oranje glanslijn en *User name* / *Password* velden).
-       - Inclusief directe testknop: **"Aanmeldscherm nu testen (Sla op & vergrendel scherm)"**.
-
-3. **Werkbalk Snel starten (*Quick Launch*) rechts naast de Startknop**
-   - Direct naast de `start`-knop: **Bureaublad weergeven**, **Mozilla Firefox**, **Windows Verkenner (Dolphin)** + je eigen toegevoegde apps (via rechtermuisknop in het Startmenu -> *Toevoegen aan Snel starten*).
-
-4. **Windows XP Systeemvak (`nl.steelhull.xptray`) met Live Achtergrond-icoontjes**
-   - Lichtblauwe verzonken Windows XP tray (of grijs 3D verzonken in Classic-modus) rechtsonder in de taakbalk met het `<` pijltje.
-   - Toont automatisch **alle actieve achtergrond-apps** (`StatusNotifierItem` via D-Bus), zoals **Discord**, **Steam**, **Unity Hub**, **Easy Effects**, inclusief hun echte icoontjes en klik-om-te-herstellen!
-
-5. **Windows XP Verkenner, Configuratiescherm & Systeemvensters (`xp-verkenner.py`)**
-   - **Configuratiescherm**, **Deze computer**, **Systeemeigenschappen**, **Eigenschappen voor Beeldscherm**, **Eigenschappen voor Taakbalk, menu Start en Aanmeldscherm**, **Windows Taakbeheer**, **Uitvoeren...** en **Afmelden bij Windows**.
-
-6. **Officiële KDE Store / Pling.com Pakketten (`kde-store-pakketten/`)**
-   - Direct klaar om te uploaden naar **[store.kde.org](https://store.kde.org)** en **[pling.com](https://www.pling.com)**! Zie [`KDE-STORE-PUBLICEREN.md`](./KDE-STORE-PUBLICEREN.md) voor alle details.
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![Platform: Bazzite / KDE Plasma 6](https://img.shields.io/badge/Platform-Bazzite%20%7C%20KDE%20Plasma%206-informational.svg)](https://bazzite.gg)
+[![Style: Windows XP SP3](https://img.shields.io/badge/Style-Windows%20XP%20SP3-green.svg)](#features)
 
 ---
 
-## 🚀 Automatische Installatie (1 Commando)
+## 📸 High-Resolution Screenshot Gallery
 
-Clone deze repository en voer het installatiescript uit:
+### 1. Windows XP Luna Desktop & Start Menu
+The authentic Windows XP experience: rolling green hills of the **Bliss** wallpaper, 3D glossy green **start** button, Quick Launch bar (*Show Desktop*, *Firefox*, *Windows Explorer*), 2-column Start Menu with avatar, and the light-blue notification area with running background apps (*Discord*, *Steam*, etc.).
+![Windows XP Luna Desktop and Start Menu](screenshots/01-desktop-startmenu-luna.png)
+
+---
+
+### 2. Windows XP Welcome Screen (Logon / Lock Screen)
+Authentic 3D Microsoft Windows XP logo, subtle light orb gradient, user accounts with avatars, password box with animated hint balloons, power button (*Turn off computer*), and account management footer.
+![Windows XP Welcome Login Screen](screenshots/02-welcome-login-screen.png)
+
+---
+
+### 3. Classic "Log On to Windows" Screen
+The iconic enterprise Windows XP Professional x64 Edition logon dialog box on `#004e98` background, complete with *User name*, *Password*, *OK*, *Cancel*, *Shut Down...*, and *Options <<* buttons.
+![Classic Log On to Windows Screen](screenshots/03-classic-logon-screen.png)
+
+---
+
+### 4. Windows XP "welcome" Splash Screen
+The classic italic glowing *welcome* splash screen displayed while logging into the desktop session.
+![Windows XP Welcome Splash Screen](screenshots/04-welcome-splash.png)
+
+---
+
+### 5. Windows Classic Start Menu & 3D Taskbar
+Prefer the classic workstation aesthetic? Switch to the classic gray 3D `[ 🪟 Start ]` button, classic 1-column Start menu with the vertical *Windows XP Professional* blue gradient banner, and recessed classic system tray.
+![Windows Classic Start Menu and Taskbar](screenshots/05-classic-startmenu-taskbar.png)
+
+---
+
+### 6. My Computer (Windows Explorer)
+Authentic Windows XP Explorer interface with collapsible blue task panes (*System Tasks*, *Other Places*, *Details*), drives categorized by *Files Stored on This Computer*, *Hard Disk Drives* (C:, D:, E:), and *Devices with Removable Storage* (CD Drive F:).
+![My Computer Explorer](screenshots/06-my-computer-explorer.png)
+
+---
+
+### 7. Control Panel (Category View & Classic View)
+Full navigation supporting both Windows XP's intuitive **Category View** (*Pick a category*) and the traditional **Classic View** displaying all 28 Control Panel applets with authentic XP icons.
+![Control Panel Category and Classic View](screenshots/07-control-panel-category-and-classic.png)
+
+---
+
+### 8. Taskbar, Start Menu & Logon Screen Properties
+Full configuration suite accessible via **Right-click on Start button -> Properties**:
+- **Taskbar tab**: Switch between Luna and Classic, adjust taskbar height & button size (30, 36, 42, 48 px), toggle Quick Launch & Clock.
+- **Start Menu tab**: Switch between Luna 2-column and Classic 1-column, adjust icon size (Large 30px / Small 20px), item count, and item source (Favorites / Most used / Custom fixed list).
+- **Logon Screen tab**: Choose between the Welcome Screen and Classic Logon dialog, with instant test lock button.
+![Taskbar and Start Menu Properties](screenshots/08-taskbar-startmenu-logon-properties.png)
+
+---
+
+### 9. System Properties & Display Properties
+Authentic replicas of `sysdm.cpl` and `desk.cpl` with live hardware details (CPU, RAM, OS info) and interactive window appearance previews.
+![System Properties and Display Properties](screenshots/09-system-and-display-properties.png)
+
+---
+
+### 10. Windows Task Manager, Run Dialog & Log Off Windows
+- **Windows Task Manager**: Live Applications list, searchable Processes list, and green-on-black CPU Usage & Page File Usage graphs.
+- **Run Dialog**: `sysdm.cpl`, `control`, `explorer`, `cmd`, or any Linux terminal command.
+- **Log Off Windows**: Classic blue banner dialog with *Switch User* and *Log Off* buttons.
+![Windows Task Manager](screenshots/10-windows-task-manager.png)
+
+---
+
+## ⚡ 1-Command Installation
+
+Open a terminal on your Bazzite KDE machine and run:
 
 ```bash
 git clone https://github.com/RuisSoftware/Bazzite-Windows-XP.git
@@ -57,20 +85,41 @@ cd Bazzite-Windows-XP
 bash installeren.sh
 ```
 
+The script will automatically configure your wallpapers, sounds, cursor theme, icons, fonts, plasmoids, lock screen, and system tray.
+
 ---
 
-## 🤖 Installeren via een AI-Agent (Claude Code, Antigravity, Cursor, Open Interpreter, etc.)
+## 🤖 Install via AI Agent (Claude Code, Antigravity, Cursor, etc.)
 
-Gebruik je een AI-assistent op Bazzite? Geef je AI-agent simpelweg de onderstaande prompt (of bekijk [`PROMPT-VOOR-AI-AGENT.md`](./PROMPT-VOOR-AI-AGENT.md)):
+Give this prompt to your AI coding agent running on Bazzite:
 
-> **Prompt voor je AI-Agent:**
 > ```text
-> Ik wil dat je mijn Bazzite KDE Plasma 6 desktop volledig instelt als originele Windows XP Professional (Luna Blue & Classic) met behulp van deze repository: https://github.com/RuisSoftware/Bazzite-Windows-XP (of de bijgevoegde Bazzite-Windows-XP-Compleet.zip).
->
-> Voer de volgende stappen volledig zelfstandig voor mij uit:
-> 1. Als je de zip hebt gekregen, pak deze dan uit. Als je de GitHub link gebruikt, clone dan https://github.com/RuisSoftware/Bazzite-Windows-XP naar een lokale map.
-> 2. Controleer of `zstd`, `tar` en `python3-gobject` aanwezig zijn (standaard aanwezig op Bazzite KDE).
-> 3. Voer `bash installeren.sh` uit vanuit de Bazzite-Windows-XP map.
-> 4. Controleer of het onderste KDE-paneel aan de linkerkant de Windows XP Startknop + Werkbalk Snel starten (`nl.steelhull.xpstart`) heeft en aan de rechterkant het Windows XP Systeemvak (`nl.steelhull.xptray`). Als er op het paneel nog een oude `org.kde.plasma.kickoff`, `org.kde.plasma.kicker` of dubbele `org.kde.plasma.systemtray` staat, vervang die dan netjes in `~/.config/plasma-org.kde.plasma.desktop-appletsrc` door `nl.steelhull.xpstart` (links) en `nl.steelhull.xptray` (rechts) en herstart `systemctl --user restart plasma-plasmashell.service`.
-> 5. Test of `python3 ~/.local/share/xp-startknop/xp-verkenner.py sni-list` werkt en meld mij zodra mijn volledige Windows XP omgeving klaar is!
+> Please configure my Bazzite KDE Plasma 6 desktop as an authentic Windows XP Professional (Luna Blue & Classic) environment using this repository: https://github.com/RuisSoftware/Bazzite-Windows-XP (or Bazzite-Windows-XP-Compleet.zip).
+> 
+> Execute these steps autonomously:
+> 1. Clone https://github.com/RuisSoftware/Bazzite-Windows-XP (or extract the zip).
+> 2. Verify dependencies (zstd, tar, python3-gobject - standard on Bazzite).
+> 3. Run: bash installeren.sh
+> 4. Ensure the bottom panel has the XP Start & Quick Launch plasmoid (nl.steelhull.xpstart) on the left and the XP System Tray (nl.steelhull.xptray) on the right. If needed, update ~/.config/plasma-org.kde.plasma.desktop-appletsrc and run systemctl --user restart plasma-plasmashell.service.
+> 5. Confirm python3 ~/.local/share/xp-startknop/xp-verkenner.py sni-list executes properly and notify me when complete!
 > ```
+
+---
+
+## 📦 KDE Store / Pling Packages (`kde-store-pakketten/`)
+
+Ready-to-upload packages formatted according to official KDE Store / Opendesktop guidelines:
+
+| Package File | Store Category | Description |
+|---|---|---|
+| `nl.steelhull.xpstart.plasmoid` | Plasma 6 Applets | Windows XP Luna & Classic Start Menu + Quick Launch |
+| `nl.steelhull.xptray.plasmoid` | Plasma 6 Applets | Windows XP Luna & Classic System Tray with background apps |
+| `org.magpie.xpluna.desktop.tar.gz` | Plasma Global Themes | Windows XP Luna Global Theme & SDDM / Lockscreen |
+
+See [`KDE-STORE-PUBLISHING.md`](./KDE-STORE-PUBLISHING.md) for step-by-step upload instructions.
+
+---
+
+## 📄 License
+This project is open-source under the [GNU General Public License v3.0](LICENSE).
+Windows XP visual design and trademarks are property of Microsoft Corporation.

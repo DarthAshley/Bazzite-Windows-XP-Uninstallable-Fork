@@ -80,9 +80,9 @@ def get_disk_usage_str(path):
         usage = shutil.disk_usage(path)
         total_gb = usage.total / (1024 ** 3)
         free_gb = usage.free / (1024 ** 3)
-        return f"Totale grootte: {total_gb:.1f} GB\nBeschikbaar: {free_gb:.1f} GB"
+        return f"Total Size: {total_gb:.1f} GB\nFree Space: {free_gb:.1f} GB"
     except Exception:
-        return "Systeemmap"
+        return "System Folder"
 
 
 XP_CSS = b"""
@@ -366,151 +366,198 @@ window, .xp-window {
     padding: 2px 8px;
     color: #333333;
 }
+
+entry, textview, textview text, spinbutton, treeview, .view {
+    background-color: #ffffff;
+    color: #000000;
+    border: 1px solid #7f9db9;
+}
+
+treeview header button {
+    background-image: linear-gradient(to bottom, #ffffff, #ece9d8);
+    color: #000000;
+    border: 1px solid #d0ccb8;
+    padding: 2px 6px;
+}
+
+combobox button.combo {
+    background-image: linear-gradient(to bottom, #ffffff, #ece9d8);
+    color: #000000;
+    border: 1px solid #7f9db9;
+    padding: 2px 6px;
+}
+
+notebook, notebook stack {
+    background-color: #fcfcfe;
+    color: #000000;
+    border: 1px solid #919b9c;
+}
+
+notebook header {
+    background-color: #ece9d8;
+}
+
+notebook header tabs tab {
+    background-image: linear-gradient(to bottom, #ffffff, #ece9d8);
+    color: #000000;
+    border: 1px solid #919b9c;
+    padding: 3px 8px;
+}
+
+notebook header tabs tab:checked {
+    background-image: linear-gradient(to bottom, #ffb74c 0%, #ffffff 18%, #fcfcfe 100%);
+    font-weight: bold;
+}
+
+frame > border {
+    border: 1px solid #d0d0bf;
+    border-radius: 3px;
+}
 """
 
 CLASSIC_ITEMS = [
-    ("Beeldscherm", "cp-display.svg", "__BEELDSCHERM__"),
-    ("Beveiligingscentrum", "xp-shield.svg", "kcmshell6 kcm_updates"),
-    ("Bluetooth-apparaten", "tray-bt.svg", "kcmshell6 kcm_bluetooth"),
-    ("Datum en tijd", "cat-datetime.svg", "kcmshell6 kcm_clock"),
-    ("Energiebeheer", "cp-power.svg", "kcmshell6 kcm_powerdevilprofilesconfig"),
-    ("Gebruikersaccounts", "cat-users.svg", "__LOGON__"),
-    ("Geluiden en\naudioapparaten", "cp-sound.svg", "kcmshell6 kcm_pulseaudio"),
-    ("Geplande taken", "cp-updates.svg", "kcmshell6 kcm_autostart"),
-    ("Internetopties", "cat-network.svg", "kcmshell6 kcm_proxy"),
-    ("Kleur en\nvormgeving", "cat-appearance.svg", "__BEELDSCHERM__"),
-    ("Landinstellingen", "defapps.svg", "kcmshell6 kcm_regionandlang"),
-    ("Lettertypen", "cp-fonts.svg", "kcmshell6 kcm_fontinst"),
-    ("Mapopties", "cp-folderopts.svg", "kcmshell6 kcm_filetypes"),
-    ("Muis", "cp-mouse.svg", "kcmshell6 kcm_mouse"),
-    ("Netwerk-\nverbindingen", "cp-network.svg", "kcmshell6 kcm_networkmanagement"),
-    ("Printers en faxen", "printers.svg", "kcmshell6 kcm_printer_manager"),
-    ("Programmatoegang\nen standaarden", "defapps.svg", "kcmshell6 kcm_componentchooser"),
-    ("Scanners en\ncamera's", "pics.svg", "kcmshell6 kcm_kamera"),
-    ("Software", "cat-software.svg", "flatpak run io.github.kolunmi.Bazaar || kcmshell6 kcm_updates"),
-    ("Spelbesturingen", "cp-gamepad.svg", "kcmshell6 kcm_gamecontroller"),
-    ("Spraak", "cp-speech.svg", "kcmshell6 kcm_soundtheme"),
-    ("Systeem", "cp-system.svg", "__SYSTEEM__"),
-    ("Systeembeheer", "cp-admin.svg", "plasma-systemmonitor"),
-    ("Taakbalk en\nmenu Start", "cp-taskbar.svg", "__TAAKBALK__"),
-    ("Toegankelijkheids-\nopties", "cat-access.svg", "kcmshell6 kcm_access"),
-    ("Toetsenbord", "cp-keyboard.svg", "kcmshell6 kcm_keyboard"),
-    ("Windows Firewall", "cp-firewall.svg", "kcmshell6 kcm_netpref"),
-    ("Draadloos netwerk\ninstellen", "cp-wireless.svg", "kcmshell6 kcm_networkmanagement"),
+    ("Accessibility\nOptions", "cat-access.svg", "kcmshell6 kcm_access"),
+    ("Add or Remove\nPrograms", "cat-software.svg", "flatpak run io.github.kolunmi.Bazaar || kcmshell6 kcm_updates"),
+    ("Administrative\nTools", "cp-admin.svg", "plasma-systemmonitor"),
+    ("Appearance and\nThemes", "cat-appearance.svg", "__BEELDSCHERM__"),
+    ("Bluetooth\nDevices", "tray-bt.svg", "kcmshell6 kcm_bluetooth"),
+    ("Date and Time", "cat-datetime.svg", "kcmshell6 kcm_clock"),
+    ("Display", "cp-display.svg", "__BEELDSCHERM__"),
+    ("Folder Options", "cp-folderopts.svg", "kcmshell6 kcm_filetypes"),
+    ("Fonts", "cp-fonts.svg", "kcmshell6 kcm_fontinst"),
+    ("Game\nControllers", "cp-gamepad.svg", "kcmshell6 kcm_gamecontroller"),
+    ("Internet\nOptions", "cat-network.svg", "kcmshell6 kcm_proxy"),
+    ("Keyboard", "cp-keyboard.svg", "kcmshell6 kcm_keyboard"),
+    ("Mouse", "cp-mouse.svg", "kcmshell6 kcm_mouse"),
+    ("Network\nConnections", "cp-network.svg", "kcmshell6 kcm_networkmanagement"),
+    ("Power Options", "cp-power.svg", "kcmshell6 kcm_powerdevilprofilesconfig"),
+    ("Printers and\nFaxes", "printers.svg", "kcmshell6 kcm_printer_manager"),
+    ("Program Access\nand Defaults", "defapps.svg", "kcmshell6 kcm_componentchooser"),
+    ("Regional and\nLanguage Options", "defapps.svg", "kcmshell6 kcm_regionandlang"),
+    ("Scanners and\nCameras", "pics.svg", "kcmshell6 kcm_kamera"),
+    ("Scheduled\nTasks", "cp-updates.svg", "kcmshell6 kcm_autostart"),
+    ("Security\nCenter", "xp-shield.svg", "kcmshell6 kcm_updates"),
+    ("Sounds and\nAudio Devices", "cp-sound.svg", "kcmshell6 kcm_pulseaudio"),
+    ("Speech", "cp-speech.svg", "kcmshell6 kcm_soundtheme"),
+    ("System", "cp-system.svg", "__SYSTEEM__"),
+    ("Taskbar and\nStart Menu", "cp-taskbar.svg", "__TAAKBALK__"),
+    ("User Accounts", "cat-users.svg", "__LOGON__"),
+    ("Windows\nFirewall", "cp-firewall.svg", "kcmshell6 kcm_netpref"),
+    ("Wireless\nNetwork Setup", "cp-wireless.svg", "kcmshell6 kcm_networkmanagement"),
 ]
 
 CATEGORIES = [
     (
-        "Vormgeving en thema's",
+        "Appearance and Themes",
         "cat-appearance.svg",
-        "Het thema van de computer wijzigen, bureaubladachtergrond of schermresolutie aanpassen",
+        "Change the computer's theme, desktop background, or screen resolution",
         [
-            ("Het thema van de computer wijzigen", "cat-appearance.svg", "__BEELDSCHERM__"),
-            ("De bureaubladachtergrond wijzigen", "cp-display.svg", "kcmshell6 kcm_wallpaper"),
-            ("De schermresolutie aanpassen", "cp-display.svg", "kcmshell6 kcm_kscreen"),
-            ("Beeldscherm", "cp-display.svg", "__BEELDSCHERM__"),
-            ("Taakbalk en menu Start", "cp-taskbar.svg", "__TAAKBALK__"),
-            ("Mapopties", "cp-folderopts.svg", "kcmshell6 kcm_filetypes"),
-            ("Lettertypen", "cp-fonts.svg", "kcmshell6 kcm_fontinst"),
+            ("Change the computer's theme", "cat-appearance.svg", "__BEELDSCHERM__"),
+            ("Change the desktop background", "cp-display.svg", "kcmshell6 kcm_wallpaper"),
+            ("Change the screen resolution", "cp-display.svg", "kcmshell6 kcm_kscreen"),
+            ("Display", "cp-display.svg", "__BEELDSCHERM__"),
+            ("Taskbar and Start Menu", "cp-taskbar.svg", "__TAAKBALK__"),
+            ("Folder Options", "cp-folderopts.svg", "kcmshell6 kcm_filetypes"),
+            ("Fonts", "cp-fonts.svg", "kcmshell6 kcm_fontinst"),
         ],
     ),
     (
-        "Printers en andere hardware",
+        "Printers and Other Hardware",
         "cat-printers.svg",
-        "Printers, muis, toetsenbord, spelbesturingen en bluetooth-apparaten instellen",
+        "Configure printers, mouse, keyboard, game controllers, and Bluetooth devices",
         [
-            ("Geïnstalleerde printers of faxprinters weergeven", "printers.svg", "kcmshell6 kcm_printer_manager"),
-            ("Een printer toevoegen", "printers.svg", "kcmshell6 kcm_printer_manager"),
-            ("Muis", "cp-mouse.svg", "kcmshell6 kcm_mouse"),
-            ("Toetsenbord", "cp-keyboard.svg", "kcmshell6 kcm_keyboard"),
-            ("Spelbesturingen", "cp-gamepad.svg", "kcmshell6 kcm_gamecontroller"),
-            ("Bluetooth-apparaten", "tray-bt.svg", "kcmshell6 kcm_bluetooth"),
+            ("View installed printers or fax printers", "printers.svg", "kcmshell6 kcm_printer_manager"),
+            ("Add a printer", "printers.svg", "kcmshell6 kcm_printer_manager"),
+            ("Mouse", "cp-mouse.svg", "kcmshell6 kcm_mouse"),
+            ("Keyboard", "cp-keyboard.svg", "kcmshell6 kcm_keyboard"),
+            ("Game Controllers", "cp-gamepad.svg", "kcmshell6 kcm_gamecontroller"),
+            ("Bluetooth Devices", "tray-bt.svg", "kcmshell6 kcm_bluetooth"),
         ],
     ),
     (
-        "Netwerk- en internetverbindingen",
+        "Network and Internet Connections",
         "cat-network.svg",
-        "Verbinding met internet en thuisnetwerk maken, firewall en netwerkadapters configureren",
+        "Connect to the Internet and home network, configure firewall and network adapters",
         [
-            ("Een verbinding met internet instellen of wijzigen", "cat-network.svg", "kcmshell6 kcm_networkmanagement"),
-            ("Netwerkverbindingen", "cp-network.svg", "kcmshell6 kcm_networkmanagement"),
-            ("Draadloos netwerk instellen", "cp-wireless.svg", "kcmshell6 kcm_networkmanagement"),
+            ("Set up or change your Internet connection", "cat-network.svg", "kcmshell6 kcm_networkmanagement"),
+            ("Network Connections", "cp-network.svg", "kcmshell6 kcm_networkmanagement"),
+            ("Wireless Network Setup Wizard", "cp-wireless.svg", "kcmshell6 kcm_networkmanagement"),
             ("Windows Firewall", "cp-firewall.svg", "kcmshell6 kcm_netpref"),
-            ("Internetopties", "cat-network.svg", "kcmshell6 kcm_proxy"),
+            ("Internet Options", "cat-network.svg", "kcmshell6 kcm_proxy"),
         ],
     ),
     (
-        "Gebruikersaccounts",
+        "User Accounts",
         "cat-users.svg",
-        "Gebruikersaccounts, wachtwoorden en aanmeldingsopties (XP Welkomstscherm vs Klassiek Logon) wijzigen",
+        "Change user accounts, passwords, and logon options (XP Welcome Screen vs Classic Logon)",
         [
-            ("De manier waarop gebruikers zich aan- of afmelden wijzigen (XP Welkomstscherm / Klassiek Logon)", "cat-users.svg", "__LOGON__"),
-            ("Een account wijzigen", "cat-users.svg", "kcmshell6 kcm_users"),
-            ("Een nieuwe account maken", "cat-users.svg", "kcmshell6 kcm_users"),
-            ("Aanmeldingsbeheer (SDDM)", "cat-users.svg", "kcmshell6 kcm_plasmalogin"),
+            ("Change the way users log on or off (XP Welcome Screen / Classic Logon)", "cat-users.svg", "__LOGON__"),
+            ("Change an account", "cat-users.svg", "kcmshell6 kcm_users"),
+            ("Create a new account", "cat-users.svg", "kcmshell6 kcm_users"),
+            ("Login Screen (SDDM)", "cat-users.svg", "kcmshell6 kcm_plasmalogin"),
         ],
     ),
     (
-        "Software",
+        "Add or Remove Programs",
         "cat-software.svg",
-        "Programma's en onderdelen installeren, bijwerken of verwijderen",
+        "Install, update, or remove programs and Windows components",
         [
-            ("Programma's wijzigen of verwijderen", "cat-software.svg", "flatpak run io.github.kolunmi.Bazaar || kcmshell6 kcm_updates"),
-            ("Nieuwe programma's toevoegen", "cat-software.svg", "flatpak run io.github.kolunmi.Bazaar || kcmshell6 kcm_updates"),
-            ("Programmatoegang en standaardinstellingen", "defapps.svg", "kcmshell6 kcm_componentchooser"),
+            ("Change or remove programs", "cat-software.svg", "flatpak run io.github.kolunmi.Bazaar || kcmshell6 kcm_updates"),
+            ("Add new programs", "cat-software.svg", "flatpak run io.github.kolunmi.Bazaar || kcmshell6 kcm_updates"),
+            ("Set Program Access and Defaults", "defapps.svg", "kcmshell6 kcm_componentchooser"),
         ],
     ),
     (
-        "Datum, tijd, taal en landinstellingen",
+        "Date, Time, Language, and Regional Options",
         "cat-datetime.svg",
-        "Datum, tijd, tijdzone, taal en getalnotatie wijzigen",
+        "Change date, time, time zone, language, and number formats",
         [
-            ("De datum en de tijd wijzigen", "cat-datetime.svg", "kcmshell6 kcm_clock"),
-            ("De indeling van getallen, datums en tijden wijzigen", "defapps.svg", "kcmshell6 kcm_regionandlang"),
-            ("Datum en tijd", "cat-datetime.svg", "kcmshell6 kcm_clock"),
-            ("Landinstellingen", "defapps.svg", "kcmshell6 kcm_regionandlang"),
+            ("Change the date and time", "cat-datetime.svg", "kcmshell6 kcm_clock"),
+            ("Change the format of numbers, dates, and times", "defapps.svg", "kcmshell6 kcm_regionandlang"),
+            ("Date and Time", "cat-datetime.svg", "kcmshell6 kcm_clock"),
+            ("Regional and Language Options", "defapps.svg", "kcmshell6 kcm_regionandlang"),
         ],
     ),
     (
-        "Geluiden, spraak en audioapparaten",
+        "Sounds, Speech, and Audio Devices",
         "cat-sound.svg",
-        "Het geluidsvolume en het geluidsthema wijzigen, luidsprekers en microfoon instellen",
+        "Change the speaker volume and sound scheme, configure speakers and microphone",
         [
-            ("Het systeemvolume aanpassen", "cp-sound.svg", "kcmshell6 kcm_pulseaudio"),
-            ("Het geluidsthema wijzigen", "cp-speech.svg", "kcmshell6 kcm_soundtheme"),
-            ("Geluiden en audioapparaten", "cp-sound.svg", "kcmshell6 kcm_pulseaudio"),
+            ("Adjust the system volume", "cp-sound.svg", "kcmshell6 kcm_pulseaudio"),
+            ("Change the sound scheme", "cp-speech.svg", "kcmshell6 kcm_soundtheme"),
+            ("Sounds and Audio Devices", "cp-sound.svg", "kcmshell6 kcm_pulseaudio"),
         ],
     ),
     (
-        "Toegankelijkheidsopties",
+        "Accessibility Options",
         "cat-access.svg",
-        "Het contrast, geluid en muisgedrag aanpassen voor beter zicht, gehoor en mobiliteit",
+        "Adjust computer contrast, sound, and mouse behavior for vision, hearing, and mobility",
         [
-            ("Toegankelijkheidsopties configureren", "cat-access.svg", "kcmshell6 kcm_access"),
-            ("Schermkleur en nachtlicht aanpassen", "cp-display.svg", "kcmshell6 kcm_nightlight"),
+            ("Configure accessibility options", "cat-access.svg", "kcmshell6 kcm_access"),
+            ("Adjust screen color and night light", "cp-display.svg", "kcmshell6 kcm_nightlight"),
         ],
     ),
     (
-        "Prestaties en onderhoud",
+        "Performance and Maintenance",
         "cat-perf.svg",
-        "Systeeminformatie bekijken, schijfruimte vrijmaken, energiebeheer en systeemtaken",
+        "See basic information about your computer, free up disk space, power options, and system tasks",
         [
-            ("Basisinformatie over uw computer weergeven", "cp-system.svg", "__SYSTEEM__"),
-            ("Visuele effecten aanpassen", "cat-appearance.svg", "kcmshell6 kcm_animations"),
-            ("Schijfruimte vrijmaken / Systeemmonitor", "cp-clean.svg", "plasma-systemmonitor"),
-            ("Systeem", "cp-system.svg", "__SYSTEEM__"),
-            ("Energiebeheer", "cp-power.svg", "kcmshell6 kcm_powerdevilprofilesconfig"),
-            ("Systeembeheer", "cp-admin.svg", "plasma-systemmonitor"),
+            ("See basic information about your computer", "cp-system.svg", "__SYSTEEM__"),
+            ("Adjust visual effects", "cat-appearance.svg", "kcmshell6 kcm_animations"),
+            ("Free up space on your hard disk / System Monitor", "cp-clean.svg", "plasma-systemmonitor"),
+            ("System", "cp-system.svg", "__SYSTEEM__"),
+            ("Power Options", "cp-power.svg", "kcmshell6 kcm_powerdevilprofilesconfig"),
+            ("Administrative Tools", "cp-admin.svg", "plasma-systemmonitor"),
         ],
     ),
     (
-        "Beveiligingscentrum",
+        "Security Center",
         "xp-shield.svg",
-        "De status van uw beveiligingsinstellingen, firewall en automatische updates controleren",
+        "Check the status of your computer's security settings, firewall, and Automatic Updates",
         [
             ("Windows Firewall", "cp-firewall.svg", "kcmshell6 kcm_netpref"),
-            ("Automatische updates", "cp-updates.svg", "kcmshell6 kcm_updates"),
-            ("App-machtigingen", "xp-shield.svg", "kcmshell6 kcm_app-permissions"),
+            ("Automatic Updates", "cp-updates.svg", "kcmshell6 kcm_updates"),
+            ("Application Permissions", "xp-shield.svg", "kcmshell6 kcm_app-permissions"),
         ],
     ),
 ]
@@ -541,10 +588,10 @@ def get_cpu_and_ram():
 
 
 class SystemPropertiesDialog(Gtk.Window):
-    """Exacte replica van het Windows XP 'Systeemeigenschappen' venster."""
+    """Exact replica of Windows XP 'System Properties'."""
 
     def __init__(self, parent=None):
-        super().__init__(title="Systeemeigenschappen")
+        super().__init__(title="System Properties")
         self.set_default_size(410, 468)
         self.set_resizable(False)
         self.set_position(Gtk.WindowPosition.CENTER)
@@ -563,7 +610,7 @@ class SystemPropertiesDialog(Gtk.Window):
 
         # Two rows of XP tabs like in the screenshot
         row1 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=1)
-        for t in ["Systeemherstel", "Automatische updates", "Verbindingen van buitenaf"]:
+        for t in ["System Restore", "Automatic Updates", "Remote"]:
             b = Gtk.Button(label=t)
             b.get_style_context().add_class("xp-tab-btn")
             b.set_hexpand(True)
@@ -571,7 +618,7 @@ class SystemPropertiesDialog(Gtk.Window):
         vbox.pack_start(row1, False, False, 0)
 
         row2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=1)
-        for idx, t in enumerate(["Algemeen", "Computernaam", "Hardware", "Geavanceerd"]):
+        for idx, t in enumerate(["General", "Computer Name", "Hardware", "Advanced"]):
             b = Gtk.Button(label=t)
             b.get_style_context().add_class("xp-tab-btn")
             if idx == 0:
@@ -614,17 +661,17 @@ class SystemPropertiesDialog(Gtk.Window):
             lbl.set_max_width_chars(30)
             right_col.pack_start(lbl, False, False, 0)
 
-        add_header("Systeem:")
+        add_header("System:")
         add_indent("Microsoft Windows XP")
         add_indent("Professional")
-        add_indent("Versie 2002")
+        add_indent("Version 2002")
         add_indent("Service Pack 3")
 
         sep1 = Gtk.Box()
         sep1.set_size_request(-1, 8)
         right_col.pack_start(sep1, False, False, 0)
 
-        add_header("Geregistreerd voor:")
+        add_header("Registered to:")
         add_indent(user_name)
         add_indent("Steel Hull Studio")
         add_indent("76456-640-1803887-23173")
@@ -636,16 +683,16 @@ class SystemPropertiesDialog(Gtk.Window):
         add_header("Computer:")
         add_indent(cpu_model)
         add_indent(f"3.70 GHz, {ram_gb}")
-        add_indent("Extensie voor fysiek adres")
+        add_indent("Physical Address Extension")
 
         page.pack_start(right_col, True, True, 0)
 
-        # Bottom OK / Annuleren / Toepassen buttons
+        # Bottom OK / Cancel / Apply buttons
         btn_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         btn_row.set_margin_top(8)
         btn_row.set_halign(Gtk.Align.END)
 
-        for label, close_win in [("OK", True), ("Annuleren", True), ("Toepassen", False)]:
+        for label, close_win in [("OK", True), ("Cancel", True), ("Apply", False)]:
             btn = Gtk.Button(label=label)
             btn.get_style_context().add_class("xp-push-btn")
             if not close_win:
@@ -658,10 +705,10 @@ class SystemPropertiesDialog(Gtk.Window):
 
 
 class DisplayPropertiesDialog(Gtk.Window):
-    """Exacte replica van 'Eigenschappen voor Beeldscherm' (Display Properties)."""
+    """Exact replica of 'Display Properties'."""
 
     def __init__(self, parent=None):
-        super().__init__(title="Eigenschappen voor Beeldscherm")
+        super().__init__(title="Display Properties")
         self.set_default_size(404, 448)
         self.set_resizable(False)
         self.set_position(Gtk.WindowPosition.CENTER)
@@ -680,11 +727,11 @@ class DisplayPropertiesDialog(Gtk.Window):
 
         tabs = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=1)
         tab_defs = [
-            ("Thema's", lambda: run_cmd("kcmshell6 kcm_lookandfeel")),
-            ("Bureaublad", lambda: run_cmd("kcmshell6 kcm_wallpaper")),
-            ("Schermbeveiliging", lambda: run_cmd("kcmshell6 kcm_screenlocker")),
-            ("Vormgeving", None),
-            ("Instellingen", lambda: run_cmd("kcmshell6 kcm_kscreen")),
+            ("Themes", lambda: run_cmd("kcmshell6 kcm_lookandfeel")),
+            ("Desktop", lambda: run_cmd("kcmshell6 kcm_wallpaper")),
+            ("Screen Saver", lambda: run_cmd("kcmshell6 kcm_screenlocker")),
+            ("Appearance", None),
+            ("Settings", lambda: run_cmd("kcmshell6 kcm_kscreen")),
         ]
         for idx, (t_label, cb) in enumerate(tab_defs):
             b = Gtk.Button(label=t_label)
@@ -720,9 +767,9 @@ class DisplayPropertiesDialog(Gtk.Window):
         cur_cfg = load_xp_settings()
         self.disp_combos = []
         for label_txt, options in [
-            ("Vensters en knoppen:", ["Windows XP-stijl", "Klassieke Windows-stijl"]),
-            ("Kleurenschema:", ["Standaard (blauw)", "Olijfgroen", "Zilver"]),
-            ("Tekengrootte:", ["Normaal", "Grote lettertypen", "Extra grote lettertypen"]),
+            ("Windows and buttons:", ["Windows XP style", "Windows Classic style"]),
+            ("Color scheme:", ["Default (blue)", "Olive Green", "Silver"]),
+            ("Font size:", ["Normal", "Large Fonts", "Extra Large Fonts"]),
         ]:
             lbl = Gtk.Label(label=label_txt, xalign=0)
             left_col.pack_start(lbl, False, False, 0)
@@ -741,11 +788,11 @@ class DisplayPropertiesDialog(Gtk.Window):
         right_col = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         right_col.set_valign(Gtk.Align.END)
 
-        btn_eff = Gtk.Button(label="Effecten...")
+        btn_eff = Gtk.Button(label="Effects...")
         btn_eff.get_style_context().add_class("xp-push-btn")
         btn_eff.connect("clicked", lambda *_: run_cmd("kcmshell6 kcm_animations"))
 
-        btn_adv = Gtk.Button(label="Geavanceerd")
+        btn_adv = Gtk.Button(label="Advanced")
         btn_adv.get_style_context().add_class("xp-push-btn")
         btn_adv.connect("clicked", lambda *_: run_cmd("kcmshell6 kcm_colors"))
 
@@ -765,7 +812,7 @@ class DisplayPropertiesDialog(Gtk.Window):
         btn_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         btn_row.set_margin_top(8)
         btn_row.set_halign(Gtk.Align.END)
-        for label, close_win in [("OK", True), ("Annuleren", None), ("Toepassen", False)]:
+        for label, close_win in [("OK", True), ("Cancel", None), ("Apply", False)]:
             btn = Gtk.Button(label=label)
             btn.get_style_context().add_class("xp-push-btn")
             if close_win is None:
@@ -794,8 +841,8 @@ DEFAULT_XP_SETTINGS = {
         "Steam|steam|steam",
         "Discord|discord|flatpak run com.discordapp.Discord",
         "Lutris|lutris|lutris",
-        "Windows Verkenner|computer|dolphin",
-        "Configuratiescherm|preferences-system|python3 $HOME/.local/share/xp-startknop/xp-verkenner.py configuratiescherm",
+        "Windows Explorer|computer|dolphin",
+        "Control Panel|preferences-system|python3 $HOME/.local/share/xp-startknop/xp-verkenner.py configuratiescherm",
     ],
     "logonStyle": "welcome",
 }
@@ -900,14 +947,14 @@ def save_xp_settings(cfg, restart_plasma=True):
 
 class TaskbarPropertiesDialog(Gtk.Window):
     """
-    Uitgebreide 'Eigenschappen voor Taakbalk, menu Start en Aanmeldscherm' met 3 werkende tabbladen:
-    1. Taakbalk (XP Luna vs Classic, Hoogte 30/36/42/48 px voor grotere knoppen, Snel starten, Klok)
-    2. Menu Start (XP vs Klassiek menu Start, Grote/Kleine iconen, Aantal items, Bron: Favorieten / Meest gebruikt / Vaste eigen lijst)
-    3. Aanmeldscherm (Windows XP Welkomstscherm met gebruikerstegels vs Klassiek 'Log On to Windows' venster)
+    Comprehensive 'Taskbar, Start Menu and Logon Properties' with 3 working tabs:
+    1. Taskbar (XP Luna vs Classic, Height 30/36/42/48 px for larger buttons, Quick Launch, Clock)
+    2. Start Menu (XP vs Classic Start menu, Large/Small icons, Item count, Source: Favorites / Most Used / Custom Fixed List)
+    3. Logon Screen (Windows XP Welcome Screen with user tiles vs Classic 'Log On to Windows' dialog)
     """
 
     def __init__(self, parent=None, initial_tab=0):
-        super().__init__(title="Eigenschappen voor Taakbalk, menu Start en Aanmeldscherm")
+        super().__init__(title="Taskbar and Start Menu Properties")
         self.set_default_size(465, 530)
         self.set_resizable(False)
         self.set_position(Gtk.WindowPosition.CENTER)
@@ -926,10 +973,10 @@ class TaskbarPropertiesDialog(Gtk.Window):
         vbox.set_margin_end(8)
         self.add(vbox)
 
-        # Tabknoppen bovenaan
+        # Tab buttons at top
         self.tab_btns = []
         tabs_bar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
-        for idx, t_label in enumerate(["Taakbalk", "Menu Start", "Aanmeldscherm (Logon)"]):
+        for idx, t_label in enumerate(["Taskbar", "Start Menu", "Logon Screen"]):
             b = Gtk.Button(label=t_label)
             b.get_style_context().add_class("xp-tab-btn")
             b.connect("clicked", lambda _, i=idx: self._switch_tab(i))
@@ -941,32 +988,32 @@ class TaskbarPropertiesDialog(Gtk.Window):
         self.stack.get_style_context().add_class("xp-tab-page")
         vbox.pack_start(self.stack, True, True, 0)
 
-        # === TAB 0: TAAKBALK ===
+        # === TAB 0: TASKBAR ===
         page_tb = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=7)
         self.stack.add_named(page_tb, "tab0")
 
         grp_tb_style = Gtk.Label(xalign=0)
-        grp_tb_style.set_markup("<span foreground='#1f4fd5' weight='bold'>Stijl en grootte van de taakbalk</span>")
+        grp_tb_style.set_markup("<span foreground='#1f4fd5' weight='bold'>Taskbar appearance and size</span>")
         page_tb.pack_start(grp_tb_style, False, False, 2)
 
-        lbl_tb_style = Gtk.Label(label="Weergavestijl van taakbalk en Start-knop:", xalign=0)
+        lbl_tb_style = Gtk.Label(label="Taskbar and Start button visual style:", xalign=0)
         page_tb.pack_start(lbl_tb_style, False, False, 0)
 
         self.combo_tb_style = Gtk.ComboBoxText()
-        self.combo_tb_style.append_text("Windows XP-stijl (Blauwe Luna-balk met groene Start-knop)")
-        self.combo_tb_style.append_text("Klassieke Windows-stijl (Grijze 3D-balk met klassieke Start-knop)")
+        self.combo_tb_style.append_text("Windows XP style (Blue Luna taskbar with green Start button)")
+        self.combo_tb_style.append_text("Windows Classic style (Gray 3D taskbar with classic Start button)")
         self.combo_tb_style.set_active(1 if self.cfg.get("taskbarStyle") == "classic" else 0)
         page_tb.pack_start(self.combo_tb_style, False, False, 2)
 
-        lbl_tb_height = Gtk.Label(label="Hoogte van de taakbalk en grootte van taakbalkknoppen:", xalign=0)
+        lbl_tb_height = Gtk.Label(label="Taskbar height and taskbar button size:", xalign=0)
         page_tb.pack_start(lbl_tb_height, False, False, 0)
 
         self.height_values = [30, 36, 42, 48]
         self.combo_tb_height = Gtk.ComboBoxText()
-        self.combo_tb_height.append_text("Standaard Windows XP (30 pixels)")
-        self.combo_tb_height.append_text("Middelgroot — Iets hogere balk & grotere knoppen (36 pixels)")
-        self.combo_tb_height.append_text("Groot — Hoge taakbalk & grote knoppen (42 pixels)")
-        self.combo_tb_height.append_text("Extra groot — Dubbele hoogte (48 pixels)")
+        self.combo_tb_height.append_text("Standard Windows XP (30 pixels)")
+        self.combo_tb_height.append_text("Medium — Slightly taller bar & larger buttons (36 pixels)")
+        self.combo_tb_height.append_text("Large — Tall taskbar & large buttons (42 pixels)")
+        self.combo_tb_height.append_text("Extra Large — Double height (48 pixels)")
         cur_h = int(self.cfg.get("taskbarHeight", 30))
         h_idx = self.height_values.index(cur_h) if cur_h in self.height_values else 0
         self.combo_tb_height.set_active(h_idx)
@@ -976,22 +1023,22 @@ class TaskbarPropertiesDialog(Gtk.Window):
         page_tb.pack_start(sep_tb1, False, False, 4)
 
         grp1 = Gtk.Label(xalign=0)
-        grp1.set_markup("<span foreground='#1f4fd5' weight='bold'>Opties voor de taakbalk</span>")
+        grp1.set_markup("<span foreground='#1f4fd5' weight='bold'>Taskbar options</span>")
         page_tb.pack_start(grp1, False, False, 2)
 
-        self.chk_lock = Gtk.CheckButton(label="De taakbalk vergrendelen")
+        self.chk_lock = Gtk.CheckButton(label="Lock the taskbar")
         self.chk_lock.set_active(True)
         page_tb.pack_start(self.chk_lock, False, False, 0)
 
-        self.chk_top = Gtk.CheckButton(label="De taakbalk altijd op de voorgrond weergeven")
+        self.chk_top = Gtk.CheckButton(label="Keep the taskbar on top of other windows")
         self.chk_top.set_active(True)
         page_tb.pack_start(self.chk_top, False, False, 0)
 
-        self.chk_group = Gtk.CheckButton(label="Gelijksoortige taakbalkknoppen groeperen")
+        self.chk_group = Gtk.CheckButton(label="Group similar taskbar buttons")
         self.chk_group.set_active(True)
         page_tb.pack_start(self.chk_group, False, False, 0)
 
-        self.chk_ql = Gtk.CheckButton(label="Werkbalk Snel starten weergeven (Bureaublad tonen, Firefox, Verkenner)")
+        self.chk_ql = Gtk.CheckButton(label="Show Quick Launch (Show Desktop, Firefox, Windows Explorer)")
         self.chk_ql.set_active(bool(self.cfg.get("showQuickLaunch", True)))
         page_tb.pack_start(self.chk_ql, False, False, 0)
 
@@ -999,30 +1046,30 @@ class TaskbarPropertiesDialog(Gtk.Window):
         page_tb.pack_start(sep_tb2, False, False, 4)
 
         grp2 = Gtk.Label(xalign=0)
-        grp2.set_markup("<span foreground='#1f4fd5' weight='bold'>Systeemvak (Rechtsonder)</span>")
+        grp2.set_markup("<span foreground='#1f4fd5' weight='bold'>Notification area (System Tray)</span>")
         page_tb.pack_start(grp2, False, False, 2)
 
-        self.chk_clock = Gtk.CheckButton(label="De klok weergeven")
+        self.chk_clock = Gtk.CheckButton(label="Show the clock")
         self.chk_clock.set_active(bool(self.cfg.get("showClock", True)))
         page_tb.pack_start(self.chk_clock, False, False, 0)
 
-        self.chk_clean = Gtk.CheckButton(label="Achtergrond-apps (Discord, Steam, etc.) en systeem-iconen tonen")
+        self.chk_clean = Gtk.CheckButton(label="Show background apps (Discord, Steam, etc.) and system icons")
         self.chk_clean.set_active(True)
         page_tb.pack_start(self.chk_clean, False, False, 0)
 
-        # === TAB 1: MENU START ===
+        # === TAB 1: START MENU ===
         page_sm = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self.stack.add_named(page_sm, "tab1")
 
         grp_sm_style = Gtk.Label(xalign=0)
-        grp_sm_style.set_markup("<span foreground='#1f4fd5' weight='bold'>Stijl van het menu Start</span>")
+        grp_sm_style.set_markup("<span foreground='#1f4fd5' weight='bold'>Start menu style</span>")
         page_sm.pack_start(grp_sm_style, False, False, 1)
 
         self.rb_sm_xp = Gtk.RadioButton.new_with_label_from_widget(
-            None, "Menu Start van Windows XP (2 kolommen met avatar, favorieten en plaatsen)"
+            None, "Start menu (Windows XP 2-column layout with user avatar, favorites & places)"
         )
         self.rb_sm_classic = Gtk.RadioButton.new_with_label_from_widget(
-            self.rb_sm_xp, "Klassiek menu Start (Klassieke 3D-weergave met 1 kolom en XP-zijbalk)"
+            self.rb_sm_xp, "Classic Start menu (Classic 3D 1-column layout with Windows XP sidebar)"
         )
         if self.cfg.get("startMenuStyle") == "classic":
             self.rb_sm_classic.set_active(True)
@@ -1035,17 +1082,17 @@ class TaskbarPropertiesDialog(Gtk.Window):
         page_sm.pack_start(sep_sm1, False, False, 3)
 
         grp_sm_items = Gtk.Label(xalign=0)
-        grp_sm_items.set_markup("<span foreground='#1f4fd5' weight='bold'>Programma's en pictogrammen in het menu Start aanpassen</span>")
+        grp_sm_items.set_markup("<span foreground='#1f4fd5' weight='bold'>Customize Start menu programs and icons</span>")
         page_sm.pack_start(grp_sm_items, False, False, 1)
 
         row_ic_cnt = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-        lbl_ic = Gtk.Label(label="Pictogrammen:", xalign=0)
+        lbl_ic = Gtk.Label(label="Icon size:", xalign=0)
         self.combo_sm_icons = Gtk.ComboBoxText()
-        self.combo_sm_icons.append_text("Grote pictogrammen (30 px)")
-        self.combo_sm_icons.append_text("Kleine pictogrammen (20 px)")
+        self.combo_sm_icons.append_text("Large icons (30 px)")
+        self.combo_sm_icons.append_text("Small icons (20 px)")
         self.combo_sm_icons.set_active(1 if self.cfg.get("startIconSize") == "small" else 0)
 
-        lbl_cnt = Gtk.Label(label="Aantal items:", xalign=0)
+        lbl_cnt = Gtk.Label(label="Number of programs:", xalign=0)
         adj = Gtk.Adjustment(value=float(self.cfg.get("startItemsCount", 6)), lower=3, upper=14, step_increment=1, page_increment=2, page_size=0)
         self.spin_sm_count = Gtk.SpinButton(adjustment=adj, climb_rate=1, digits=0)
 
@@ -1055,21 +1102,21 @@ class TaskbarPropertiesDialog(Gtk.Window):
         row_ic_cnt.pack_start(self.spin_sm_count, False, False, 0)
         page_sm.pack_start(row_ic_cnt, False, False, 2)
 
-        lbl_mode = Gtk.Label(label="Welke programma's op de linkerlijst van het menu Start tonen:", xalign=0)
+        lbl_mode = Gtk.Label(label="Programs shown on the left side of the Start menu:", xalign=0)
         page_sm.pack_start(lbl_mode, False, False, 0)
 
         self.mode_keys = ["both", "favorites", "recent", "custom"]
         self.combo_sm_mode = Gtk.ComboBoxText()
-        self.combo_sm_mode.append_text("Favorieten + Meest gebruikte programma's (Standaard XP)")
-        self.combo_sm_mode.append_text("Alleen Favorieten (Vastgemaakte programma's)")
-        self.combo_sm_mode.append_text("Alleen Meest gebruikte programma's")
-        self.combo_sm_mode.append_text("Vaste eigen lijst (Hieronder zelf samenstellen)")
+        self.combo_sm_mode.append_text("Favorites + Most frequently used programs (Default XP)")
+        self.combo_sm_mode.append_text("Favorites only (Pinned programs)")
+        self.combo_sm_mode.append_text("Most frequently used programs only")
+        self.combo_sm_mode.append_text("Custom fixed list (Configure below)")
         cur_m = self.cfg.get("startItemsMode", "both")
         self.combo_sm_mode.set_active(self.mode_keys.index(cur_m) if cur_m in self.mode_keys else 0)
         page_sm.pack_start(self.combo_sm_mode, False, False, 2)
 
         lbl_custom = Gtk.Label(
-            label="Vaste eigen lijst (1 programma per regel als: Naam|icoon|commando):",
+            label="Custom fixed list (1 program per line as: Name|icon|command):",
             xalign=0,
         )
         page_sm.pack_start(lbl_custom, False, False, 0)
@@ -1085,28 +1132,28 @@ class TaskbarPropertiesDialog(Gtk.Window):
         sc_custom.add(self.txt_custom)
         page_sm.pack_start(sc_custom, True, True, 0)
 
-        # === TAB 2: AANMELDSCHERM (LOGON) ===
+        # === TAB 2: LOGON SCREEN ===
         page_lg = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         self.stack.add_named(page_lg, "tab2")
 
         grp_lg = Gtk.Label(xalign=0)
-        grp_lg.set_markup("<span foreground='#1f4fd5' weight='bold'>Manier waarop gebruikers zich aanmelden kiezen</span>")
+        grp_lg.set_markup("<span foreground='#1f4fd5' weight='bold'>Select the way users log on</span>")
         page_lg.pack_start(grp_lg, False, False, 2)
 
         self.rb_lg_welcome = Gtk.RadioButton.new_with_label_from_widget(
-            None, "Het welkomstscherm gebruiken (Standaard Windows XP Blauw scherm)"
+            None, "Use the Welcome screen (Standard Windows XP Blue Welcome Screen)"
         )
         desc_w = Gtk.Label(
-            label="   Toont het blauwe Windows XP aanmeldscherm met het echte 3D Windows XP-logo,\n   gebruikerstegels, wachtwoordveld en het 'welcome' scherm.",
+            label="   Displays the blue Windows XP login screen with the authentic 3D Windows XP logo,\n   user tiles, password field, and the italic 'welcome' screen.",
             xalign=0,
         )
         desc_w.get_style_context().add_class("xp-cat-desc")
 
         self.rb_lg_classic = Gtk.RadioButton.new_with_label_from_widget(
-            self.rb_lg_welcome, "Het klassieke aanmeldingsvenster gebruiken ('Log On to Windows')"
+            self.rb_lg_welcome, "Use the Classic logon prompt ('Log On to Windows' dialog box)"
         )
         desc_c = Gtk.Label(
-            label="   Toont het klassieke Windows XP Professional x64 'Log On to Windows' venster\n   met User name, Password en de knoppen OK, Cancel, Shut Down... en Options <<.",
+            label="   Displays the classic Windows XP Professional x64 'Log On to Windows' dialog\n   with User name, Password, and OK, Cancel, Shut Down..., and Options << buttons.",
             xalign=0,
         )
         desc_c.get_style_context().add_class("xp-cat-desc")
@@ -1124,12 +1171,12 @@ class TaskbarPropertiesDialog(Gtk.Window):
         sep_lg = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         page_lg.pack_start(sep_lg, False, False, 6)
 
-        btn_test_lock = Gtk.Button(label="Aanmeldscherm nu testen (Sla op & vergrendel scherm)")
+        btn_test_lock = Gtk.Button(label="Test Logon Screen Now (Save & Lock Screen)")
         btn_test_lock.get_style_context().add_class("xp-push-btn")
         btn_test_lock.connect("clicked", self._on_test_logon)
         page_lg.pack_start(btn_test_lock, False, False, 4)
 
-        # Onderste knoppenrij: OK / Annuleren / Toepassen
+        # Bottom button row: OK / Cancel / Apply
         btn_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         btn_row.set_margin_top(8)
         btn_row.set_halign(Gtk.Align.END)
@@ -1138,11 +1185,11 @@ class TaskbarPropertiesDialog(Gtk.Window):
         btn_ok.get_style_context().add_class("xp-push-btn")
         btn_ok.connect("clicked", lambda *_: self._apply_settings(close_after=True))
 
-        btn_cancel = Gtk.Button(label="Annuleren")
+        btn_cancel = Gtk.Button(label="Cancel")
         btn_cancel.get_style_context().add_class("xp-push-btn")
         btn_cancel.connect("clicked", lambda *_: self.destroy())
 
-        btn_apply = Gtk.Button(label="Toepassen")
+        btn_apply = Gtk.Button(label="Apply")
         btn_apply.get_style_context().add_class("xp-push-btn")
         btn_apply.connect("clicked", lambda *_: self._apply_settings(close_after=False))
 
@@ -1201,10 +1248,10 @@ class TaskbarPropertiesDialog(Gtk.Window):
 
 
 class RunDialog(Gtk.Window):
-    """Exacte replica van het Windows XP 'Uitvoeren' venster."""
+    """Exact replica of the Windows XP 'Run' dialog."""
 
     def __init__(self):
-        super().__init__(title="Uitvoeren")
+        super().__init__(title="Run")
         self.set_default_size(365, 175)
         self.set_resizable(False)
         icon_pb = load_pixbuf("run.svg", 24)
@@ -1221,14 +1268,14 @@ class RunDialog(Gtk.Window):
         top = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         top.pack_start(make_icon("run.svg", 36), False, False, 0)
         desc = Gtk.Label(
-            label="Geef de naam van een programma, map, document of\ninternetbron op en Windows zal deze voor u openen.",
+            label="Type the name of a program, folder, document, or\nInternet resource, and Windows will open it for you.",
             xalign=0,
         )
         top.pack_start(desc, True, True, 0)
         vbox.pack_start(top, False, False, 0)
 
         mid = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        lbl = Gtk.Label(label="Openen:", xalign=0)
+        lbl = Gtk.Label(label="Open:", xalign=0)
         self.entry = Gtk.Entry()
         self.entry.set_hexpand(True)
         self.entry.connect("activate", self._on_ok)
@@ -1244,11 +1291,11 @@ class RunDialog(Gtk.Window):
         ok_btn.get_style_context().add_class("xp-push-btn")
         ok_btn.connect("clicked", self._on_ok)
 
-        cancel_btn = Gtk.Button(label="Annuleren")
+        cancel_btn = Gtk.Button(label="Cancel")
         cancel_btn.get_style_context().add_class("xp-push-btn")
         cancel_btn.connect("clicked", lambda *_: Gtk.main_quit())
 
-        browse_btn = Gtk.Button(label="Bladeren...")
+        browse_btn = Gtk.Button(label="Browse...")
         browse_btn.get_style_context().add_class("xp-push-btn")
         browse_btn.connect("clicked", self._on_browse)
 
@@ -1282,21 +1329,21 @@ class RunDialog(Gtk.Window):
 
 
 class TaskManagerWindow(Gtk.Window):
-    """Authentieke Windows XP 'Windows Taakbeheer' (Task Manager) met Toepassingen, Processen en groene Prestatie-grafieken."""
+    """Authentic Windows XP 'Windows Task Manager' with Applications, Processes, and green Performance graphs."""
 
     def __init__(self):
-        super().__init__(title="Windows Taakbeheer")
+        super().__init__(title="Windows Task Manager")
         self.set_default_size(435, 475)
         self.set_position(Gtk.WindowPosition.CENTER)
         icon_pb = load_pixbuf("cp-perf.svg", 24)
         if icon_pb:
             self.set_icon(icon_pb)
 
-        self.cpu_history = [12] * 60
+        self.cpu_history = [12, 18, 15, 22, 14, 19, 25, 17, 13, 16] * 6
         self.mem_history = [35] * 60
         self.last_cpu_stat = self._read_cpu_stat()
         self.proc_count = 0
-        self.cur_cpu_pct = 5
+        self.cur_cpu_pct = 14
         self.cur_mem_mb = 2048
         self.total_mem_mb = 16384
 
@@ -1306,10 +1353,10 @@ class TaskManagerWindow(Gtk.Window):
 
         menubar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
         menubar.get_style_context().add_class("xp-menubar")
-        for m_txt in ("Bestand", "Opties", "Beeld", "Afsluiten", "Help"):
+        for m_txt in ("File", "Options", "View", "Shut Down", "Help"):
             mb = Gtk.Button(label=m_txt)
             mb.get_style_context().add_class("xp-menubar-btn")
-            if m_txt == "Bestand":
+            if m_txt == "File":
                 mb.connect("clicked", lambda *_: run_cmd([sys.executable, os.path.abspath(__file__), "uitvoeren"]))
             elif m_txt == "Help":
                 mb.connect("clicked", lambda *_: run_cmd("plasma-systemmonitor"))
@@ -1323,7 +1370,7 @@ class TaskManagerWindow(Gtk.Window):
         self.notebook.set_margin_bottom(4)
         vbox.pack_start(self.notebook, True, True, 0)
 
-        # Tab 1: Toepassingen
+        # Tab 1: Applications
         app_tab = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         app_tab.set_margin_start(8)
         app_tab.set_margin_end(8)
@@ -1332,7 +1379,7 @@ class TaskManagerWindow(Gtk.Window):
 
         self.app_store = Gtk.ListStore(str, str, int)
         app_tree = Gtk.TreeView(model=self.app_store)
-        for idx, col_title in enumerate(("Taak", "Status")):
+        for idx, col_title in enumerate(("Task", "Status")):
             renderer = Gtk.CellRendererText()
             col = Gtk.TreeViewColumn(col_title, renderer, text=idx)
             col.set_expand(idx == 0)
@@ -1345,18 +1392,20 @@ class TaskManagerWindow(Gtk.Window):
         app_tab.pack_start(app_scroll, True, True, 0)
 
         app_btn_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        new_task_btn = Gtk.Button(label="Nieuwe taak...")
+        new_task_btn = Gtk.Button(label="New Task...")
+        new_task_btn.get_style_context().add_class("xp-push-btn")
         new_task_btn.set_size_request(105, 24)
         new_task_btn.connect("clicked", lambda *_: run_cmd([sys.executable, os.path.abspath(__file__), "uitvoeren"]))
-        end_task_btn = Gtk.Button(label="Taak beëindigen")
-        end_task_btn.set_size_request(115, 24)
+        end_task_btn = Gtk.Button(label="End Task")
+        end_task_btn.get_style_context().add_class("xp-push-btn")
+        end_task_btn.set_size_request(105, 24)
         end_task_btn.connect("clicked", self._on_kill_selected_app)
         app_btn_row.pack_end(new_task_btn, False, False, 0)
         app_btn_row.pack_end(end_task_btn, False, False, 0)
         app_tab.pack_start(app_btn_row, False, False, 0)
-        self.notebook.append_page(app_tab, Gtk.Label(label="Toepassingen"))
+        self.notebook.append_page(app_tab, Gtk.Label(label="Applications"))
 
-        # Tab 2: Processen
+        # Tab 2: Processes
         proc_tab = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         proc_tab.set_margin_start(8)
         proc_tab.set_margin_end(8)
@@ -1365,7 +1414,7 @@ class TaskManagerWindow(Gtk.Window):
 
         self.proc_store = Gtk.ListStore(str, str, str, str, int)
         proc_tree = Gtk.TreeView(model=self.proc_store)
-        for idx, col_title in enumerate(("Procesnaam", "Gebruikersnaam", "CPU", "Geheugengebruik")):
+        for idx, col_title in enumerate(("Image Name", "User Name", "CPU", "Mem Usage")):
             renderer = Gtk.CellRendererText()
             col = Gtk.TreeViewColumn(col_title, renderer, text=idx)
             col.set_expand(idx == 0)
@@ -1378,17 +1427,18 @@ class TaskManagerWindow(Gtk.Window):
         proc_tab.pack_start(proc_scroll, True, True, 0)
 
         proc_btn_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        proc_chk = Gtk.CheckButton(label="Processen van alle gebruikers weergeven")
+        proc_chk = Gtk.CheckButton(label="Show processes from all users")
         proc_chk.set_active(True)
         proc_btn_row.pack_start(proc_chk, False, False, 0)
-        end_proc_btn = Gtk.Button(label="Proces beëindigen")
-        end_proc_btn.set_size_request(125, 24)
+        end_proc_btn = Gtk.Button(label="End Process")
+        end_proc_btn.get_style_context().add_class("xp-push-btn")
+        end_proc_btn.set_size_request(115, 24)
         end_proc_btn.connect("clicked", self._on_kill_selected_proc)
         proc_btn_row.pack_end(end_proc_btn, False, False, 0)
         proc_tab.pack_start(proc_btn_row, False, False, 0)
-        self.notebook.append_page(proc_tab, Gtk.Label(label="Processen"))
+        self.notebook.append_page(proc_tab, Gtk.Label(label="Processes"))
 
-        # Tab 3: Prestaties (met zwart/groene Windows XP grafieken)
+        # Tab 3: Performance (with black/green Windows XP graphs)
         perf_tab = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         perf_tab.set_margin_start(8)
         perf_tab.set_margin_end(8)
@@ -1396,14 +1446,14 @@ class TaskManagerWindow(Gtk.Window):
         perf_tab.set_margin_bottom(8)
 
         cpu_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        cpu_gauge_frame = Gtk.Frame(label=" CPU-gebruik ")
+        cpu_gauge_frame = Gtk.Frame(label=" CPU Usage ")
         self.cpu_gauge_area = Gtk.DrawingArea()
         self.cpu_gauge_area.set_size_request(95, 86)
         self.cpu_gauge_area.connect("draw", self._draw_cpu_gauge)
         cpu_gauge_frame.add(self.cpu_gauge_area)
         cpu_row.pack_start(cpu_gauge_frame, False, False, 0)
 
-        cpu_hist_frame = Gtk.Frame(label=" Geschiedenis van CPU-gebruik ")
+        cpu_hist_frame = Gtk.Frame(label=" CPU Usage History ")
         self.cpu_hist_area = Gtk.DrawingArea()
         self.cpu_hist_area.set_size_request(260, 86)
         self.cpu_hist_area.connect("draw", self._draw_cpu_hist)
@@ -1412,14 +1462,14 @@ class TaskManagerWindow(Gtk.Window):
         perf_tab.pack_start(cpu_row, False, False, 0)
 
         mem_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        mem_gauge_frame = Gtk.Frame(label=" Wisselbestand ")
+        mem_gauge_frame = Gtk.Frame(label=" PF Usage ")
         self.mem_gauge_area = Gtk.DrawingArea()
         self.mem_gauge_area.set_size_request(95, 86)
         self.mem_gauge_area.connect("draw", self._draw_mem_gauge)
         mem_gauge_frame.add(self.mem_gauge_area)
         mem_row.pack_start(mem_gauge_frame, False, False, 0)
 
-        mem_hist_frame = Gtk.Frame(label=" Geschiedenis van wisselbestandgebruik ")
+        mem_hist_frame = Gtk.Frame(label=" Page File Usage History ")
         self.mem_hist_area = Gtk.DrawingArea()
         self.mem_hist_area.set_size_request(260, 86)
         self.mem_hist_area.connect("draw", self._draw_mem_hist)
@@ -1428,9 +1478,9 @@ class TaskManagerWindow(Gtk.Window):
         perf_tab.pack_start(mem_row, False, False, 0)
 
         stats_grid = Gtk.Grid(column_spacing=8, row_spacing=6)
-        self.lbl_totals = Gtk.Label(label="Ingangen:  42180\nThreads:   1480\nProcessen: 215", xalign=0)
-        self.lbl_phys = Gtk.Label(label="Totaal:      16384000\nBeschikbaar: 10240000\nSysteemcache: 4120000", xalign=0)
-        for idx, (f_title, w_lbl) in enumerate(((" Totalen ", self.lbl_totals), (" Fysiek geheugen (kB) ", self.lbl_phys))):
+        self.lbl_totals = Gtk.Label(label="Handles:   42180\nThreads:   1480\nProcesses: 215", xalign=0)
+        self.lbl_phys = Gtk.Label(label="Total:        16384000\nAvailable:    10240000\nSystem Cache: 4120000", xalign=0)
+        for idx, (f_title, w_lbl) in enumerate(((" Totals ", self.lbl_totals), (" Physical Memory (K) ", self.lbl_phys))):
             fr = Gtk.Frame(label=f_title)
             w_lbl.set_margin_start(6)
             w_lbl.set_margin_end(6)
@@ -1440,14 +1490,14 @@ class TaskManagerWindow(Gtk.Window):
             fr.set_hexpand(True)
             stats_grid.attach(fr, idx, 0, 1, 1)
         perf_tab.pack_start(stats_grid, False, False, 0)
-        self.notebook.append_page(perf_tab, Gtk.Label(label="Prestaties"))
+        self.notebook.append_page(perf_tab, Gtk.Label(label="Performance"))
 
-        self.statusbar = Gtk.Label(label="Processen: --   |   CPU-gebruik: --%   |   Geheugengebruik: -- MB", xalign=0)
-        self.statusbar.get_style_context().add_class("xp-statusbar")
+        self.statusbar = Gtk.Label(label="Processes: --   |   CPU Usage: --%   |   Commit Charge: -- MB", xalign=0)
+        self.statusbar.get_style_context().add_class("xp-status-bar")
         vbox.pack_start(self.statusbar, False, False, 0)
 
-        self._refresh_stats()
         self._refresh_processes()
+        self._refresh_stats()
         GLib.timeout_add(1200, self._refresh_stats)
         GLib.timeout_add(3500, self._refresh_processes)
 
@@ -1466,7 +1516,7 @@ class TaskManagerWindow(Gtk.Window):
         self.last_cpu_stat = (tot, idle)
         dt = max(1, tot - prev_tot)
         didle = max(0, idle - prev_idle)
-        pct = max(1, min(100, int(round(100.0 * (dt - didle) / dt))))
+        pct = max(4, min(100, int(round(100.0 * (dt - didle) / dt))))
         self.cur_cpu_pct = pct
         self.cpu_history.append(pct)
         self.cpu_history = self.cpu_history[-60:]
@@ -1488,16 +1538,16 @@ class TaskManagerWindow(Gtk.Window):
             self.mem_history.append(mem_pct)
             self.mem_history = self.mem_history[-60:]
             self.lbl_phys.set_text(
-                f"Totaal:       {tot_kb}\nBeschikbaar:  {avail_kb}\nSysteemcache: {cached_kb}"
+                f"Total:        {tot_kb}\nAvailable:    {avail_kb}\nSystem Cache: {cached_kb}"
             )
         except Exception:
             pass
 
         self.lbl_totals.set_text(
-            f"Ingangen:   {self.proc_count * 142}\nThreads:    {self.proc_count * 6}\nProcessen:  {self.proc_count}"
+            f"Handles:    {self.proc_count * 142}\nThreads:    {self.proc_count * 6}\nProcesses:  {self.proc_count}"
         )
         self.statusbar.set_text(
-            f"Processen: {self.proc_count}     |     CPU-gebruik: {self.cur_cpu_pct}%     |     Geheugengebruik: {self.cur_mem_mb} MB / {self.total_mem_mb} MB"
+            f"Processes: {self.proc_count}     |     CPU Usage: {self.cur_cpu_pct}%     |     Commit Charge: {self.cur_mem_mb}M / {self.total_mem_mb}M"
         )
         self.cpu_gauge_area.queue_draw()
         self.cpu_hist_area.queue_draw()
@@ -1523,10 +1573,10 @@ class TaskManagerWindow(Gtk.Window):
                     continue
                 pid_s, usr, pcpu, rss_s, comm = parts
                 pid = int(pid_s)
-                kb_str = f"{int(rss_s):,} kB".replace(",", ".")
+                kb_str = f"{int(rss_s):,} K"
                 self.proc_store.append([comm, usr, f"{pcpu}%", kb_str, pid])
                 if any(k in comm.lower() for k in gui_keywords):
-                    self.app_store.append([comm, "Actief", pid])
+                    self.app_store.append([comm, "Running", pid])
         except Exception:
             pass
         return True
@@ -1649,12 +1699,12 @@ class TaskManagerWindow(Gtk.Window):
 
 class XpExplorerWindow(Gtk.Window):
     """
-    Windows XP Verkenner voor 'Deze computer' én 'Configuratiescherm'
-    (Categorieweergave + Klassieke weergave).
+    Windows XP Explorer for 'My Computer' and 'Control Panel'
+    (Category View + Classic View).
     """
 
     def __init__(self, initial_page="computer"):
-        super().__init__(title="Deze computer")
+        super().__init__(title="My Computer")
         self.set_default_size(880, 610)
         self.set_position(Gtk.WindowPosition.CENTER)
 
@@ -1673,11 +1723,11 @@ class XpExplorerWindow(Gtk.Window):
         menubar_row.get_style_context().add_class("xp-menubar")
 
         for m_label, action in [
-            ("Bestand", lambda: self.destroy()),
-            ("Bewerken", None),
-            ("Beeld", lambda: self.toggle_cp_mode()),
-            ("Favorieten", lambda: open_in_dolphin(os.path.expanduser("~"))),
-            ("Extra", lambda: run_cmd("kcmshell6 kcm_filetypes")),
+            ("File", lambda: self.destroy()),
+            ("Edit", None),
+            ("View", lambda: self.toggle_cp_mode()),
+            ("Favorites", lambda: open_in_dolphin(os.path.expanduser("~"))),
+            ("Tools", lambda: run_cmd("kcmshell6 kcm_filetypes")),
             ("Help", lambda: run_cmd("khelpcenter")),
         ]:
             mb = Gtk.Button(label=m_label)
@@ -1696,7 +1746,7 @@ class XpExplorerWindow(Gtk.Window):
         tbar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
         tbar.get_style_context().add_class("xp-toolbar")
 
-        self.btn_back = self._make_toolbtn("back.svg", "Terug  ▾", self.go_back)
+        self.btn_back = self._make_toolbtn("back.svg", "Back  ▾", self.go_back)
         self.btn_fwd = self._make_toolbtn("forward.svg", "▾", self.go_forward)
         self.btn_up = self._make_toolbtn("folder-up.svg", None, self.go_up)
 
@@ -1705,9 +1755,9 @@ class XpExplorerWindow(Gtk.Window):
         tbar.pack_start(self.btn_up, False, False, 0)
         tbar.pack_start(self._make_vsep(), False, False, 2)
 
-        btn_search = self._make_toolbtn("search.svg", "Zoeken", lambda: run_cmd("krunner"))
+        btn_search = self._make_toolbtn("search.svg", "Search", lambda: run_cmd("krunner"))
         btn_folders = self._make_toolbtn(
-            "folder.svg", "Mappen", lambda: open_in_dolphin(os.path.expanduser("~"))
+            "folder.svg", "Folders", lambda: open_in_dolphin(os.path.expanduser("~"))
         )
         tbar.pack_start(btn_search, False, False, 0)
         tbar.pack_start(btn_folders, False, False, 0)
@@ -1721,7 +1771,7 @@ class XpExplorerWindow(Gtk.Window):
         abar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
         abar.get_style_context().add_class("xp-addressbar")
 
-        addr_lbl = Gtk.Label(label="Adres")
+        addr_lbl = Gtk.Label(label="Address")
         addr_lbl.get_style_context().add_class("xp-address-label")
         abar.pack_start(addr_lbl, False, False, 0)
 
@@ -1743,7 +1793,7 @@ class XpExplorerWindow(Gtk.Window):
         go_btn.get_style_context().add_class("xp-go-btn")
         go_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
         go_row.pack_start(make_icon("go-button.svg", 18), False, False, 0)
-        go_row.pack_start(Gtk.Label(label="Ga naar"), False, False, 0)
+        go_row.pack_start(Gtk.Label(label="Go"), False, False, 0)
         go_btn.add(go_row)
         go_btn.connect("clicked", self.on_address_go)
         abar.pack_start(go_btn, False, False, 0)
@@ -1771,7 +1821,7 @@ class XpExplorerWindow(Gtk.Window):
         # 5. Status Bar
         self.statusbar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         self.statusbar.get_style_context().add_class("xp-status-bar")
-        self.status_lbl = Gtk.Label(label="Deze computer", xalign=0)
+        self.status_lbl = Gtk.Label(label="My Computer", xalign=0)
         self.statusbar.pack_start(self.status_lbl, True, True, 0)
         root.pack_start(self.statusbar, False, False, 0)
 
@@ -1933,22 +1983,22 @@ class XpExplorerWindow(Gtk.Window):
         self.content_holder.show_all()
 
     def _render_my_computer(self):
-        self.set_title("Deze computer")
+        self.set_title("My Computer")
         pb = load_pixbuf("computer.svg", 24)
         if pb:
             self.set_icon(pb)
         self.addr_icon.set_from_pixbuf(load_pixbuf("computer.svg", 16))
-        self.addr_entry.set_text("Deze computer")
-        self.status_lbl.set_text("6 objecten  |  Deze computer")
+        self.addr_entry.set_text("My Computer")
+        self.status_lbl.set_text("6 objects  |  My Computer")
 
-        # Left sidebar cards (Systeemtaken, Andere locaties, Details)
+        # Left sidebar cards (System Tasks, Other Places, Details)
         self.sidebar_box.pack_start(
             self._make_card(
-                "Systeemtaken",
+                "System Tasks",
                 [
-                    ("cp-admin.svg", "Systeeminformatie weergeven", lambda: self.execute_action("__SYSTEEM__")),
-                    ("cat-software.svg", "Programma's installeren of verwijderen", lambda: run_cmd("flatpak run io.github.kolunmi.Bazaar || kcmshell6 kcm_updates")),
-                    ("controlpanel.svg", "Een instelling wijzigen", lambda: self.navigate("configuratiescherm")),
+                    ("cp-admin.svg", "View system information", lambda: self.execute_action("__SYSTEEM__")),
+                    ("cat-software.svg", "Add or remove programs", lambda: run_cmd("flatpak run io.github.kolunmi.Bazaar || kcmshell6 kcm_updates")),
+                    ("controlpanel.svg", "Change a setting", lambda: self.navigate("configuratiescherm")),
                 ],
             ),
             False,
@@ -1957,12 +2007,12 @@ class XpExplorerWindow(Gtk.Window):
         )
         self.sidebar_box.pack_start(
             self._make_card(
-                "Andere locaties",
+                "Other Places",
                 [
-                    ("cp-network.svg", "Mijn netwerklocaties", lambda: open_in_dolphin("remote:/")),
-                    ("docs.svg", "Mijn documenten", lambda: open_in_dolphin(os.path.expanduser("~/Documenten"))),
-                    ("folder-shared.svg", "Gedeelde documenten", lambda: open_in_dolphin(os.path.expanduser("~/Openbaar"))),
-                    ("controlpanel.svg", "Configuratiescherm", lambda: self.navigate("configuratiescherm")),
+                    ("cp-network.svg", "My Network Places", lambda: open_in_dolphin("remote:/")),
+                    ("docs.svg", "My Documents", lambda: open_in_dolphin(os.path.expanduser("~/Documenten"))),
+                    ("folder-shared.svg", "Shared Documents", lambda: open_in_dolphin(os.path.expanduser("~/Openbaar"))),
+                    ("controlpanel.svg", "Control Panel", lambda: self.navigate("configuratiescherm")),
                 ],
             ),
             False,
@@ -1971,7 +2021,7 @@ class XpExplorerWindow(Gtk.Window):
         )
         self.details_card = self._make_card(
             "Details",
-            [("Deze computer", True), ("Systeemmap", False)],
+            [("My Computer", True), ("System Folder", False)],
         )
         self.sidebar_box.pack_start(self.details_card, False, False, 0)
 
@@ -1986,24 +2036,24 @@ class XpExplorerWindow(Gtk.Window):
 
         sections = [
             (
-                "Bestanden op deze computer",
+                "Files Stored on This Computer",
                 [
-                    ("folder-shared.svg", "Gedeelde documenten", os.path.expanduser("~/Openbaar"), "Systeemmap"),
-                    ("docs.svg", f"Documenten van {user_full}", os.path.expanduser("~/Documenten"), "Systeemmap"),
+                    ("folder-shared.svg", "Shared Documents", os.path.expanduser("~/Openbaar"), "System Folder"),
+                    ("docs.svg", f"{user_full}'s Documents", os.path.expanduser("~/Documenten"), "System Folder"),
                 ],
             ),
             (
-                "Harde-schijfstations",
+                "Hard Disk Drives",
                 [
-                    ("hdd.svg", "Lokale schijf (C:)", "/var/home/king", "Lokaal station (Btrfs)\n" + get_disk_usage_str("/var/home/king")),
-                    ("hdd.svg", "1TB SSD (D:)", "/var/mnt/schijven/1TB SSD", "Lokaal station (Ext4)\n" + get_disk_usage_str("/var/mnt/schijven/1TB SSD")),
-                    ("hdd.svg", "Data Schijf (E:)", "/var/mnt/6A441A2F4419FE8F", "Lokaal station (NTFS)\n" + get_disk_usage_str("/var/mnt/6A441A2F4419FE8F")),
+                    ("hdd.svg", "Local Disk (C:)", "/var/home/king", "Local Disk (Btrfs)\n" + get_disk_usage_str("/var/home/king")),
+                    ("hdd.svg", "1TB SSD (D:)", "/var/mnt/schijven/1TB SSD", "Local Disk (Ext4)\n" + get_disk_usage_str("/var/mnt/schijven/1TB SSD")),
+                    ("hdd.svg", "Data Disk (E:)", "/var/mnt/6A441A2F4419FE8F", "Local Disk (NTFS)\n" + get_disk_usage_str("/var/mnt/6A441A2F4419FE8F")),
                 ],
             ),
             (
-                "Apparaten met verwisselbare opslag",
+                "Devices with Removable Storage",
                 [
-                    ("cdrom.svg", "Dvd-rw-station (F:)", "/run/media/king", "Cd-rom-station"),
+                    ("cdrom.svg", "CD Drive (F:)", "/run/media/king", "CD-ROM Drive"),
                 ],
             ),
         ]
@@ -2046,21 +2096,21 @@ class XpExplorerWindow(Gtk.Window):
         self.content_holder.pack_start(view, True, True, 0)
 
     def _render_control_panel(self):
-        self.set_title("Configuratiescherm")
+        self.set_title("Control Panel")
         pb = load_pixbuf("controlpanel.svg", 24)
         if pb:
             self.set_icon(pb)
         self.addr_icon.set_from_pixbuf(load_pixbuf("controlpanel.svg", 16))
-        self.addr_entry.set_text("Configuratiescherm")
+        self.addr_entry.set_text("Control Panel")
 
         switch_label = (
-            "Schakel over naar categorieweergave"
+            "Switch to Category View"
             if self.cp_classic
-            else "Schakel over naar klassieke weergave"
+            else "Switch to Classic View"
         )
         self.sidebar_box.pack_start(
             self._make_card(
-                "Configuratiescherm",
+                "Control Panel",
                 [("controlpanel.svg", switch_label, self.toggle_cp_mode)],
                 dark_header=True,
                 header_icon="controlpanel.svg",
@@ -2071,11 +2121,11 @@ class XpExplorerWindow(Gtk.Window):
         )
         self.sidebar_box.pack_start(
             self._make_card(
-                "Zie ook",
+                "See Also",
                 [
                     ("cp-updates.svg", "Windows Update", lambda: run_cmd("kcmshell6 kcm_updates")),
-                    ("help.svg", "Help en ondersteuning", lambda: run_cmd("khelpcenter")),
-                    ("controlpanel.svg", "KDE Systeeminstellingen", lambda: run_cmd([REAL_SYSTEMSETTINGS])),
+                    ("help.svg", "Help and Support", lambda: run_cmd("khelpcenter")),
+                    ("controlpanel.svg", "KDE System Settings", lambda: run_cmd([REAL_SYSTEMSETTINGS])),
                 ],
             ),
             False,
@@ -2084,7 +2134,7 @@ class XpExplorerWindow(Gtk.Window):
         )
 
         if self.cp_classic:
-            self.status_lbl.set_text(f"{len(CLASSIC_ITEMS)} objecten  |  Configuratiescherm (Klassieke weergave)")
+            self.status_lbl.set_text(f"{len(CLASSIC_ITEMS)} objects  |  Control Panel (Classic View)")
             view = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
             view.get_style_context().add_class("xp-white-view")
             view.set_vexpand(True)
@@ -2117,12 +2167,12 @@ class XpExplorerWindow(Gtk.Window):
             view.pack_start(flow, False, False, 0)
             self.content_holder.pack_start(view, True, True, 0)
         else:
-            self.status_lbl.set_text("Configuratiescherm  |  Categorieweergave")
+            self.status_lbl.set_text("Control Panel  |  Category View")
             view = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
             view.get_style_context().add_class("xp-cat-view")
             view.set_vexpand(True)
 
-            heading = Gtk.Label(label="Kies een categorie", xalign=0)
+            heading = Gtk.Label(label="Pick a category", xalign=0)
             heading.get_style_context().add_class("xp-cat-heading")
             view.pack_start(heading, False, False, 0)
 
@@ -2168,15 +2218,15 @@ class XpExplorerWindow(Gtk.Window):
         cat_title, cat_icon, cat_desc, subitems = CATEGORIES[idx]
         self.set_title(cat_title)
         self.addr_icon.set_from_pixbuf(load_pixbuf(cat_icon, 16))
-        self.addr_entry.set_text(f"Configuratiescherm\\{cat_title}")
+        self.addr_entry.set_text(f"Control Panel\\{cat_title}")
         self.status_lbl.set_text(cat_desc)
 
         self.sidebar_box.pack_start(
             self._make_card(
-                "Configuratiescherm",
+                "Control Panel",
                 [
-                    ("controlpanel.svg", "Configuratiescherm (Overzicht)", lambda: self.navigate("configuratiescherm")),
-                    ("controlpanel.svg", "Schakel over naar klassieke weergave", self.toggle_cp_mode),
+                    ("controlpanel.svg", "Control Panel Home", lambda: self.navigate("configuratiescherm")),
+                    ("controlpanel.svg", "Switch to Classic View", self.toggle_cp_mode),
                 ],
                 dark_header=True,
                 header_icon="controlpanel.svg",
@@ -2187,10 +2237,10 @@ class XpExplorerWindow(Gtk.Window):
         )
         self.sidebar_box.pack_start(
             self._make_card(
-                "Zie ook",
+                "See Also",
                 [
                     ("cp-updates.svg", "Windows Update", lambda: run_cmd("kcmshell6 kcm_updates")),
-                    ("help.svg", "Help en ondersteuning", lambda: run_cmd("khelpcenter")),
+                    ("help.svg", "Help and Support", lambda: run_cmd("khelpcenter")),
                 ],
             ),
             False,
@@ -2206,7 +2256,7 @@ class XpExplorerWindow(Gtk.Window):
         heading.get_style_context().add_class("xp-cat-heading")
         view.pack_start(heading, False, False, 0)
 
-        subhead = Gtk.Label(label="Kies een taak of een onderdeel van het Configuratiescherm", xalign=0)
+        subhead = Gtk.Label(label="or pick a Control Panel icon", xalign=0)
         subhead.get_style_context().add_class("xp-cat-subhead")
         view.pack_start(subhead, False, False, 0)
 
@@ -2512,10 +2562,10 @@ def sni_menu(svc, path, menu_path="/com/canonical/dbusmenu"):
 
 
 class XpLogoffDialog(Gtk.Window):
-    """Authentiek Windows XP 'Afmelden bij Windows' venster (Gebruiker wisselen / Afmelden)."""
+    """Authentic Windows XP 'Log Off Windows' dialog (Switch User / Log Off)."""
 
     def __init__(self):
-        super().__init__(title="Afmelden bij Windows")
+        super().__init__(title="Log Off Windows")
         self.set_default_size(340, 200)
         self.set_resizable(False)
         self.set_position(Gtk.WindowPosition.CENTER)
@@ -2524,24 +2574,24 @@ class XpLogoffDialog(Gtk.Window):
         outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         self.add(outer)
 
-        # Donkerblauwe XP balk bovenaan met Windows XP vlag
+        # Dark blue XP bar at top with Windows XP flag
         top = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         top.set_size_request(-1, 44)
         top.override_background_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0.0, 0.19, 0.61, 1.0))
         lbl_top = Gtk.Label()
-        lbl_top.set_markup("<span foreground='white' font_desc='Tahoma Bold 12'>  Afmelden bij Windows</span>")
+        lbl_top.set_markup("<span foreground='white' font_desc='Tahoma Bold 12'>  Log Off Windows</span>")
         lbl_top.set_xalign(0.0)
         top.pack_start(lbl_top, True, True, 8)
         top.pack_end(make_icon("xp-flag.svg", 28), False, False, 12)
         outer.pack_start(top, False, False, 0)
 
-        # Oranje glanslijn
+        # Orange highlight line
         sep = Gtk.Box()
         sep.set_size_request(-1, 2)
         sep.override_background_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(1.0, 0.60, 0.20, 1.0))
         outer.pack_start(sep, False, False, 0)
 
-        # Middenblauw vlak met de twee knoppen: Gebruiker wisselen (opent het XP Login scherm!) & Afmelden
+        # Center blue area with Switch User & Log Off buttons
         mid = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=36)
         mid.set_halign(Gtk.Align.CENTER)
         mid.set_valign(Gtk.Align.CENTER)
@@ -2565,24 +2615,24 @@ class XpLogoffDialog(Gtk.Window):
             return col
 
         def on_switch_user(_):
-            play_xp_click()
+            play_xp_sound("klick.wav")
             run_cmd(["loginctl", "lock-session"])
             Gtk.main_quit()
 
         def on_logoff(_):
-            play_xp_click()
+            play_xp_sound("klick.wav")
             run_cmd(["qdbus-qt6", "org.kde.Shutdown", "/Shutdown", "logout"])
             Gtk.main_quit()
 
-        mid.pack_start(make_choice("cat-users.svg", "Gebruiker wisselen", on_switch_user), False, False, 0)
-        mid.pack_start(make_choice("logout.svg", "Afmelden", on_logoff), False, False, 0)
+        mid.pack_start(make_choice("cat-users.svg", "Switch User", on_switch_user), False, False, 0)
+        mid.pack_start(make_choice("logout.svg", "Log Off", on_logoff), False, False, 0)
 
-        # Onderbalk met Annuleren-knop
+        # Bottom bar with Cancel button
         bot = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         bot.set_size_request(-1, 42)
         bot.override_background_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0.0, 0.19, 0.61, 1.0))
-        cancel_btn = Gtk.Button(label="Annuleren")
-        cancel_btn.get_style_context().add_class("xp-btn")
+        cancel_btn = Gtk.Button(label="Cancel")
+        cancel_btn.get_style_context().add_class("xp-push-btn")
         cancel_btn.set_margin_end(14)
         cancel_btn.set_margin_top(8)
         cancel_btn.set_margin_bottom(8)

@@ -15,7 +15,7 @@ Item {
     property bool selectedTile: true
     property bool showHintBalloon: false
     property string balloonTitle: "Password Hint:"
-    property string balloonText: "Voer je Bazzite gebruikerswachtwoord in en druk op Enter."
+    property string balloonText: "Type your user password and press Enter."
     property bool welcomeMode: false
     property bool pendingSubmit: false
 

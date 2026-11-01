@@ -32,3 +32,4 @@ In de map [`kde-store-pakketten/`](./kde-store-pakketten/) staan de 4 officiële
    - Het **Windows XP Welkomstscherm (`welcome`)** en het **Klassieke `Log On to Windows` scherm**
    - De **Eigenschappen voor Taakbalk, menu Start en Aanmeldscherm**
 6. Klik op **Publish** — je thema staat nu live op `store.kde.org` én is direct vindbaar vanuit KDE Plasma 6!
+

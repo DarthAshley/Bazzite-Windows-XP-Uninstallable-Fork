@@ -7,11 +7,11 @@
             }
         ],
         "Category": "System Information",
-        "Description": "Authentiek Windows XP Professional (Luna & Classic) Systeemvak met achtergrond-apps (SNI) en Klok voor KDE Plasma 6",
+        "Description": "Authentic Windows XP Professional (Luna Blue & Classic) System Tray (Notification Area) with live background apps (SNI) and Clock for KDE Plasma 6",
         "Icon": "preferences-system-time",
         "Id": "nl.steelhull.xptray",
         "License": "GPL-2.0+",
-        "Name": "Windows XP Systeemvak (System Tray)",
+        "Name": "Windows XP System Tray",
         "Version": "2.0",
         "Website": "https://github.com/RuisSoftware/Bazzite-Windows-XP"
     },

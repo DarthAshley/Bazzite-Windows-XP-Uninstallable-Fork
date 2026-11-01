@@ -15,8 +15,8 @@ KCM.SimpleKCM {
     Kirigami.FormLayout {
         QQC2.ComboBox {
             id: tbStyleCombo
-            Kirigami.FormData.label: "Taakbalk- & Startknopstijl:"
-            model: ["Standaard (Uit XP Eigenschappen)", "Windows XP Luna (Groene Startknop)", "Klassieke Windows-stijl (Grijze 3D Startknop)"]
+            Kirigami.FormData.label: "Taskbar & Start Button Style:"
+            model: ["Default (From XP Properties)", "Windows XP Luna (Green Start Button)", "Windows Classic (Gray 3D Start Button)"]
             currentIndex: cfg_taskbarStyle === "classic" ? 2 : (cfg_taskbarStyle === "xp" ? 1 : 0)
             onActivated: index => {
                 cfg_taskbarStyle = index === 2 ? "classic" : (index === 1 ? "xp" : "")
@@ -25,8 +25,8 @@ KCM.SimpleKCM {
 
         QQC2.ComboBox {
             id: smStyleCombo
-            Kirigami.FormData.label: "Stijl van Menu Start:"
-            model: ["Standaard (Uit XP Eigenschappen)", "Windows XP Menu Start (2 kolommen)", "Klassiek Menu Start (1 kolom met zijbalk)"]
+            Kirigami.FormData.label: "Start Menu Style:"
+            model: ["Default (From XP Properties)", "Windows XP Start Menu (2 columns)", "Classic Start Menu (1 column with sidebar)"]
             currentIndex: cfg_startMenuStyle === "classic" ? 2 : (cfg_startMenuStyle === "xp" ? 1 : 0)
             onActivated: index => {
                 cfg_startMenuStyle = index === 2 ? "classic" : (index === 1 ? "xp" : "")
@@ -35,13 +35,13 @@ KCM.SimpleKCM {
 
         QQC2.ComboBox {
             id: modeCombo
-            Kirigami.FormData.label: "Programmalijst in Menu Start:"
+            Kirigami.FormData.label: "Start Menu Program List:"
             model: [
-                "Standaard (Uit XP Eigenschappen)",
-                "Favorieten + Meest gebruikte programma's",
-                "Alleen Favorieten",
-                "Alleen Meest gebruikte programma's",
-                "Vaste eigen lijst"
+                "Default (From XP Properties)",
+                "Favorites + Most Frequently Used Programs",
+                "Favorites Only",
+                "Most Frequently Used Programs Only",
+                "Custom Fixed List"
             ]
             currentIndex: cfg_startItemsMode === "custom" ? 4 : (cfg_startItemsMode === "recent" ? 3 : (cfg_startItemsMode === "favorites" ? 2 : (cfg_startItemsMode === "both" ? 1 : 0)))
             onActivated: index => {
@@ -52,8 +52,8 @@ KCM.SimpleKCM {
 
         QQC2.ComboBox {
             id: iconSizeCombo
-            Kirigami.FormData.label: "Pictogramgrootte in Menu Start:"
-            model: ["Standaard (Uit XP Eigenschappen)", "Grote pictogrammen (30 px)", "Kleine pictogrammen (20 px)"]
+            Kirigami.FormData.label: "Start Menu Icon Size:"
+            model: ["Default (From XP Properties)", "Large Icons (30 px)", "Small Icons (20 px)"]
             currentIndex: cfg_startIconSize === "small" ? 2 : (cfg_startIconSize === "large" ? 1 : 0)
             onActivated: index => {
                 cfg_startIconSize = index === 2 ? "small" : (index === 1 ? "large" : "")
@@ -62,15 +62,15 @@ KCM.SimpleKCM {
 
         QQC2.SpinBox {
             id: countSpin
-            Kirigami.FormData.label: "Aantal programma's (0 = automatisch):"
+            Kirigami.FormData.label: "Number of programs on Start menu (0 = auto):"
             from: 0
             to: 15
         }
 
         QQC2.CheckBox {
             id: showQLCheck
-            Kirigami.FormData.label: "Werkbalk Snel starten:"
-            text: "Snelkoppelingen (Bureaublad tonen, Firefox, Verkenner) naast Startknop tonen"
+            Kirigami.FormData.label: "Quick Launch Toolbar:"
+            text: "Show Quick Launch icons (Show Desktop, Firefox, Explorer) next to Start button"
         }
     }
 }
