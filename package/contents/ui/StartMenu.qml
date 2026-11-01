@@ -26,6 +26,62 @@ Item {
     property string activeSubFolder: ""
     property real col2TargetY: 160
     property real col3TargetY: 160
+    property double allProgramsOpenedAt: 0
+
+    // Timers zodat Alle programma's en submenu's NOOIT per ongeluk sluiten tijdens muisbewegingen
+    Timer {
+        id: closeAllProgsTimer
+        interval: 500
+        repeat: false
+        onTriggered: {
+            if (!allHover.containsMouse && !col1Blocker.containsMouse && !col2Blocker.containsMouse && !col3Blocker.containsMouse) {
+                menu.allPrograms = false
+                menu.activeCategoryIndex = -1
+                menu.activeBuiltinFolder = ""
+                menu.activeSubFolder = ""
+            }
+        }
+    }
+
+    Timer {
+        id: col2SwitchTimer
+        interval: 220
+        repeat: false
+        property int nextCatIndex: -1
+        property string nextBuiltin: ""
+        property real nextY: 160
+        onTriggered: {
+            if (!col2Blocker.containsMouse && !col3Blocker.containsMouse) {
+                menu.col2TargetY = nextY
+                menu.activeCategoryIndex = nextCatIndex
+                menu.activeBuiltinFolder = nextBuiltin
+                menu.activeSubFolder = ""
+            }
+        }
+    }
+
+    function requestCol2Change(catIdx, builtinName, targetY) {
+        closeAllProgsTimer.stop()
+        // Als er nog geen submenu open staat, open direct zonder vertraging
+        if (menu.activeCategoryIndex === -1 && menu.activeBuiltinFolder === "") {
+            menu.col2TargetY = targetY
+            menu.activeCategoryIndex = catIdx
+            menu.activeBuiltinFolder = builtinName
+            menu.activeSubFolder = ""
+            col2SwitchTimer.stop()
+        } else {
+            col2SwitchTimer.nextCatIndex = catIdx
+            col2SwitchTimer.nextBuiltin = builtinName
+            col2SwitchTimer.nextY = targetY
+            col2SwitchTimer.restart()
+        }
+    }
+
+    function scheduleCloseAllPrograms() {
+        if (menu.allPrograms) {
+            closeAllProgsTimer.restart()
+        }
+    }
 
     property var removedList: Plasmoid.configuration.removedItems || []
     property var pinnedList: Plasmoid.configuration.pinnedItems || []
@@ -36,6 +92,8 @@ Item {
     signal closeRequested()
 
     function reset() {
+        closeAllProgsTimer.stop()
+        col2SwitchTimer.stop()
         allPrograms = false
         showRecentDocs = false
         activeCategoryIndex = -1
@@ -229,8 +287,8 @@ Item {
         }
     }
 
-    // Dynamische canvasbreedte zodat uitklapmenu's rechts vrij kunnen uitklappen
-    readonly property int extraPopupWidth: (allPrograms || showRecentDocs) ? 680 : (ctxMenu.visible ? 220 : 0)
+    // Vaste canvasbreedte voor uitklapmenu's zodat Wayland het dialoogvenster NOOIT hoeft te resizen (voorkomt focusverlies!)
+    readonly property int extraPopupWidth: 640
 
     width: menuWidth + extraPopupWidth
     height: Math.max(menuHeight, 560)
@@ -250,10 +308,9 @@ Item {
         onNewData: source => disconnectSource(source)
     }
 
-    // Klik buiten het menu of uitklapmenu sluit de popups
+    // Klik in de transparante ruimte rechts/boven het Startmenu sluit eerst open sub-popups of anders het Startmenu zelf
     MouseArea {
         anchors.fill: parent
-        visible: menu.allPrograms || menu.showRecentDocs || ctxMenu.visible
         onClicked: {
             if (ctxMenu.visible) {
                 ctxMenu.visible = false
@@ -276,6 +333,14 @@ Item {
         anchors.bottom: parent.bottom
         width: menu.menuWidth
         height: menu.menuHeight
+
+        // Vang kliks binnen startBox op zodat ze niet doorlekken naar het transparante buitenveld
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                if (ctxMenu.visible) ctxMenu.visible = false
+            }
+        }
 
         // Blauwe Luna buitenrand
         Rectangle {
@@ -511,16 +576,28 @@ Item {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 onEntered: {
+                                    closeAllProgsTimer.stop()
                                     menu.showRecentDocs = false
-                                    menu.allPrograms = true
+                                    if (!menu.allPrograms) {
+                                        menu.allProgramsOpenedAt = Date.now()
+                                        menu.allPrograms = true
+                                    }
                                 }
                                 onClicked: {
+                                    closeAllProgsTimer.stop()
                                     menu.showRecentDocs = false
-                                    menu.allPrograms = !menu.allPrograms
+                                    let now = Date.now()
                                     if (!menu.allPrograms) {
+                                        menu.allProgramsOpenedAt = now
+                                        menu.allPrograms = true
+                                    } else if (now - menu.allProgramsOpenedAt > 600) {
+                                        menu.allPrograms = false
                                         menu.activeCategoryIndex = -1
                                         menu.activeBuiltinFolder = ""
                                         menu.activeSubFolder = ""
+                                    } else {
+                                        // Net geopend door erop te wijzen -> klik houdt het menu juist open!
+                                        menu.allPrograms = true
                                     }
                                 }
                             }
@@ -547,7 +624,7 @@ Item {
                         AppEntry {
                             width: parent.width; height: 32; iconSize: 24; fontSize: 11; bold: true; light: true
                             label: "Mijn documenten"; iconFile: "docs.svg"
-                            onHovered: { menu.allPrograms = false; menu.showRecentDocs = false }
+                            onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                             onActivated: menu.openFolder(StandardPaths.writableLocation(StandardPaths.DocumentsLocation))
                         }
                         AppEntry {
@@ -556,7 +633,7 @@ Item {
                             activeHighlight: menu.showRecentDocs
                             label: "Mijn recente documenten"; iconFile: "recent.svg"
                             onHovered: {
-                                menu.allPrograms = false
+                                menu.scheduleCloseAllPrograms()
                                 menu.showRecentDocs = true
                             }
                             onActivated: menu.openFolder("recentlyused:/files/")
@@ -564,19 +641,19 @@ Item {
                         AppEntry {
                             width: parent.width; height: 32; iconSize: 24; fontSize: 11; bold: true; light: true
                             label: "Mijn afbeeldingen"; iconFile: "pics.svg"
-                            onHovered: { menu.allPrograms = false; menu.showRecentDocs = false }
+                            onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                             onActivated: menu.openFolder(StandardPaths.writableLocation(StandardPaths.PicturesLocation))
                         }
                         AppEntry {
                             width: parent.width; height: 32; iconSize: 24; fontSize: 11; bold: true; light: true
                             label: "Mijn muziek"; iconFile: "music.svg"
-                            onHovered: { menu.allPrograms = false; menu.showRecentDocs = false }
+                            onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                             onActivated: menu.openFolder(StandardPaths.writableLocation(StandardPaths.MusicLocation))
                         }
                         AppEntry {
                             width: parent.width; height: 32; iconSize: 24; fontSize: 11; bold: true; light: true
                             label: "Deze computer"; iconFile: "computer.svg"
-                            onHovered: { menu.allPrograms = false; menu.showRecentDocs = false }
+                            onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                             onActivated: menu.runXpMode("computer")
                             onRightClicked: (gx, gy) => {
                                 let p = mapToItem(menu, gx, gy)
@@ -587,7 +664,7 @@ Item {
                         AppEntry {
                             width: parent.width; height: 32; iconSize: 24; fontSize: 11; light: true
                             label: "Configuratiescherm"; iconFile: "controlpanel.svg"
-                            onHovered: { menu.allPrograms = false; menu.showRecentDocs = false }
+                            onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                             onActivated: menu.runXpMode("configuratiescherm")
                             onRightClicked: (gx, gy) => {
                                 let p = mapToItem(menu, gx, gy)
@@ -597,32 +674,32 @@ Item {
                         AppEntry {
                             width: parent.width; height: 38; iconSize: 24; fontSize: 11; light: true; allowWrap: true
                             label: "Programmatoegang en -standaarden"; iconFile: "defapps.svg"
-                            onHovered: { menu.allPrograms = false; menu.showRecentDocs = false }
+                            onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                             onActivated: menu.run("kcmshell6 kcm_componentchooser")
                         }
                         AppEntry {
                             width: parent.width; height: 32; iconSize: 24; fontSize: 11; light: true
                             label: "Printers en faxen"; iconFile: "printers.svg"
-                            onHovered: { menu.allPrograms = false; menu.showRecentDocs = false }
+                            onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                             onActivated: menu.run("kcmshell6 kcm_printer_manager")
                         }
                         Separator { width: parent.width; lineColor: "#95bdee" }
                         AppEntry {
                             width: parent.width; height: 32; iconSize: 24; fontSize: 11; light: true
                             label: "Help en ondersteuning"; iconFile: "help.svg"
-                            onHovered: { menu.allPrograms = false; menu.showRecentDocs = false }
+                            onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                             onActivated: menu.run("khelpcenter")
                         }
                         AppEntry {
                             width: parent.width; height: 32; iconSize: 24; fontSize: 11; light: true
                             label: "Zoeken"; iconFile: "search.svg"
-                            onHovered: { menu.allPrograms = false; menu.showRecentDocs = false }
+                            onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                             onActivated: menu.run("krunner")
                         }
                         AppEntry {
                             width: parent.width; height: 32; iconSize: 24; fontSize: 11; light: true
                             label: "Uitvoeren..."; iconFile: "run.svg"
-                            onHovered: { menu.allPrograms = false; menu.showRecentDocs = false }
+                            onHovered: { menu.scheduleCloseAllPrograms(); menu.showRecentDocs = false }
                             onActivated: menu.runXpMode("uitvoeren")
                         }
                     }
@@ -758,7 +835,7 @@ Item {
     Rectangle {
         id: allProgramsCol1
         visible: menu.allPrograms
-        x: Math.round(menu.menuWidth * 0.46)
+        x: Math.round(menu.menuWidth * 0.36)
         anchors.bottom: startBox.bottom
         anchors.bottomMargin: 42
         width: 268
@@ -766,6 +843,14 @@ Item {
         color: "#ffffff"
         border.color: "#7b9ebd"
         border.width: 1
+
+        // Blokkeer muis-hover doorlekken naar de rechterkolom erachter!
+        MouseArea {
+            id: col1Blocker
+            anchors.fill: parent
+            hoverEnabled: true
+            onEntered: closeAllProgsTimer.stop()
+        }
 
         // Kenmerkende verticale blauwe XP-strook aan de linkerkant van het popupmenu
         Rectangle {
@@ -800,19 +885,19 @@ Item {
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16; fontSize: 11
                     label: "Programmatoegang en standaardinstellingen"; iconFile: "defapps.svg"
-                    onHovered: { menu.activeCategoryIndex = -1; menu.activeBuiltinFolder = ""; menu.activeSubFolder = "" }
+                    onHovered: menu.requestCol2Change(-1, "", 160)
                     onActivated: menu.run("kcmshell6 kcm_componentchooser")
                 }
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16; fontSize: 11
                     label: "Windows Catalogus"; iconFile: "cp-folderopts.svg"
-                    onHovered: { menu.activeCategoryIndex = -1; menu.activeBuiltinFolder = ""; menu.activeSubFolder = "" }
+                    onHovered: menu.requestCol2Change(-1, "", 160)
                     onActivated: menu.run("xdg-open https://flathub.org")
                 }
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16; fontSize: 11
                     label: "Windows Update"; iconFile: "cp-updates.svg"
-                    onHovered: { menu.activeCategoryIndex = -1; menu.activeBuiltinFolder = ""; menu.activeSubFolder = "" }
+                    onHovered: menu.requestCol2Change(-1, "", 160)
                     onActivated: menu.run("kcmshell6 kcm_updates")
                 }
 
@@ -830,12 +915,10 @@ Item {
                     label: "Bureau-accessoires"; iconFile: "progfolder.svg"
                     activeHighlight: menu.activeBuiltinFolder === "accessories"
                     onHovered: {
-                        menu.col2TargetY = accEntry.mapToItem(menu, 0, 0).y
-                        menu.activeCategoryIndex = -1
-                        menu.activeBuiltinFolder = "accessories"
-                        menu.activeSubFolder = ""
+                        menu.requestCol2Change(-1, "accessories", accEntry.mapToItem(menu, 0, 0).y)
                     }
                     onActivated: {
+                        col2SwitchTimer.stop()
                         menu.col2TargetY = accEntry.mapToItem(menu, 0, 0).y
                         menu.activeCategoryIndex = -1
                         menu.activeBuiltinFolder = "accessories"
@@ -848,10 +931,7 @@ Item {
                     label: "Opstarten"; iconFile: "progfolder.svg"
                     activeHighlight: menu.activeBuiltinFolder === "startup"
                     onHovered: {
-                        menu.col2TargetY = startupEntry.mapToItem(menu, 0, 0).y
-                        menu.activeCategoryIndex = -1
-                        menu.activeBuiltinFolder = "startup"
-                        menu.activeSubFolder = ""
+                        menu.requestCol2Change(-1, "startup", startupEntry.mapToItem(menu, 0, 0).y)
                     }
                     onActivated: menu.run("kcmshell6 kcm_autostart")
                 }
@@ -877,12 +957,10 @@ Item {
                         arrow: true
                         activeHighlight: menu.activeCategoryIndex === index
                         onHovered: {
-                            menu.col2TargetY = catEntryItem.mapToItem(menu, 0, 0).y
-                            menu.activeBuiltinFolder = ""
-                            menu.activeSubFolder = ""
-                            menu.activeCategoryIndex = index
+                            menu.requestCol2Change(index, "", catEntryItem.mapToItem(menu, 0, 0).y)
                         }
                         onActivated: {
+                            col2SwitchTimer.stop()
                             menu.col2TargetY = catEntryItem.mapToItem(menu, 0, 0).y
                             menu.activeBuiltinFolder = ""
                             menu.activeSubFolder = ""
@@ -895,25 +973,25 @@ Item {
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16; fontSize: 11
                     label: "Internet Explorer"; iconFile: "ie6.svg"
-                    onHovered: { menu.activeCategoryIndex = -1; menu.activeBuiltinFolder = ""; menu.activeSubFolder = "" }
+                    onHovered: menu.requestCol2Change(-1, "", 160)
                     onActivated: menu.run("xdg-open https://www.google.nl")
                 }
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16; fontSize: 11
                     label: "MSN"; iconFile: "msn.svg"
-                    onHovered: { menu.activeCategoryIndex = -1; menu.activeBuiltinFolder = ""; menu.activeSubFolder = "" }
+                    onHovered: menu.requestCol2Change(-1, "", 160)
                     onActivated: menu.run("xdg-open https://messenger.steelhullstudio.nl")
                 }
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16; fontSize: 11
                     label: "Outlook Express"; iconFile: "outlook.svg"
-                    onHovered: { menu.activeCategoryIndex = -1; menu.activeBuiltinFolder = ""; menu.activeSubFolder = "" }
+                    onHovered: menu.requestCol2Change(-1, "", 160)
                     onActivated: menu.run("xdg-open https://mail.steelhullstudio.nl")
                 }
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16; fontSize: 11
                     label: "Windows Verkenner"; iconFile: "computer.svg"
-                    onHovered: { menu.activeCategoryIndex = -1; menu.activeBuiltinFolder = ""; menu.activeSubFolder = "" }
+                    onHovered: menu.requestCol2Change(-1, "", 160)
                     onActivated: menu.run("dolphin")
                 }
 
@@ -934,9 +1012,7 @@ Item {
                         label: appTitle
                         icon: iconName
                         onHovered: {
-                            menu.activeCategoryIndex = -1
-                            menu.activeBuiltinFolder = ""
-                            menu.activeSubFolder = ""
+                            menu.requestCol2Change(-1, "", 160)
                         }
                         onActivated: menu.triggerLeftItem(sourceType, sourceIndex)
                         onRightClicked: (gx, gy) => {
@@ -963,6 +1039,17 @@ Item {
         color: "#ffffff"
         border.color: "#7b9ebd"
         border.width: 1
+
+        // Blokkeer muis-hover doorlekken en annuleer sluit-/wisseltimers zodra muis in Kolom 2 komt
+        MouseArea {
+            id: col2Blocker
+            anchors.fill: parent
+            hoverEnabled: true
+            onEntered: {
+                closeAllProgsTimer.stop()
+                col2SwitchTimer.stop()
+            }
+        }
 
         // Verticale blauwe XP-strook links
         Rectangle {
@@ -1139,6 +1226,16 @@ Item {
         color: "#ffffff"
         border.color: "#7b9ebd"
         border.width: 1
+
+        MouseArea {
+            id: col3Blocker
+            anchors.fill: parent
+            hoverEnabled: true
+            onEntered: {
+                closeAllProgsTimer.stop()
+                col2SwitchTimer.stop()
+            }
+        }
 
         Rectangle {
             anchors.top: parent.top
