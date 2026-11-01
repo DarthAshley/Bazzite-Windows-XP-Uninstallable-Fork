@@ -33,7 +33,17 @@ Voer zelfstandig de volgende stappen uit zonder mij om tussenstappen te vragen:
      * Eigenschappen voor Beeldscherm (met live XP-venstervoorbeeld en achtergronden)
      * Eigenschappen voor Taakbalk en het menu Start
      * Windows Taakbeheer (Toepassingen, Processen en Prestaties met live groene CPU/RAM-grafieken)
+     * Authentiek 'Computer uitschakelen' venster (Stand-by, Uitschakelen, Opnieuw opstarten)
      * Uitvoeren...
+   - MSN Messenger 2004 Suite (`~/.local/share/xp-startknop/xp-msn.py` & `msn.desktop`):
+     * Authentiek MSN Messenger opstart-/aanmeldscherm met 3D-buddy, statuskeuze en Luna-knoppen.
+     * Contactenlijst met profielkaart, aanpasbare persoonlijke boodschap (bijv. "listening 2 music ♫"), zoekbalk en inklapbare groepen (Online, Afwezig, Bezet, Offline).
+     * Chatvenster met actiebalk (Uitnodigen, Bestanden, Video, Spelletjes), weergave-afbeeldingen, emoticons en de iconische NUDGE (trillen + nudge.wav!).
+     * MSN Toast-notificaties rechtsonderin bij het aanmelden van contacten met online.wav.
+   - Discord & Vesktop integratie:
+     * "Discord" start automatisch Vesktop (`flatpak run dev.vencord.Vesktop`).
+     * "Discord Legacy" start de officiële Discord (`flatpak run com.discordapp.Discord`).
+     * Installeert het custom MSN Messenger thema voor Vesktop (`vesktop-theme/Windows-XP-MSN-Messenger.theme.css`).
 
 3. Controleer na `bash installeren.sh` mijn `~/.config/plasma-org.kde.plasma.desktop-appletsrc`:
    - Zorg dat op het onderste taakbalk-paneel helemaal links `nl.steelhull.xpstart` staat (verwijder eventuele standaard `org.kde.plasma.kickoff` of `org.kde.plasma.kicker` en `org.kde.plasma.icontasks` als er al een gewone `org.kde.plasma.taskmanager` met tekstlabels is, of zet `org.kde.plasma.icontasks` om naar `org.kde.plasma.taskmanager` zodat vensters als echte Windows XP taakbalkknoppen met tekst getoond worden).

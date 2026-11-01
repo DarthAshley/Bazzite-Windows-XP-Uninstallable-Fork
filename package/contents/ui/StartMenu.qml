@@ -156,13 +156,6 @@ Item {
             let p = (pinnedList[i] || "").split("|")[0].toLowerCase().trim()
             if (p === target) return true
         }
-        let fav = menu.rootModel ? menu.rootModel.favoritesModel : null
-        if (fav) {
-            for (let j = 0; j < fav.count; ++j) {
-                let nm = (fav.data(fav.index(j, 0), Qt.DisplayRole) || "").toString().toLowerCase().trim()
-                if (nm === target) return true
-            }
-        }
         return false
     }
 
@@ -383,37 +376,8 @@ Item {
             })
         }
 
-        // B. KDE Favorites (when mode is "both" or "favorites")
-        let favModel = menu.rootModel ? menu.rootModel.favoritesModel : null
-        if (favModel && (mode === "both" || mode === "favorites")) {
-            for (let i = 0; i < favModel.count; ++i) {
-                let idx = favModel.index(i, 0)
-                let name = (favModel.data(idx, Qt.DisplayRole) || "").toString().trim()
-                let iconVal = favModel.data(idx, Qt.DecorationRole) || "application-x-executable"
-                let iconStr = iconVal.toString()
-                let nameKey = name.toLowerCase()
-                if (name !== "" && !seen[nameKey] && !isRemoved(name)) {
-                    seen[nameKey] = true
-                    pinnedAppsModel.append({
-                        "appTitle": name,
-                        "iconName": iconStr,
-                        "subtitle": "",
-                        "sourceType": "fav",
-                        "sourceIndex": i,
-                        "cmd": ""
-                    })
-                }
-            }
-        }
-
         // === 2. BOTTOM SECTION: MOST FREQUENTLY USED APPS (MFU) ===
-        let rowH = menu.isSmallIcons ? 26 : 38
-        let hasInternet = !isRemoved("Internet")
-        let hasEmail = !isRemoved("E-mail")
-        let pinnedHeight = 5 + (hasInternet ? (menu.isSmallIcons ? 26 : 42) : 0) + (hasEmail ? (menu.isSmallIcons ? 26 : 42) : 0) + (pinnedAppsModel.count * (menu.isSmallIcons ? 26 : 38))
-        let availHeight = menu.menuHeight - 60 - 42 - 40 - 8 - pinnedHeight
-        let autoSlots = Math.max(2, Math.floor(availHeight / rowH))
-        let maxSlots = (menu.effectiveItemsCount > 0) ? Math.min(autoSlots, menu.effectiveItemsCount) : autoSlots
+        let maxSlots = (menu.effectiveItemsCount > 0) ? menu.effectiveItemsCount : 25
 
         // Modus: Vaste eigen lijst ("custom")
         if (mode === "custom") {
@@ -462,7 +426,23 @@ Item {
     }
 
     function triggerLeftItem(sourceType, sourceIndex, appTitle, cmd) {
+        if (appTitle === "MSN" || appTitle === "MSN Messenger") {
+            menu.run("python3 '" + xpScript.replace("xp-verkenner.py", "xp-msn.py") + "'")
+            return
+        }
+        if (appTitle === "Discord") {
+            menu.run("flatpak run dev.vencord.Vesktop")
+            return
+        }
+        if (appTitle === "Discord Legacy") {
+            menu.run("flatpak run com.discordapp.Discord")
+            return
+        }
         if (cmd && cmd !== "") {
+            if (cmd.indexOf("com.discordapp.Discord") !== -1 && appTitle === "Discord") {
+                menu.run("flatpak run dev.vencord.Vesktop")
+                return
+            }
             menu.run(cmd)
             return
         }
@@ -683,142 +663,40 @@ Item {
                 Layout.fillHeight: true
                 spacing: 0
 
-                // Linkerkolom (Wit): Vastgepind (Internet + E-mail), Meest gebruikt, Alle programma's
+                // Linkerkolom (Wit): Vastgepind (Internet + E-mail + Pinned), Meest gebruikt, Alle programma's
                 Rectangle {
                     Layout.preferredWidth: Math.round(menu.menuWidth * 0.485)
                     Layout.fillHeight: true
                     color: "white"
+                    clip: true
 
-                    ColumnLayout {
-                        anchors.fill: parent
-                        spacing: 0
-
-                        // Vastgepind: Internet & E-mail (zoals in origineel Windows XP)
-                        Item {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: 5
-                        }
-
-                        AppEntry {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: menu.isSmallIcons ? 26 : 42
-                            visible: !menu.isRemoved("Internet")
-                            label: "Internet"
-                            subtitle: "Internet Explorer"
-                            iconFile: "ie6.svg"
-                            iconSize: menu.isSmallIcons ? 20 : 32
-                            bold: true
-                            onHovered: {
-                                menu.showRecentDocs = false
-                            }
-                            onActivated: menu.run("xdg-open https://www.google.nl")
-                            onRightClicked: (gx, gy) => {
-                                let p = mapToItem(menu, gx, gy)
-                                ctxMenu.openForItem(p.x, p.y, "Internet", "cmd", "xdg-open https://www.google.nl", -1, "ie6.svg")
-                            }
-                        }
-
-                        AppEntry {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: menu.isSmallIcons ? 26 : 42
-                            visible: !menu.isRemoved("E-mail")
-                            label: "E-mail"
-                            subtitle: "Outlook Express"
-                            iconFile: "outlook.svg"
-                            iconSize: menu.isSmallIcons ? 20 : 32
-                            bold: true
-                            onHovered: {
-                                menu.showRecentDocs = false
-                            }
-                            onActivated: menu.run("xdg-open https://mail.steelhullstudio.nl")
-                            onRightClicked: (gx, gy) => {
-                                let p = mapToItem(menu, gx, gy)
-                                ctxMenu.openForItem(p.x, p.y, "E-mail", "cmd", "xdg-open https://mail.steelhullstudio.nl", -1, "outlook.svg")
-                            }
-                        }
-
-                        // Bovenste lijst: Extra vastgepinde programma's / favorieten van de gebruiker (Steam, etc.)
-                        Repeater {
-                            model: pinnedAppsModel
-                            delegate: AppEntry {
-                                required property int index
-                                required property string appTitle
-                                required property string iconName
-                                required property string subtitle
-                                required property string sourceType
-                                required property int sourceIndex
-                                required property string cmd
-
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: subtitle !== "" ? (menu.isSmallIcons ? 26 : 42) : (menu.isSmallIcons ? 26 : 38)
-                                label: appTitle
-                                subtitle: subtitle
-                                icon: iconName
-                                iconSize: menu.isSmallIcons ? 20 : 30
-                                bold: true
-                                onHovered: {
-                                    menu.showRecentDocs = false
-                                }
-                                onActivated: menu.triggerLeftItem(sourceType, sourceIndex, appTitle, cmd)
-                                onRightClicked: (gx, gy) => {
-                                    let p = mapToItem(menu, gx, gy)
-                                    ctxMenu.openForItem(p.x, p.y, appTitle, sourceType, cmd, sourceIndex, iconName)
-                                }
-                            }
-                        }
+                    // 1. Vast onderaan: Alle programma's balk + scheidingslijn
+                    Rectangle {
+                        id: allProgramsSection
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        height: 42
+                        color: "white"
+                        z: 10
 
                         Separator {
-                            Layout.fillWidth: true
-                            lineColor: "#c8c6c0"
-                        }
-
-                        // 6+ Meest gebruikte programma's (enkele regel, gewone Tahoma, niet dikgedrukt)
-                        ListView {
-                            id: leftListView
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            clip: true
-                            interactive: false
-                            model: leftAppsModel
-
-                            delegate: AppEntry {
-                                required property int index
-                                required property string appTitle
-                                required property string iconName
-                                required property string sourceType
-                                required property int sourceIndex
-                                required property string cmd
-
-                                width: ListView.view.width
-                                height: menu.isSmallIcons ? 26 : 38
-                                label: appTitle
-                                icon: iconName
-                                iconSize: menu.isSmallIcons ? 20 : 30
-                                bold: false
-                                onHovered: {
-                                    menu.showRecentDocs = false
-                                }
-                                onActivated: menu.triggerLeftItem(sourceType, sourceIndex, appTitle, cmd)
-                                onRightClicked: (gx, gy) => {
-                                    let p = mapToItem(menu, gx, gy)
-                                    ctxMenu.openForItem(p.x, p.y, appTitle, sourceType, cmd, sourceIndex, iconName)
-                                }
-                            }
-                        }
-
-                        Separator {
-                            Layout.fillWidth: true
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+                            anchors.right: parent.right
                             lineColor: "#c8c6c0"
                         }
 
                         // "Alle programma's" met het echte groene 3D XP-pijltje
                         Rectangle {
                             id: allProgramsBar
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: 34
-                            Layout.leftMargin: 3
-                            Layout.rightMargin: 3
-                            Layout.bottomMargin: 2
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.bottom: parent.bottom
+                            anchors.margins: 2
+                            anchors.leftMargin: 3
+                            anchors.rightMargin: 3
+                            height: 34
                             readonly property bool activeState: allHover.containsMouse || menu.allPrograms
                             color: activeState ? "#316ac5" : "transparent"
 
@@ -872,6 +750,149 @@ Item {
                                         // Net geopend door erop te wijzen -> klik houdt het menu juist open!
                                         menu.allPrograms = true
                                     }
+                                }
+                            }
+                        }
+                    }
+
+                    // 2. Programma-gebied daarboven (Scrollbaar met Windows XP scrollbalk als er te veel items zijn!)
+                    Item {
+                        id: progScrollArea
+                        anchors.top: parent.top
+                        anchors.bottom: allProgramsSection.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+
+                        Flickable {
+                            id: leftFlickable
+                            anchors.top: parent.top
+                            anchors.bottom: parent.bottom
+                            anchors.left: parent.left
+                            anchors.right: xpScroll.visible ? xpScroll.left : parent.right
+                            contentWidth: width
+                            contentHeight: leftContentCol.implicitHeight
+                            clip: true
+                            boundsBehavior: Flickable.StopAtBounds
+
+                            Column {
+                                id: leftContentCol
+                                width: parent.width
+                                spacing: 0
+
+                                Item { width: parent.width; height: 5 }
+
+                                AppEntry {
+                                    width: parent.width
+                                    height: menu.isSmallIcons ? 26 : 42
+                                    visible: !menu.isRemoved("Internet")
+                                    label: "Internet"
+                                    subtitle: "Internet Explorer"
+                                    iconFile: "ie6.svg"
+                                    iconSize: menu.isSmallIcons ? 20 : 32
+                                    bold: true
+                                    onHovered: menu.showRecentDocs = false
+                                    onActivated: menu.run("xdg-open https://www.google.nl")
+                                    onRightClicked: (gx, gy) => {
+                                        let p = mapToItem(menu, gx, gy)
+                                        ctxMenu.openForItem(p.x, p.y, "Internet", "cmd", "xdg-open https://www.google.nl", -1, "ie6.svg")
+                                    }
+                                }
+
+                                AppEntry {
+                                    width: parent.width
+                                    height: menu.isSmallIcons ? 26 : 42
+                                    visible: !menu.isRemoved("E-mail")
+                                    label: "E-mail"
+                                    subtitle: "Outlook Express"
+                                    iconFile: "outlook.svg"
+                                    iconSize: menu.isSmallIcons ? 20 : 32
+                                    bold: true
+                                    onHovered: menu.showRecentDocs = false
+                                    onActivated: menu.run("xdg-open https://mail.steelhullstudio.nl")
+                                    onRightClicked: (gx, gy) => {
+                                        let p = mapToItem(menu, gx, gy)
+                                        ctxMenu.openForItem(p.x, p.y, "E-mail", "cmd", "xdg-open https://mail.steelhullstudio.nl", -1, "outlook.svg")
+                                    }
+                                }
+
+                                // Bovenste lijst: Extra vastgepinde programma's van de gebruiker (Steam, Bazaar, etc.)
+                                Repeater {
+                                    model: pinnedAppsModel
+                                    delegate: AppEntry {
+                                        required property int index
+                                        required property string appTitle
+                                        required property string iconName
+                                        required property string subtitle
+                                        required property string sourceType
+                                        required property int sourceIndex
+                                        required property string cmd
+
+                                        width: parent.width
+                                        height: subtitle !== "" ? (menu.isSmallIcons ? 26 : 42) : (menu.isSmallIcons ? 26 : 38)
+                                        label: appTitle
+                                        subtitle: subtitle
+                                        icon: iconName
+                                        iconSize: menu.isSmallIcons ? 20 : 30
+                                        bold: true
+                                        onHovered: menu.showRecentDocs = false
+                                        onActivated: menu.triggerLeftItem(sourceType, sourceIndex, appTitle, cmd)
+                                        onRightClicked: (gx, gy) => {
+                                            let p = mapToItem(menu, gx, gy)
+                                            ctxMenu.openForItem(p.x, p.y, appTitle, sourceType, cmd, sourceIndex, iconName)
+                                        }
+                                    }
+                                }
+
+                                Separator {
+                                    width: parent.width
+                                    lineColor: "#c8c6c0"
+                                }
+
+                                // Onderste lijst: Meest gebruikte programma's (enkele regel, gewone Tahoma, NIET dikgedrukt)
+                                Repeater {
+                                    model: leftAppsModel
+                                    delegate: AppEntry {
+                                        required property int index
+                                        required property string appTitle
+                                        required property string iconName
+                                        required property string sourceType
+                                        required property int sourceIndex
+                                        required property string cmd
+
+                                        width: parent.width
+                                        height: menu.isSmallIcons ? 26 : 38
+                                        label: appTitle
+                                        icon: iconName
+                                        iconSize: menu.isSmallIcons ? 20 : 30
+                                        bold: false
+                                        onHovered: menu.showRecentDocs = false
+                                        onActivated: menu.triggerLeftItem(sourceType, sourceIndex, appTitle, cmd)
+                                        onRightClicked: (gx, gy) => {
+                                            let p = mapToItem(menu, gx, gy)
+                                            ctxMenu.openForItem(p.x, p.y, appTitle, sourceType, cmd, sourceIndex, iconName)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Windows XP Scrollbalk (automatisch zichtbaar als er te veel items zijn!)
+                        XpScrollBar {
+                            id: xpScroll
+                            anchors.top: parent.top
+                            anchors.bottom: parent.bottom
+                            anchors.right: parent.right
+                            target: leftFlickable
+                        }
+
+                        // Muiswiel ondersteuning over het hele programmagebied
+                        MouseArea {
+                            anchors.fill: parent
+                            acceptedButtons: Qt.NoButton
+                            onWheel: wheel => {
+                                if (leftFlickable.contentHeight > leftFlickable.height) {
+                                    let delta = wheel.angleDelta.y > 0 ? -38 : 38
+                                    leftFlickable.contentY = Math.max(0, Math.min(leftFlickable.contentHeight - leftFlickable.height, leftFlickable.contentY + delta))
                                 }
                             }
                         }
@@ -1006,10 +1027,7 @@ Item {
                     SessionButton {
                         label: "Turn Off Computer"
                         iconFile: "shutdown.svg"
-                        onActivated: {
-                            menu.closeRequested()
-                            session.requestShutdown()
-                        }
+                        onActivated: menu.runXpMode("shutdown")
                     }
                 }
             }
@@ -1415,9 +1433,9 @@ Item {
                 }
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16; fontSize: 11
-                    label: "MSN"; iconFile: "msn.svg"
+                    label: "MSN Messenger"; iconFile: "msn.svg"
                     onHovered: menu.requestCol2Change(-1, "", 160)
-                    onActivated: menu.run("xdg-open https://messenger.steelhullstudio.nl")
+                    onActivated: menu.run("python3 '" + xpScript.replace("xp-verkenner.py", "xp-msn.py") + "'")
                 }
                 AppEntry {
                     width: parent.width; height: 24; iconSize: 16; fontSize: 11

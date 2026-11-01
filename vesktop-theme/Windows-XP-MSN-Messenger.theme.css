@@ -1,0 +1,242 @@
+/**
+ * @name Windows XP MSN Messenger
+ * @author RuisSoftware
+ * @version 1.0.0
+ * @description Authentic Windows XP Luna Blue & MSN Messenger 2003/2004 theme for Discord / Vesktop.
+ * @source https://github.com/RuisSoftware/Bazzite-Windows-XP
+ */
+
+:root {
+    --font-primary: 'Tahoma', 'Segoe UI', Arial, sans-serif !important;
+    --font-display: 'Tahoma', 'Segoe UI', Arial, sans-serif !important;
+    --font-headline: 'Tahoma', 'Segoe UI', Arial, sans-serif !important;
+    --font-code: 'Consolas', 'Courier New', monospace !important;
+
+    /* Windows XP Luna Blue Palette */
+    --xp-luna-blue-top: #0058ee;
+    --xp-luna-blue-mid: #288eff;
+    --xp-luna-blue-bot: #0262ee;
+    --xp-window-bg: #ece9d8;
+    --xp-panel-bg: #ffffff;
+    --xp-border: #7f9db9;
+    --xp-highlight: #316ac5;
+    --xp-text-main: #000000;
+    --xp-text-blue: #001961;
+
+    /* Theme overrides for Discord variables */
+    --background-primary: #ffffff !important;
+    --background-secondary: #ece9d8 !important;
+    --background-secondary-alt: #e2decb !important;
+    --background-tertiary: #d8d2bd !important;
+    --background-accent: #316ac5 !important;
+    --background-floating: #ffffff !important;
+    
+    --header-primary: #001961 !important;
+    --header-secondary: #4a5d78 !important;
+    --text-normal: #000000 !important;
+    --text-muted: #555555 !important;
+    --text-link: #0a246a !important;
+    --interactive-normal: #222222 !important;
+    --interactive-hover: #000000 !important;
+    --interactive-active: #ffffff !important;
+    --interactive-muted: #888888 !important;
+
+    /* Status indicators */
+    --status-positive: #22b14c !important;
+    --status-warning: #ff7f27 !important;
+    --status-danger: #ed1c24 !important;
+    --status-offline: #7f7f7f !important;
+
+    --brand-experiment: #316ac5 !important;
+    --brand-experiment-hover: #2255aa !important;
+    --brand-experiment-active: #153c82 !important;
+
+    --radius-sm: 2px !important;
+    --radius-md: 3px !important;
+    --radius-lg: 4px !important;
+}
+
+/* Base Font & Window background */
+body, #app-mount {
+    font-family: var(--font-primary) !important;
+    background-color: var(--xp-window-bg) !important;
+}
+
+/* Titlebar & App Header: Luna Blue Gradient */
+[class*="typeWindows"], [class*="titleBar"] {
+    background: linear-gradient(to bottom, #0058ee 0%, #3593ff 4%, #288eff 18%, #127dff 35%, #036ffc 70%, #0262ee 100%) !important;
+    height: 30px !important;
+    border-bottom: 1px solid #002266 !important;
+}
+[class*="wordmarkWindows"] {
+    color: #ffffff !important;
+    font-weight: bold !important;
+    text-shadow: 1px 1px 2px #001961 !important;
+    font-size: 12px !important;
+}
+[class*="wordmarkWindows"]::after {
+    content: " (MSN Messenger 2004 Edition)" !important;
+    font-size: 11px !important;
+    font-weight: normal !important;
+    color: #dce7f8 !important;
+}
+
+/* Top Navigation & Channel Header */
+[class*="subtitleContainer"], section[class*="title_"] {
+    background: linear-gradient(to bottom, #f6f4ec 0%, #ece9d8 100%) !important;
+    border-bottom: 1px solid var(--xp-border) !important;
+    box-shadow: inset 0 1px 0 #ffffff !important;
+}
+
+/* Sidebar Channels List */
+[class*="sidebar_"] {
+    background-color: var(--xp-window-bg) !important;
+    border-right: 1px solid var(--xp-border) !important;
+}
+[class*="sidebar_"] [class*="container_"] {
+    background-color: transparent !important;
+}
+
+/* Server List */
+[class*="guilds_"] {
+    background: linear-gradient(to bottom, #003399 0%, #001f5c 100%) !important;
+    border-right: 1px solid #00143a !important;
+}
+[class*="guilds_"] [class*="scroller_"] {
+    background: transparent !important;
+}
+
+/* Channel Items & Category Headers */
+[class*="wrapper_"][class*="modeSelected_"] [class*="link_"] {
+    background-color: var(--xp-highlight) !important;
+    border-radius: 2px !important;
+}
+[class*="wrapper_"][class*="modeSelected_"] [class*="name_"],
+[class*="wrapper_"][class*="modeSelected_"] svg {
+    color: #ffffff !important;
+}
+[class*="wrapper_"]:hover:not([class*="modeSelected_"]) [class*="link_"] {
+    background-color: #dce7f8 !important;
+    border-radius: 2px !important;
+}
+
+/* Category Headers (e.g. Text Channels) */
+[class*="categoryHeader_"], [class*="containerDefault_"] [class*="header_"] {
+    color: var(--xp-text-blue) !important;
+    font-weight: bold !important;
+    font-size: 11px !important;
+    text-transform: none !important;
+}
+
+/* Message Feed Area */
+main[class*="chatContent_"] {
+    background-color: var(--xp-panel-bg) !important;
+}
+[class*="messagesWrapper_"] {
+    background-color: var(--xp-panel-bg) !important;
+}
+
+/* Messages: MSN Messenger Format */
+[class*="message_"] {
+    border-bottom: 1px solid #f0f0f0 !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+}
+[class*="message_"]:hover {
+    background-color: #f7f9fd !important;
+}
+[class*="username_"] {
+    color: var(--xp-text-blue) !important;
+    font-weight: bold !important;
+    font-size: 12px !important;
+}
+[class*="username_"]::after {
+    content: " says:" !important;
+    font-weight: normal !important;
+    color: #555555 !important;
+    margin-left: 4px !important;
+}
+[class*="timestamp_"] {
+    color: #777777 !important;
+    font-size: 10px !important;
+}
+[class*="messageContent_"] {
+    color: #000000 !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+}
+
+/* Text Input Box (Chat bar) */
+[class*="channelTextArea_"] {
+    background-color: #ffffff !important;
+    border: 1px solid var(--xp-border) !important;
+    border-radius: 0px !important;
+    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.15) !important;
+}
+[class*="scrollableContainer_"] {
+    background-color: #ffffff !important;
+}
+[class*="placeholder_"] {
+    color: #888888 !important;
+    font-style: italic !important;
+}
+
+/* Members List */
+[class*="members_"], [class*="membersWrap_"] {
+    background-color: #f9f8f4 !important;
+    border-left: 1px solid var(--xp-border) !important;
+}
+[class*="member_"]:hover {
+    background-color: #e5eef9 !important;
+    border-radius: 2px !important;
+}
+[class*="member_"][class*="selected_"] {
+    background-color: var(--xp-highlight) !important;
+    border-radius: 2px !important;
+}
+[class*="member_"][class*="selected_"] [class*="name_"] {
+    color: #ffffff !important;
+}
+
+/* Windows XP Retro Push Buttons */
+button[class*="lookFilled_"][class*="colorBrand_"] {
+    background-image: linear-gradient(to bottom, #ffffff 0%, #ece9d8 50%, #d8d2bd 100%) !important;
+    border: 1px solid #003c74 !important;
+    border-radius: 3px !important;
+    color: #000000 !important;
+    font-weight: bold !important;
+    box-shadow: inset 1px 1px 0px #ffffff, 1px 1px 2px rgba(0,0,0,0.2) !important;
+}
+button[class*="lookFilled_"][class*="colorBrand_"]:hover {
+    background-image: linear-gradient(to bottom, #fff5cc 0%, #ffe085 50%, #ffc947 100%) !important;
+    border-color: #e5a000 !important;
+}
+
+/* Windows XP Classic Scrollbars */
+::-webkit-scrollbar {
+    width: 16px !important;
+    height: 16px !important;
+}
+::-webkit-scrollbar-track {
+    background-color: #ece9d8 !important;
+    background-image: radial-gradient(#d8d2bd 15%, transparent 16%) !important;
+    background-size: 4px 4px !important;
+    border: 1px solid #ffffff !important;
+}
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(to right, #61a6ff 0%, #316ac5 50%, #154c9e 100%) !important;
+    border: 1px solid #ffffff !important;
+    border-radius: 4px !important;
+    box-shadow: inset 1px 1px 0px #a4c9ff, inset -1px -1px 0px #092e6e !important;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to right, #7cb7ff 0%, #437cd9 50%, #205bb5 100%) !important;
+}
+
+/* Modals & Dialogs */
+[class*="root_"][class*="small_"], [class*="modal_"] [class*="inner_"] {
+    background-color: var(--xp-window-bg) !important;
+    border: 1px solid var(--xp-border) !important;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.3) !important;
+    border-radius: 4px !important;
+}

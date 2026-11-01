@@ -22,7 +22,9 @@ Execute these steps autonomously:
 
 - **Start Menu & Quick Launch**: Green 3D Start button, 2-column Luna menu or Classic 1-column menu, Quick Launch icons (*Show Desktop*, *Firefox*, *Explorer*).
 - **System Tray**: Windows XP blue notification area (or Classic 3D recessed tray) with clock, volume, network, security center, and live background apps (Discord, Steam, Unity Hub, etc.).
-- **Explorer & Control Panel**: Full Windows XP Explorer replica with both Category View and Classic View, System Properties, Display Properties, and Task Manager.
+- **Explorer & Control Panel**: Full Windows XP Explorer replica with both Category View and Classic View, System Properties, Display Properties, authentic Turn Off Computer dialog, and Task Manager.
+- **MSN Messenger 2004 Retro Suite**: Complete MSN Messenger 6.0/7.0 client with startup/login window, buddy list, custom personal messages, conversation window with action toolbar, emoticons, nudge (shake + sound), and toast notifications.
+- **Discord & Vesktop Theming**: Direct mapping of "Discord" to Vesktop, "Discord Legacy" to official Discord, and custom Windows XP MSN Messenger Vencord theme for Vesktop.
 - **Logon & Lock Screen**: Authentic Windows XP Welcome Screen with 3D logo or Classic *Log On to Windows* dialog.
 - **Theme, Sounds & Wallpapers**: High-resolution Bliss wallpaper, authentic Windows XP startup/shutdown/click sound scheme, and Luna Blue color palette.
 

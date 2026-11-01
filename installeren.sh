@@ -316,8 +316,12 @@ cat > "$DOLPHIN_UI" << 'EOF'
 </gui>
 EOF
 
-echo "==> [7/9] Snelkoppelingen voor Windows XP Configuratiescherm & Taakbeheer aanmaken..."
-mkdir -p "$K/.local/share/applications"
+echo "==> [7/9] Snelkoppelingen voor Windows XP Apps, MSN Messenger & Vesktop configureren..."
+mkdir -p "$K/.local/share/applications" "$XP_SHARE/sounds"
+cp -f "$MAP/xp-verkenner.py" "$XP_SHARE/xp-verkenner.py"
+cp -f "$MAP/xp-msn.py" "$XP_SHARE/xp-msn.py" 2>/dev/null || true
+[ -d "$MAP/sounds" ] && cp -rf "$MAP/sounds/"* "$XP_SHARE/sounds/" 2>/dev/null || true
+
 cat > "$SYS_DESKTOP" << EOF
 [Desktop Entry]
 Type=Application
@@ -341,6 +345,48 @@ Icon=utilities-system-monitor
 Terminal=false
 Categories=Qt;KDE;System;
 EOF
+
+cat > "$K/.local/share/applications/msn.desktop" << EOF
+[Desktop Entry]
+Name=MSN Messenger
+GenericName=Internet Messenger
+Comment=Send instant messages, chat with friends, and see who is online (MSN Messenger 2004)
+Exec=python3 "$XP_SHARE/xp-msn.py"
+Icon=msn
+Terminal=false
+Type=Application
+Categories=Network;InstantMessaging;
+StartupWMClass=xp-msn.py
+Keywords=msn;messenger;chat;live;retro;
+EOF
+
+cat > "$K/.local/share/applications/dev.vencord.Vesktop.desktop" << EOF
+[Desktop Entry]
+Categories=Network;InstantMessaging;
+Comment=All-in-one voice and text chat (Vesktop)
+Exec=flatpak run dev.vencord.Vesktop @@u %U @@
+GenericName=Discord
+Icon=discord
+Keywords=discord;vencord;electron;chat;
+MimeType=x-scheme-handler/discord;
+Name=Discord
+NoDisplay=false
+StartupNotify=true
+StartupWMClass=vesktop
+Terminal=false
+Type=Application
+X-Desktop-File-Install-Version=0.28
+X-Flatpak=dev.vencord.Vesktop
+EOF
+cp -f "$K/.local/share/applications/dev.vencord.Vesktop.desktop" "$K/.local/share/applications/discord.desktop" 2>/dev/null || true
+
+# Vesktop MSN Messenger & Windows XP Thema automatisch installeren
+VESKTOP_THEMES="$K/.var/app/dev.vencord.Vesktop/config/vesktop/themes"
+if [ -d "$VESKTOP_THEMES" ] && [ -f "$MAP/vesktop-theme/Windows-XP-MSN-Messenger.theme.css" ]; then
+    echo "    Vesktop MSN Messenger thema installeren in $VESKTOP_THEMES..."
+    cp -f "$MAP/vesktop-theme/Windows-XP-MSN-Messenger.theme.css" "$VESKTOP_THEMES/"
+fi
+kbuildsycoca6 >/dev/null 2>&1 || true
 
 echo "==> [8/9] Plasma 6 Applets installeren (nl.steelhull.xpstart & nl.steelhull.xptray)..."
 kpackagetool6 -t Plasma/Applet -u "$MAP/package" 2>/dev/null || kpackagetool6 -t Plasma/Applet -i "$MAP/package"

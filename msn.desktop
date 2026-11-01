@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=MSN Messenger
+GenericName=Internet Messenger
+Comment=Send instant messages, chat with friends, and see who is online (MSN Messenger 2004)
+Exec=python3 /home/king/.local/share/xp-startknop/xp-msn.py
+Icon=msn
+Terminal=false
+Type=Application
+Categories=Network;InstantMessaging;
+StartupWMClass=xp-msn.py
+Keywords=msn;messenger;chat;live;retro;

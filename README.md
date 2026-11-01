@@ -67,11 +67,35 @@ Authentic replicas of `sysdm.cpl` and `desk.cpl` with live hardware details (CPU
 
 ---
 
-### 10. Windows Task Manager, Run Dialog & Log Off Windows
+### 10. Windows Task Manager, Run Dialog & Turn Off Computer
 - **Windows Task Manager**: Live Applications list, searchable Processes list, and green-on-black CPU Usage & Page File Usage graphs.
 - **Run Dialog**: `sysdm.cpl`, `control`, `explorer`, `cmd`, or any Linux terminal command.
-- **Log Off Windows**: Classic blue banner dialog with *Switch User* and *Log Off* buttons.
+- **Authentic Turn Off Computer**: Pixel-perfect Windows XP Stand By, Turn Off, and Restart dialog matching original XP aesthetics.
 ![Windows Task Manager](screenshots/10-windows-task-manager.png)
+
+---
+
+### 11. 💬 MSN Messenger 2003/2004 & Windows Live Suite
+A complete, authentic recreation of the legendary **MSN Messenger 6.0/7.0 & Windows Live Messenger** experience:
+- **Startup & Login Screen**: 3D buddy avatar, email dropdown (`KingGeoffrey@hotmail.com`), password box, status selector (*Online*, *Busy*, *Be Right Back*, *Away*, *On The Phone*, *Out To Lunch*, *Appear Offline*), *Remember Me*, *Remember Password*, and 3D Luna *Sign In* button.
+- **Buddy List Window**: Profile card with display name, customizable personal message (*listening 2 music ♫*), subtoolbar (*Webcam*, *Hotmail ✉*, *Call*, *Search*), searchable contact filter, and collapsible groups (*Online*, *Away*, *Busy*, *Offline*).
+- **Conversation / Chat Window**:
+  - Action toolbar: *Invite*, *Send Files*, *Video*, *Voice*, *Activities*, *Games*, *Block*.
+  - Chat history with timestamps, nick colors, buddy avatars, and emoticon support.
+  - **The Legendary Nudge**: Click the *⚡ Nudge!* button to play the classic `nudge.wav` sound and watch the chat window shake across the screen! Contacts reply and nudge back!
+  - Emoticon picker popup with classic retro smileys.
+- **MSN Toast Popup**: Authentic toast notification sliding up from the system tray when contacts sign in, accompanied by the nostalgic `online.wav` chime.
+- **Desktop & Start Menu Integration**: Launch via Start Menu -> *MSN Messenger* or `msn.desktop`.
+
+---
+
+### 12. 🎮 Discord & Vesktop Integration (with Retro MSN Theme)
+- **Discord via Vesktop**: Clicking **Discord** in the Start Menu launches **Vesktop** (`flatpak run dev.vencord.Vesktop`).
+- **Discord Legacy**: Official Discord remains accessible under **Discord Legacy** (`flatpak run com.discordapp.Discord`).
+- **Windows XP MSN Messenger Theme for Vesktop**:
+  - A custom Vencord theme (`vesktop-theme/Windows-XP-MSN-Messenger.theme.css`) that transforms Discord into MSN Messenger 2004!
+  - Features Luna Blue headers, Tahoma typography, classic retro chat formatting (`User says:`), and XP status indicators.
+  - Installed automatically to `~/.var/app/dev.vencord.Vesktop/config/vesktop/themes/`. Toggle anytime in Vesktop Settings -> Themes.
 
 ---
 

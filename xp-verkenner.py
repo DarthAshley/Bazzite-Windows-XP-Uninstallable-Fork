@@ -7,6 +7,15 @@ Gebruik:
 """
 import os
 import sys
+
+# Force X11 backend for popup context menu and tray menus so KWin doesn't decorate with Aurorae
+if len(sys.argv) > 1 and sys.argv[1].lower() in ("sni-menu",) and os.environ.get("GDK_BACKEND") != "x11":
+    os.environ["GDK_BACKEND"] = "x11"
+    try:
+        os.execv(sys.executable, [sys.executable] + sys.argv)
+    except Exception:
+        pass
+
 import json
 import shutil
 import subprocess
@@ -113,6 +122,33 @@ window, .xp-window {
 .xp-menubar-btn:hover {
     background-color: #316ac5;
     color: #ffffff;
+}
+
+/* Authentic Windows XP Context Menu */
+.xp-popup-menu {
+    background-color: #ffffff;
+    border: 1px solid #716f64;
+    padding: 2px 1px;
+}
+.xp-popup-item {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 0px;
+    padding: 4px 22px 4px 18px;
+    color: #000000;
+    font-family: 'Tahoma', 'Segoe UI', sans-serif;
+    font-size: 11px;
+    box-shadow: none;
+}
+.xp-popup-item:hover {
+    background-color: #316ac5;
+    color: #ffffff;
+}
+.xp-popup-sep {
+    background-color: #aca899;
+    border-bottom: 1px solid #ffffff;
+    min-height: 1px;
+    margin: 3px 2px;
 }
 .xp-flag-box {
     background-color: #ffffff;
@@ -839,7 +875,8 @@ DEFAULT_XP_SETTINGS = {
     "customItems": [
         "Firefox|firefox|firefox",
         "Steam|steam|steam",
-        "Discord|discord|flatpak run com.discordapp.Discord",
+        "Discord|discord|flatpak run dev.vencord.Vesktop",
+        "Discord Legacy|com.discordapp.Discord|flatpak run com.discordapp.Discord",
         "Lutris|lutris|lutris",
         "Windows Explorer|computer|dolphin",
         "Control Panel|preferences-system|python3 $HOME/.local/share/xp-startknop/xp-verkenner.py configuratiescherm",
@@ -903,21 +940,21 @@ def save_xp_settings(cfg, restart_plasma=True):
         except Exception:
             pass
 
-    # Pas de taakbalkhoogte (panel thickness) direct aan in plasmashellrc én via qdbus
+    # Pas de taakbalkhoogte (panel thickness) direct aan in plasmashellrc én plasma-org.kde.plasma.desktop-appletsrc
     tb_height = int(cfg.get("taskbarHeight", 30))
-    plasmashellrc = os.path.join(home, ".config/plasmashellrc")
+    home_appletsrc = os.path.join(home, ".config/plasma-org.kde.plasma.desktop-appletsrc")
     try:
-        if os.path.exists(plasmashellrc):
-            with open(plasmashellrc, "r", encoding="utf-8") as f:
-                lines = f.readlines()
-            new_lines = []
-            for ln in lines:
-                if ln.strip().startswith("thickness="):
-                    new_lines.append(f"thickness={tb_height}\n")
-                else:
-                    new_lines.append(ln)
-            with open(plasmashellrc, "w", encoding="utf-8") as f:
-                f.writelines(new_lines)
+        # Zoek alle panel containments in plasma-org.kde.plasma.desktop-appletsrc
+        if os.path.exists(home_appletsrc):
+            with open(home_appletsrc, "r", encoding="utf-8") as f:
+                app_lines = f.readlines()
+            cur_grp = ""
+            for aln in app_lines:
+                aln_s = aln.strip()
+                if aln_s.startswith("[Containments][") and aln_s.endswith("]"):
+                    cur_grp = aln_s[1:-1]
+                elif aln_s == "plugin=org.kde.panel" and cur_grp:
+                    subprocess.run(["kwriteconfig6", "--file", "plasma-org.kde.plasma.desktop-appletsrc", "--group", cur_grp.split("][")[0], "--group", cur_grp.split("][")[1], "--group", "General", "--key", "thickness", str(tb_height)], check=False)
     except Exception:
         pass
 
@@ -928,7 +965,7 @@ def save_xp_settings(cfg, restart_plasma=True):
                 "org.kde.plasmashell",
                 "/PlasmaShell",
                 "org.kde.PlasmaShell.evaluateScript",
-                f"panels().forEach(p => {{ p.height = {tb_height}; }});",
+                f"for (var i = 0; i < panels().length; ++i) {{ panels()[i].height = {tb_height}; }}",
             ],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
@@ -938,7 +975,7 @@ def save_xp_settings(cfg, restart_plasma=True):
         pass
 
     if restart_plasma:
-        subprocess.Popen(
+        subprocess.run(
             ["systemctl", "--user", "restart", "plasma-plasmashell.service"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
@@ -1233,12 +1270,8 @@ class TaskbarPropertiesDialog(Gtk.Window):
 
     def _apply_settings(self, close_after=False):
         play_xp_click()
-        old_cfg = dict(self.cfg)
         self.cfg = self._collect_cfg()
-        # Alleen plasmashell herstarten als taakbalk of startmenu gewijzigd is
-        plasma_keys = ("taskbarStyle", "taskbarHeight", "showQuickLaunch", "showClock", "startMenuStyle", "startIconSize", "startItemsCount", "startItemsMode", "customItems")
-        need_restart = any(old_cfg.get(k) != self.cfg.get(k) for k in plasma_keys)
-        save_xp_settings(self.cfg, restart_plasma=need_restart)
+        save_xp_settings(self.cfg, restart_plasma=True)
         if close_after:
             self.destroy()
 
@@ -1331,8 +1364,9 @@ class RunDialog(Gtk.Window):
 class TaskManagerWindow(Gtk.Window):
     """Authentic Windows XP 'Windows Task Manager' with Applications, Processes, and green Performance graphs."""
 
-    def __init__(self):
+    def __init__(self, initial_tab=0):
         super().__init__(title="Windows Task Manager")
+        self.initial_tab = initial_tab
         self.set_default_size(435, 475)
         self.set_position(Gtk.WindowPosition.CENTER)
         icon_pb = load_pixbuf("cp-perf.svg", 24)
@@ -1498,6 +1532,8 @@ class TaskManagerWindow(Gtk.Window):
 
         self._refresh_processes()
         self._refresh_stats()
+        if initial_tab > 0:
+            self.notebook.set_current_page(initial_tab)
         GLib.timeout_add(1200, self._refresh_stats)
         GLib.timeout_add(3500, self._refresh_processes)
 
@@ -2490,7 +2526,7 @@ def sni_activate(svc, path, menu_path="/com/canonical/dbusmenu"):
                 return
 
 
-def sni_menu(svc, path, menu_path="/com/canonical/dbusmenu"):
+def sni_menu(svc, path, menu_path="/com/canonical/dbusmenu", target_x=None, target_y=None):
     try:
         bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
     except Exception:
@@ -2520,27 +2556,25 @@ def sni_menu(svc, path, menu_path="/com/canonical/dbusmenu"):
     )
 
     win = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
-    win.set_title("Menu")
+    win.set_type_hint(Gdk.WindowTypeHint.POPUP_MENU)
+    win.set_title("StatusNotifierMenu")
     win.set_decorated(False)
+    win.set_resizable(False)
     win.set_skip_taskbar_hint(True)
     win.set_skip_pager_hint(True)
     win.set_keep_above(True)
-    win.set_position(Gtk.WindowPosition.MOUSE)
 
-    frame = Gtk.Frame()
-    vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
-    vbox.set_margin_top(3)
-    vbox.set_margin_bottom(3)
-    vbox.set_margin_start(3)
-    vbox.set_margin_end(3)
+    box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+    box.get_style_context().add_class("xp-popup-menu")
 
     for it in items:
         if it.get("separator"):
             sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-            vbox.pack_start(sep, False, False, 2)
+            sep.get_style_context().add_class("xp-popup-sep")
+            box.pack_start(sep, False, False, 2)
         else:
             btn = Gtk.Button(label=it["label"])
-            btn.get_style_context().add_class("xp-menubar-btn")
+            btn.get_style_context().add_class("xp-popup-item")
             btn.get_child().set_xalign(0.0)
             btn.set_sensitive(bool(it.get("enabled", True)))
             cid = it["id"]
@@ -2550,14 +2584,37 @@ def sni_menu(svc, path, menu_path="/com/canonical/dbusmenu"):
                 Gtk.main_quit()
 
             btn.connect("clicked", on_item_click)
-            vbox.pack_start(btn, False, False, 0)
+            box.pack_start(btn, False, False, 0)
 
-    frame.add(vbox)
-    win.add(frame)
+    win.add(box)
     win.connect("focus-out-event", lambda *_: Gtk.main_quit())
     win.connect("key-press-event", lambda _, ev: Gtk.main_quit() if ev.keyval == Gdk.KEY_Escape else False)
     win.connect("destroy", Gtk.main_quit)
     win.show_all()
+
+    # Position cleanly in bottom-right corner at tray icon
+    if target_x is None or target_y is None:
+        try:
+            seat = Gdk.Display.get_default().get_default_seat()
+            screen, cx, cy = seat.get_pointer().get_position()
+            target_x, target_y = cx, cy
+        except Exception:
+            target_x, target_y = 1800, 1000
+
+    alloc = win.get_allocation()
+    w = max(175, alloc.width)
+    h = max(35, alloc.height)
+    screen = Gdk.Screen.get_default()
+    sw = screen.get_width() if screen else 1920
+    sh = screen.get_height() if screen else 1080
+
+    px = min(max(4, target_x - w + 20), sw - w - 4)
+    py = max(4, target_y - h - 6)
+    if py < 4:
+        py = min(target_y + 16, sh - h - 4)
+
+    win.move(px, py)
+    win.present()
     Gtk.main()
 
 
@@ -2641,6 +2698,274 @@ class XpLogoffDialog(Gtk.Window):
         outer.pack_start(bot, False, False, 0)
 
 
+class XpTurnOffDialog(Gtk.Window):
+    """Authentic Windows XP 'Turn off computer' dialog (Stand By / Turn Off / Restart)."""
+
+    def __init__(self):
+        super().__init__(title="Turn off computer")
+        self.set_default_size(320, 204)
+        self.set_resizable(False)
+        self.set_position(Gtk.WindowPosition.CENTER)
+        self.set_decorated(False)
+
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        self.add(box)
+
+        # 1. Top bar (#001961)
+        top = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        top.set_size_request(-1, 38)
+        top.override_background_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0.0, 0.19, 0.61, 1.0))
+        lbl_title = Gtk.Label()
+        lbl_title.set_markup("<span foreground='white' font_desc='Tahoma Bold 13'> Turn off computer</span>")
+        lbl_title.set_xalign(0.0)
+        top.pack_start(lbl_title, True, True, 12)
+
+        flag = make_icon("xp-flag.svg", 28)
+        flag.set_margin_end(10)
+        top.pack_end(flag, False, False, 0)
+        box.pack_start(top, False, False, 0)
+
+        # 2. Middle band (Luna gradient + 3 buttons)
+        mid_da = Gtk.DrawingArea()
+        mid_da.set_size_request(320, 126)
+        mid_da.add_events(Gdk.EventMask.POINTER_MOTION_MASK | Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.BUTTON_RELEASE_MASK | Gdk.EventMask.LEAVE_NOTIFY_MASK)
+
+        self.hover_btn = -1
+        self.pressed_btn = -1
+
+        centers_x = [62, 160, 258]
+        btn_y = 20
+        btn_size = 38
+        rad = 6
+
+        def draw_mid(widget, cr):
+            w = widget.get_allocated_width()
+            h = widget.get_allocated_height()
+
+            # Luna gradient exactly from original XP
+            pat = cairo.LinearGradient(0, 0, 0, h)
+            pat.add_color_stop_rgb(0.0, 0.44, 0.60, 0.88)
+            pat.add_color_stop_rgb(0.4, 0.53, 0.68, 0.93)
+            pat.add_color_stop_rgb(1.0, 0.38, 0.53, 0.82)
+            cr.set_source(pat)
+            cr.rectangle(0, 0, w, h)
+            cr.fill()
+
+            # Top white highlight line
+            cr.set_source_rgba(1, 1, 1, 0.45)
+            cr.set_line_width(1)
+            cr.move_to(0, 0.5); cr.line_to(w, 0.5); cr.stroke()
+
+            # Bottom dark shadow line
+            cr.set_source_rgba(0, 0.1, 0.4, 0.4)
+            cr.move_to(0, h - 0.5); cr.line_to(w, h - 0.5); cr.stroke()
+
+            btns = [
+                ("Stand By", (1.0, 0.88, 0.35), (0.98, 0.62, 0.0), (0.80, 0.42, 0.0), "standby"),
+                ("Turn Off", (1.0, 0.46, 0.40), (0.90, 0.18, 0.10), (0.70, 0.08, 0.04), "turnoff"),
+                ("Restart", (0.50, 0.90, 0.35), (0.24, 0.74, 0.12), (0.12, 0.52, 0.06), "restart"),
+            ]
+
+            for idx, (lbl, col_top, col_mid, col_bot, btype) in enumerate(btns):
+                cx = centers_x[idx]
+                bx = cx - btn_size // 2
+                by = btn_y
+                is_hov = (self.hover_btn == idx)
+                is_prs = (self.pressed_btn == idx)
+
+                # Soft drop shadow
+                for s_off, s_alpha in [(3, 0.08), (2, 0.15), (1, 0.25)]:
+                    cr.new_sub_path()
+                    cr.arc(bx + rad, by + rad + s_off, rad, 3.14, 4.71)
+                    cr.arc(bx + btn_size - rad, by + rad + s_off, rad, 4.71, 6.28)
+                    cr.arc(bx + btn_size - rad, by + btn_size - rad + s_off, rad, 0, 1.57)
+                    cr.arc(bx + rad, by + btn_size - rad + s_off, rad, 1.57, 3.14)
+                    cr.close_path()
+                    cr.set_source_rgba(0, 0.08, 0.3, s_alpha)
+                    cr.fill()
+
+                # Button body
+                cr.new_sub_path()
+                cr.arc(bx + rad, by + rad, rad, 3.14, 4.71)
+                cr.arc(bx + btn_size - rad, by + rad, rad, 4.71, 6.28)
+                cr.arc(bx + btn_size - rad, by + btn_size - rad, rad, 0, 1.57)
+                cr.arc(bx + rad, by + btn_size - rad, rad, 1.57, 3.14)
+                cr.close_path()
+
+                b_pat = cairo.LinearGradient(bx, by, bx, by + btn_size)
+                if is_prs:
+                    b_pat.add_color_stop_rgb(0.0, *col_bot)
+                    b_pat.add_color_stop_rgb(0.5, *col_mid)
+                    b_pat.add_color_stop_rgb(1.0, *col_top)
+                elif is_hov:
+                    b_pat.add_color_stop_rgb(0.0, min(1.0, col_top[0]+0.1), min(1.0, col_top[1]+0.1), min(1.0, col_top[2]+0.1))
+                    b_pat.add_color_stop_rgb(0.48, *col_mid)
+                    b_pat.add_color_stop_rgb(1.0, *col_bot)
+                else:
+                    b_pat.add_color_stop_rgb(0.0, *col_top)
+                    b_pat.add_color_stop_rgb(0.48, *col_mid)
+                    b_pat.add_color_stop_rgb(1.0, *col_bot)
+                cr.set_source(b_pat)
+                cr.fill_preserve()
+
+                # Outer crisp white/light bevel border
+                cr.set_source_rgba(1, 1, 1, 0.95 if is_hov else 0.85)
+                cr.set_line_width(1.2 if is_hov else 1.0)
+                cr.stroke()
+
+                # Top glossy highlight
+                cr.save()
+                cr.new_sub_path()
+                cr.arc(bx + rad + 0.5, by + rad + 0.5, rad - 0.5, 3.14, 4.71)
+                cr.arc(bx + btn_size - rad - 0.5, by + rad + 0.5, rad - 0.5, 4.71, 6.28)
+                cr.line_to(bx + btn_size - 1.5, by + btn_size * 0.45)
+                cr.curve_to(bx + btn_size * 0.5, by + btn_size * 0.35, bx + btn_size * 0.5, by + btn_size * 0.35, bx + 1.5, by + btn_size * 0.45)
+                cr.close_path()
+                cr.set_source_rgba(1, 1, 1, 0.45)
+                cr.fill()
+                cr.restore()
+
+                # Inner symbols in pure white
+                cr.set_source_rgb(1, 1, 1)
+                cr.set_line_width(2.8)
+                cr.set_line_cap(cairo.LINE_CAP_ROUND)
+
+                if btype == "standby":
+                    cr.arc(cx, by + btn_size // 2 + 1, 8.5, 5.2, 4.2)
+                    cr.stroke()
+                    cr.move_to(cx, by + 10)
+                    cr.line_to(cx, by + 19)
+                    cr.stroke()
+                elif btype == "turnoff":
+                    cr.arc(cx, by + btn_size // 2, 8.5, 0, 6.28)
+                    cr.stroke()
+                    cr.move_to(cx, by + 11)
+                    cr.line_to(cx, by + btn_size - 11)
+                    cr.stroke()
+                elif btype == "restart":
+                    for angle in [0, 45, 90, 135, 180, 225, 270, 315]:
+                        import math
+                        rad_a = math.radians(angle)
+                        x1 = cx + math.cos(rad_a) * 3.5
+                        y1 = by + btn_size // 2 + math.sin(rad_a) * 3.5
+                        x2 = cx + math.cos(rad_a) * 9.5
+                        y2 = by + btn_size // 2 + math.sin(rad_a) * 9.5
+                        cr.move_to(x1, y1)
+                        cr.line_to(x2, y2)
+                        cr.stroke()
+
+                # Label below
+                cr.select_font_face("Tahoma", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+                cr.set_font_size(11)
+                ext = cr.text_extents(lbl)
+                lx = cx - ext.width / 2
+                ly = by + btn_size + 24
+                # Drop shadow
+                cr.set_source_rgba(0, 0.1, 0.35, 0.8)
+                cr.move_to(lx + 1, ly + 1); cr.show_text(lbl)
+                # Text
+                cr.set_source_rgb(1, 1, 1)
+                cr.move_to(lx, ly); cr.show_text(lbl)
+
+            return False
+
+        def on_motion(w, ev):
+            idx = -1
+            for i, cx in enumerate(centers_x):
+                if abs(ev.x - cx) <= btn_size // 2 + 4 and abs(ev.y - (btn_y + btn_size // 2)) <= btn_size // 2 + 4:
+                    idx = i
+                    break
+            if idx != self.hover_btn:
+                self.hover_btn = idx
+                w.queue_draw()
+
+        def on_leave(w, _):
+            if self.hover_btn != -1:
+                self.hover_btn = -1
+                w.queue_draw()
+
+        def on_btn_press(w, ev):
+            if ev.button == 1 and self.hover_btn != -1:
+                self.pressed_btn = self.hover_btn
+                w.queue_draw()
+
+        def on_btn_release(w, ev):
+            if ev.button == 1 and self.pressed_btn != -1:
+                act = self.pressed_btn
+                self.pressed_btn = -1
+                w.queue_draw()
+                play_xp_sound("klick.wav")
+                if act == 0:  # Stand By
+                    run_cmd(["systemctl", "suspend"])
+                    Gtk.main_quit()
+                elif act == 1:  # Turn Off
+                    run_cmd(["qdbus-qt6", "org.kde.Shutdown", "/Shutdown", "logoutAndShutdown"])
+                    Gtk.main_quit()
+                elif act == 2:  # Restart
+                    run_cmd(["qdbus-qt6", "org.kde.Shutdown", "/Shutdown", "logoutAndReboot"])
+                    Gtk.main_quit()
+
+        mid_da.connect("draw", draw_mid)
+        mid_da.connect("motion-notify-event", on_motion)
+        mid_da.connect("leave-notify-event", on_leave)
+        mid_da.connect("button-press-event", on_btn_press)
+        mid_da.connect("button-release-event", on_btn_release)
+        box.pack_start(mid_da, True, True, 0)
+
+        # 3. Bottom bar (#001961) with authentic XP Cancel button
+        bot_da = Gtk.DrawingArea()
+        bot_da.set_size_request(320, 40)
+        bot_da.add_events(Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.POINTER_MOTION_MASK | Gdk.EventMask.LEAVE_NOTIFY_MASK)
+
+        def draw_bot(widget, cr):
+            w = widget.get_allocated_width()
+            h = widget.get_allocated_height()
+            cr.set_source_rgb(0.0, 0.19, 0.61)
+            cr.rectangle(0, 0, w, h)
+            cr.fill()
+
+            bx = w - 75 - 12
+            by = 9
+            bw = 75
+            bh = 22
+
+            cr.set_source_rgb(0.0, 0.23, 0.45)
+            cr.rectangle(bx, by, bw, bh)
+            cr.fill()
+
+            cr.set_source_rgb(0.925, 0.914, 0.847)
+            cr.rectangle(bx + 1, by + 1, bw - 2, bh - 2)
+            cr.fill()
+
+            cr.set_source_rgb(1, 1, 1)
+            cr.move_to(bx + 1, by + bh - 2); cr.line_to(bx + 1, by + 1); cr.line_to(bx + bw - 2, by + 1)
+            cr.stroke()
+
+            cr.set_source_rgb(0.55, 0.55, 0.52)
+            cr.move_to(bx + bw - 2, by + 2); cr.line_to(bx + bw - 2, by + bh - 2); cr.line_to(bx + 2, by + bh - 2)
+            cr.stroke()
+
+            cr.select_font_face("Tahoma", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+            cr.set_font_size(11)
+            cr.set_source_rgb(0, 0, 0)
+            ext = cr.text_extents("Cancel")
+            cr.move_to(bx + (bw - ext.width) / 2, by + (bh + ext.height) / 2 - 1)
+            cr.show_text("Cancel")
+            return False
+
+        def on_bot_click(w, ev):
+            bx = 320 - 75 - 12
+            if bx <= ev.x <= bx + 75 and 9 <= ev.y <= 31:
+                play_xp_sound("klick.wav")
+                Gtk.main_quit()
+
+        bot_da.connect("draw", draw_bot)
+        bot_da.connect("button-press-event", on_bot_click)
+        box.pack_start(bot_da, False, False, 0)
+
+        self.connect("key-press-event", lambda _, ev: Gtk.main_quit() if ev.keyval == Gdk.KEY_Escape else False)
+
+
 def main():
     mode = sys.argv[1].lower() if len(sys.argv) > 1 else "computer"
     if mode == "sni-list":
@@ -2650,7 +2975,9 @@ def main():
         sni_activate(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) >= 5 else "/com/canonical/dbusmenu")
         return
     if mode == "sni-menu" and len(sys.argv) >= 4:
-        sni_menu(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) >= 5 else "/com/canonical/dbusmenu")
+        tx = int(sys.argv[5]) if len(sys.argv) >= 7 and sys.argv[5].isdigit() else None
+        ty = int(sys.argv[6]) if len(sys.argv) >= 7 and sys.argv[6].isdigit() else None
+        sni_menu(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) >= 5 else "/com/canonical/dbusmenu", tx, ty)
         return
 
     provider = Gtk.CssProvider()
@@ -2670,12 +2997,21 @@ def main():
         win = TaskbarPropertiesDialog(initial_tab=1)
     elif mode in ("logon", "aanmelden", "gebruikersaccounts"):
         win = TaskbarPropertiesDialog(initial_tab=2)
-    elif mode in ("taakbeheer", "taskmgr", "taskmanager"):
-        win = TaskManagerWindow()
+    elif mode in ("taakbeheer", "taskmgr", "taskmanager", "taskmgr-perf", "taskmgr-proc"):
+        initial_tab = 2 if mode == "taskmgr-perf" else (1 if mode == "taskmgr-proc" else 0)
+        win = TaskManagerWindow(initial_tab=initial_tab)
+    elif mode in ("msn", "messenger"):
+        msn_script = os.path.join(BASE_DIR, "xp-msn.py")
+        if not os.path.exists(msn_script):
+            msn_script = os.path.expanduser("~/.local/share/xp-startknop/xp-msn.py")
+        subprocess.Popen([sys.executable, msn_script] + sys.argv[2:])
+        return
     elif mode in ("uitvoeren", "run"):
         win = RunDialog()
     elif mode in ("afmelden", "logoff"):
         win = XpLogoffDialog()
+    elif mode in ("shutdown", "turnoff", "afsluiten"):
+        win = XpTurnOffDialog()
     elif mode in ("configuratiescherm", "control", "instellingen"):
         win = XpExplorerWindow("configuratiescherm")
     elif mode in ("klassiek", "classic"):
@@ -2685,6 +3021,8 @@ def main():
 
     win.connect("destroy", Gtk.main_quit)
     win.show_all()
+    if hasattr(win, "initial_tab") and win.initial_tab > 0:
+        win.notebook.set_current_page(win.initial_tab)
     Gtk.main()
 
 
