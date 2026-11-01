@@ -2,6 +2,28 @@
 
 All notable changes to the Windows XP Suite for Bazzite / KDE Plasma 6 will be documented in this file.
 
+## [v1.3.1] — 2026-11-01
+
+### 🌐 Firefox Internet Explorer 6 Shell Perfection
+- **Pure Browser-Shell Styling**: Eliminated web content CSS overrides in `userContent.css` so websites display naturally according to their intended layout, while completely skinning the browser frame.
+- **Top Menubar & Animated IE Globe**: Classic Windows XP menubar with Tahoma typography, blue selection highlights, and the iconic animated IE globe / Windows flag throbber (`throbber.gif` / `throbber_busy.gif`).
+- **Full-Width Address Bar & Links Toolbar**: Wide address input with 3D inset borders, "Address" label, "Go" button, and "Links" bookmarks toolbar.
+- **Tabs Below Toolbars**: Repositioned tabs below the navigation and address bars using modern flexbox ordering, styled as classic Windows XP folder tabs.
+- **Modern Firefox Gecko Support**: Replaced all obsolete `:-moz-any()` selectors with standard `:is()`, ensuring 100% compatibility with Firefox Quantum 128+ / 159+.
+
+### 🔒 Borderless Log Off & Shutdown Dialogs
+- **Removed Aurorae Frames**: Enforced `GDK_BACKEND=x11` and borderless dialog hints on `XpLogoffDialog` and `XpTurnOffDialog`, eliminating unwanted KWin window titlebars.
+- **Fixed Cairo Import Bug**: Added missing `import cairo` to `xp-verkenner.py` to allow smooth rendering of the Luna gradient and glossy Cairo buttons.
+
+### 📍 System Tray Context Menu Sizing
+- **Accurate Popup Placement**: Integrated `win.get_preferred_size()` in `xp-verkenner.py` to calculate the exact popup height (174px) and center the context menu directly above the clicked tray icon using live `xdotool` coordinates.
+
+### 💬 Vesktop Vencord Settings Placement
+- **Top Placement**: Configured Vencord `settingsLocation: "top"` in `settings.json`, ensuring Vencord Settings, Themes, and Plugins appear immediately at the top of User Settings.
+
+### 🎨 Start Menu Icon Reliability
+- **System Icon Fallback**: Updated `AppEntry.qml` to immediately fall back to `Kirigami.Icon` with the application's native icon if an image sprite is missing or fails to load.
+
 ## [v1.3.0] — 2026-11-01
 
 ### 🌐 Firefox Internet Explorer 6 Transformation

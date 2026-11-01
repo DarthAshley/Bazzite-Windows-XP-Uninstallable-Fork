@@ -503,6 +503,10 @@ try:
     if "Windows-XP-MSN-Messenger.theme.css" not in themes:
         themes.append("Windows-XP-MSN-Messenger.theme.css")
     cfg["enabledThemes"] = themes
+    if "plugins" not in cfg: cfg["plugins"] = {}
+    if "Settings" not in cfg["plugins"]: cfg["plugins"]["Settings"] = {}
+    cfg["plugins"]["Settings"]["enabled"] = True
+    cfg["plugins"]["Settings"]["settingsLocation"] = "top"
     os.makedirs(os.path.dirname(vencord_settings), exist_ok=True)
     with open(vencord_settings, "w", encoding="utf-8") as f:
         json.dump(cfg, f, indent=4)

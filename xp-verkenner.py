@@ -17,6 +17,7 @@ if len(sys.argv) > 1 and sys.argv[1].lower() in ("sni-menu", "afmelden", "logoff
         pass
 
 import json
+import cairo
 import shutil
 import subprocess
 import gi
@@ -2613,9 +2614,9 @@ def sni_menu(svc, path, menu_path="/com/canonical/dbusmenu", target_x=None, targ
         target_x = sw - 140
         target_y = sh - 36
 
-    alloc = win.get_allocation()
-    w = max(175, alloc.width)
-    h = max(35, alloc.height)
+    min_size, nat_size = win.get_preferred_size()
+    w = max(175, nat_size.width)
+    h = max(35, nat_size.height)
 
     px = max(4, min(target_x - w // 2, sw - w - 4))
     py = max(4, target_y - h - 6)

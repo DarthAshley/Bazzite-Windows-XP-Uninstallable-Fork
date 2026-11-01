@@ -1,7 +1,7 @@
 /* TABS: height */
 
 
-#nav-bar:not(:-moz-lwtheme) {
+#nav-bar {
   margin-top: 1px !important;
   background-color: inherit !important;
   background-image: url("image/top.png") !important;
@@ -14,7 +14,7 @@
   border-image-slice: 2 2 2 7 !important;
 }
 
-toolbar:not(#TabsToolbar):not(#toolbar-menubar):not(#nav-bar):not(:-moz-lwtheme) {
+toolbar:not(#TabsToolbar):not(#toolbar-menubar):not(#nav-bar) {
   -moz-appearance: none !important;
   background-color: inherit !important;
   background-image: url("image/bottom.png") !important;
@@ -26,7 +26,7 @@ toolbar:not(#TabsToolbar):not(#toolbar-menubar):not(#nav-bar):not(:-moz-lwtheme)
   border-image-slice: 2 2 2 7 !important;
   margin-bottom: 1px !important; }
 
-#main-window[uidensity="compact"] toolbar:not(#TabsToolbar):not(#toolbar-menubar):not(#nav-bar):not(:-moz-lwtheme) {
+#main-window[uidensity="compact"] toolbar:not(#TabsToolbar):not(#toolbar-menubar):not(#nav-bar) {
   margin-bottom: 0px !important;
 }
 

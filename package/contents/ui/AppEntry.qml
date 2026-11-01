@@ -47,7 +47,7 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         width: entry.iconSize
         height: entry.iconSize
-        visible: entry.effectiveIconFile !== ""
+        visible: entry.effectiveIconFile !== "" && status === Image.Ready
         source: entry.effectiveIconFile !== "" ? Qt.resolvedUrl("../images/icons/" + entry.effectiveIconFile) : ""
         sourceSize.width: entry.iconSize * 2
         sourceSize.height: entry.iconSize * 2
@@ -60,7 +60,7 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         width: entry.iconSize
         height: entry.iconSize
-        visible: entry.effectiveIconFile === ""
+        visible: entry.effectiveIconFile === "" || customIcon.status !== Image.Ready
         source: entry.icon
         fallback: "application-x-executable"
     }
