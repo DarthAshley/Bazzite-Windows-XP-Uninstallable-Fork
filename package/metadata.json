@@ -1,0 +1,15 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [{ "Name": "King Geoffrey" }],
+        "Category": "Application Launchers",
+        "Description": "Windows XP startknop en startmenu",
+        "Icon": "start-here-kde",
+        "Id": "nl.steelhull.xpstart",
+        "License": "GPL-2.0+",
+        "Name": "XP Start",
+        "Version": "1.0"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0",
+    "X-Plasma-Provides": ["org.kde.plasma.launchermenu"]
+}

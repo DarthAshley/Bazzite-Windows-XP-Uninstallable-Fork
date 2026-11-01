@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="abCover" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f7d688"/>
+      <stop offset="55%" stop-color="#d89b38"/>
+      <stop offset="100%" stop-color="#9e6414"/>
+    </linearGradient>
+    <linearGradient id="abPerson" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#58a6f8"/>
+      <stop offset="100%" stop-color="#1c5bb0"/>
+    </linearGradient>
+  </defs>
+  <!-- Boek omslag -->
+  <rect x="5" y="3" width="20" height="26" rx="2" fill="url(#abCover)" stroke="#6e4209" stroke-width="1.2"/>
+  <!-- Rug van het boek -->
+  <rect x="5" y="3" width="4" height="26" fill="#7d4b0a"/>
+  <!-- Tabjes rechts -->
+  <rect x="24" y="6" width="3" height="4" rx="0.8" fill="#e85b48" stroke="#8a2519" stroke-width="0.7"/>
+  <rect x="24" y="11" width="3" height="4" rx="0.8" fill="#54b848" stroke="#22691b" stroke-width="0.7"/>
+  <rect x="24" y="16" width="3" height="4" rx="0.8" fill="#4892e8" stroke="#1b4d8a" stroke-width="0.7"/>
+  <rect x="24" y="21" width="3" height="4" rx="0.8" fill="#f2c94c" stroke="#8a6c14" stroke-width="0.7"/>
+  <!-- Telefoon/persoon icoontje op omslag -->
+  <circle cx="15.5" cy="12" r="3.2" fill="#ffe2b8" stroke="#6e4209" stroke-width="0.9"/>
+  <path d="M10.5,21 C10.5,16.8 20.5,16.8 20.5,21 Z" fill="url(#abPerson)" stroke="#123d7a" stroke-width="0.9"/>
+</svg>
+

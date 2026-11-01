@@ -1,0 +1,19 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Steel Hull Studio"
+            }
+        ],
+        "Category": "System Information",
+        "Description": "Windows XP Luna Systeemvak en Klok",
+        "Icon": "preferences-system-time",
+        "Id": "nl.steelhull.xptray",
+        "License": "GPL-2.0+",
+        "Name": "XP Systeemvak",
+        "Version": "1.0"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}
+

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="calcBody" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#8fb8e8"/>
+      <stop offset="50%" stop-color="#4b7ec4"/>
+      <stop offset="100%" stop-color="#274f8a"/>
+    </linearGradient>
+  </defs>
+  <rect x="5" y="3" width="22" height="26" rx="2.5" fill="url(#calcBody)" stroke="#18345e" stroke-width="1.2"/>
+  <rect x="8" y="6" width="16" height="5" rx="1" fill="#d8f0d0" stroke="#3a5e36" stroke-width="0.9"/>
+  <!-- Knopjes -->
+  <rect x="8" y="13" width="3.2" height="2.8" rx="0.5" fill="#f0f4fa"/>
+  <rect x="12.4" y="13" width="3.2" height="2.8" rx="0.5" fill="#f0f4fa"/>
+  <rect x="16.8" y="13" width="3.2" height="2.8" rx="0.5" fill="#f0f4fa"/>
+  <rect x="21" y="13" width="3" height="2.8" rx="0.5" fill="#f59a4b"/>
+
+  <rect x="8" y="17" width="3.2" height="2.8" rx="0.5" fill="#f0f4fa"/>
+  <rect x="12.4" y="17" width="3.2" height="2.8" rx="0.5" fill="#f0f4fa"/>
+  <rect x="16.8" y="17" width="3.2" height="2.8" rx="0.5" fill="#f0f4fa"/>
+  <rect x="21" y="17" width="3" height="2.8" rx="0.5" fill="#f59a4b"/>
+
+  <rect x="8" y="21" width="3.2" height="2.8" rx="0.5" fill="#f0f4fa"/>
+  <rect x="12.4" y="21" width="3.2" height="2.8" rx="0.5" fill="#f0f4fa"/>
+  <rect x="16.8" y="21" width="3.2" height="2.8" rx="0.5" fill="#f0f4fa"/>
+  <rect x="21" y="21" width="3" height="5.8" rx="0.5" fill="#52b848"/>
+
+  <rect x="8" y="25" width="7.6" height="2" rx="0.5" fill="#f0f4fa"/>
+  <rect x="16.8" y="25" width="3.2" height="2" rx="0.5" fill="#f0f4fa"/>
+</svg>
+
