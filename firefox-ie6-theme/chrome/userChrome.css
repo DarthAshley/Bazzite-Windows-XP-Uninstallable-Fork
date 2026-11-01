@@ -1,17 +1,28 @@
 /* ==============================================================================
-   Windows XP Internet Explorer 6 / Luna Blue Complete Suite for Modern Firefox
+   Windows XP Internet Explorer 6 / Luna Blue Complete Theme for Modern Firefox
+   100% Authentic Browser Chrome Reproduction (userChrome.css)
    ============================================================================== */
 
+@namespace html url("http://www.w3.org/1999/xhtml");
+
+/* ------------------------------------------------------------------------------
+   0. ROOT & SYSTEM OVERRIDES (Force Luna Light Theme even in Dark Mode)
+   ------------------------------------------------------------------------------ */
 :root {
+  color-scheme: light !important;
   --toolbar-bgcolor: #ECE9D8 !important;
   --toolbar-bgimage: none !important;
   --toolbar-color: #000000 !important;
   --toolbarbutton-icon-fill: #000000 !important;
-  --lwt-text-color: #000000 !important;
   --lwt-toolbarbutton-icon-fill: #000000 !important;
-  --toolbar-field-focus-border-color: #316AC5 !important;
+  --lwt-text-color: #000000 !important;
   --lwt-toolbar-field-background-color: #FFFFFF !important;
   --lwt-toolbar-field-color: #000000 !important;
+  --toolbar-field-background-color: #FFFFFF !important;
+  --toolbar-field-color: #000000 !important;
+  --toolbar-field-focus-background-color: #FFFFFF !important;
+  --toolbar-field-focus-color: #000000 !important;
+  --toolbar-field-focus-border-color: #316AC5 !important;
   --toolbarbutton-icon-fill-opacity: 1 !important;
   --arrowpanel-background: #ECE9D8 !important;
   --arrowpanel-color: #000000 !important;
@@ -21,16 +32,13 @@
 }
 
 #main-window {
+  color-scheme: light !important;
   background-color: #ECE9D8 !important;
   color: #000000 !important;
 }
 
 /* ------------------------------------------------------------------------------
-   NAVIGATOR TOOLBOX & TOOLBARS ORDERING
-   1: Menubar (with animated IE Throbber)
-   2: Navigation Bar (Back, Forward, Stop, Refresh, Home, Address Bar, Go)
-   3: Links Toolbar (Bookmarks)
-   4: Tabs Toolbar (At bottom of toolbar area, classic XP folder tabs)
+   TOOLBOX & TOOLBAR LAYOUT (Ordering: Menubar -> Buttons -> Address -> Links -> Tabs)
    ------------------------------------------------------------------------------ */
 #navigator-toolbox {
   background-color: #ECE9D8 !important;
@@ -40,15 +48,33 @@
   flex-direction: column !important;
 }
 
-/* 1. Classic Windows Menubar */
-#toolbar-menubar {
+#titlebar {
+  display: contents !important;
+}
+
+/* ------------------------------------------------------------------------------
+   1. AUTHENTIC WINDOWS MENUBAR (Bestand, Bewerken, Beeld, Favorieten, Extra, Help)
+   ------------------------------------------------------------------------------ */
+#toolbar-menubar,
+#toolbar-menubar[autohide="true"],
+#toolbar-menubar[inactive="true"] {
   order: 1 !important;
+  -moz-box-ordinal-group: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
   background-color: #ECE9D8 !important;
   padding: 1px 4px !important;
   min-height: 24px !important;
+  height: auto !important;
   border: none !important;
-  display: flex !important;
+  border-left: 7px solid transparent !important;
+  border-image: url("image/toolbar_handle_top.png") 2 2 2 7 fill !important;
   align-items: center !important;
+}
+
+#main-menubar {
+  visibility: visible !important;
+  display: flex !important;
 }
 
 #toolbar-menubar .menubar-text {
@@ -80,6 +106,7 @@
   border: 1px solid #7F9DB9 !important;
   margin-left: auto !important;
   margin-right: 4px !important;
+  flex-shrink: 0 !important;
 }
 
 #main-window[busy] #toolbar-menubar::after,
@@ -87,37 +114,352 @@
   background-image: url("image/throbber_busy.gif") !important;
 }
 
-/* 2. Navigation Bar */
+/* ------------------------------------------------------------------------------
+   2. NAVIGATION BAR: Standard Buttons Toolbar (Row 1) & Address Bar (Row 2)
+   ------------------------------------------------------------------------------ */
 #nav-bar {
   order: 2 !important;
+  -moz-box-ordinal-group: 2 !important;
   background-color: #ECE9D8 !important;
   background-image: url("image/top.png") !important;
   background-position: left bottom !important;
   border-top: 1px solid #FFFFFF !important;
   border-bottom: 1px solid #D8D2BD !important;
-  border-left: 7px solid transparent !important;
-  border-image: url("image/toolbar_handle_top.png") 2 2 2 7 fill !important;
-  padding: 3px 6px !important;
+  padding: 2px 4px !important;
   box-shadow: none !important;
   display: flex !important;
-  align-items: center !important;
+  flex-direction: column !important;
 }
 
-/* 3. Links / Bookmarks Bar */
+#nav-bar-customization-target {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+/* Standard Buttons Row (Row 2 of toolbox) */
+#nav-bar .toolbarbutton-1 {
+  order: 1 !important;
+  -moz-box-ordinal-group: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 52px !important;
+  min-height: 44px !important;
+  padding: 3px 6px !important;
+  margin: 0 1px !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: 2px !important;
+}
+
+#nav-bar .toolbarbutton-1:not([disabled="true"]):hover {
+  border: 1px solid #316AC5 !important;
+  border-image: url("image/toolbar_button.png") 1 1 1 1 !important;
+  background: linear-gradient(to bottom, #EBF3FD, #B5D2F6) !important;
+}
+
+#nav-bar .toolbarbutton-1:not([disabled="true"]):active {
+  border: 1px solid #28559D !important;
+  border-image: url("image/toolbar_button_pressed.png") 1 1 1 1 !important;
+  background: linear-gradient(to bottom, #9CBDDF, #BED9F8) !important;
+}
+
+#nav-bar .toolbarbutton-1[disabled="true"] {
+  opacity: 0.5 !important;
+}
+
+#nav-bar .toolbarbutton-1 > .toolbarbutton-text {
+  display: block !important;
+  visibility: visible !important;
+  font-family: Tahoma, "Segoe UI", sans-serif !important;
+  font-size: 11px !important;
+  color: #000000 !important;
+  margin-top: 2px !important;
+  text-align: center !important;
+}
+
+/* Fallback button text labels for Dutch IE6 experience */
+#back-button > .toolbarbutton-text:empty::after,
+#back-button:not(:has(.toolbarbutton-text))::after {
+  content: "Vorige" !important;
+  font-family: Tahoma, "Segoe UI", sans-serif !important;
+  font-size: 11px !important;
+  color: #000000 !important;
+  margin-top: 1px !important;
+}
+
+#forward-button > .toolbarbutton-text:empty::after,
+#forward-button:not(:has(.toolbarbutton-text))::after {
+  content: "Volgende" !important;
+  font-family: Tahoma, "Segoe UI", sans-serif !important;
+  font-size: 11px !important;
+  color: #000000 !important;
+  margin-top: 1px !important;
+}
+
+#home-button > .toolbarbutton-text:empty::after,
+#home-button:not(:has(.toolbarbutton-text))::after {
+  content: "Startpagina" !important;
+  font-family: Tahoma, "Segoe UI", sans-serif !important;
+  font-size: 11px !important;
+  color: #000000 !important;
+  margin-top: 1px !important;
+}
+
+#search-button > .toolbarbutton-text:empty::after,
+#find-button > .toolbarbutton-text:empty::after,
+#find-button:not(:has(.toolbarbutton-text))::after {
+  content: "Zoeken" !important;
+  font-family: Tahoma, "Segoe UI", sans-serif !important;
+  font-size: 11px !important;
+  color: #000000 !important;
+  margin-top: 1px !important;
+}
+
+#bookmarks-menu-button > .toolbarbutton-text:empty::after,
+#library-button > .toolbarbutton-text:empty::after,
+#library-button:not(:has(.toolbarbutton-text))::after {
+  content: "Favorieten" !important;
+  font-family: Tahoma, "Segoe UI", sans-serif !important;
+  font-size: 11px !important;
+  color: #000000 !important;
+  margin-top: 1px !important;
+}
+
+#history-panelmenu > .toolbarbutton-text:empty::after,
+#history-panelmenu:not(:has(.toolbarbutton-text))::after {
+  content: "Geschiedenis" !important;
+  font-family: Tahoma, "Segoe UI", sans-serif !important;
+  font-size: 11px !important;
+  color: #000000 !important;
+  margin-top: 1px !important;
+}
+
+#print-button > .toolbarbutton-text:empty::after,
+#print-button:not(:has(.toolbarbutton-text))::after {
+  content: "Afdrukken" !important;
+  font-family: Tahoma, "Segoe UI", sans-serif !important;
+  font-size: 11px !important;
+  color: #000000 !important;
+  margin-top: 1px !important;
+}
+
+#stop-reload-button[displaystop]::after,
+#stop-button > .toolbarbutton-text:empty::after {
+  content: "Stop" !important;
+  font-family: Tahoma, "Segoe UI", sans-serif !important;
+  font-size: 11px !important;
+  color: #000000 !important;
+  margin-top: 1px !important;
+}
+
+#stop-reload-button:not([displaystop])::after,
+#reload-button > .toolbarbutton-text:empty::after {
+  content: "Vernieuwen" !important;
+  font-family: Tahoma, "Segoe UI", sans-serif !important;
+  font-size: 11px !important;
+  color: #000000 !important;
+  margin-top: 1px !important;
+}
+
+/* Toolbar button handle on the left of buttons */
+#nav-bar-customization-target::before {
+  content: "" !important;
+  order: 0 !important;
+  display: block !important;
+  width: 8px !important;
+  height: 38px !important;
+  background-image: url("image/toolbar_handle_top.png") !important;
+  background-repeat: no-repeat !important;
+  background-position: center center !important;
+  margin-right: 2px !important;
+}
+
+/* Authentic Large 25x25 IE6 Toolbar Icons */
+#nav-bar .toolbarbutton-1 .toolbarbutton-icon {
+  width: 25px !important;
+  height: 25px !important;
+  padding: 0 !important;
+  list-style-image: url("image/toolbar.png") !important;
+}
+
+/* Icon sprite mappings (image/toolbar.png, 400x25, 16 icons each 25x25) */
+#back-button .toolbarbutton-icon {
+  -moz-image-region: rect(0px, 25px, 25px, 0px) !important;
+}
+
+#forward-button .toolbarbutton-icon {
+  -moz-image-region: rect(0px, 50px, 25px, 25px) !important;
+}
+
+#stop-button .toolbarbutton-icon,
+#stop-reload-button[displaystop] .toolbarbutton-icon {
+  -moz-image-region: rect(0px, 100px, 25px, 75px) !important;
+}
+
+#reload-button .toolbarbutton-icon,
+#stop-reload-button:not([displaystop]) .toolbarbutton-icon {
+  -moz-image-region: rect(0px, 75px, 25px, 50px) !important;
+}
+
+#home-button .toolbarbutton-icon {
+  -moz-image-region: rect(0px, 125px, 25px, 100px) !important;
+}
+
+#search-button .toolbarbutton-icon,
+#find-button .toolbarbutton-icon {
+  -moz-image-region: rect(0px, 150px, 25px, 125px) !important;
+}
+
+#bookmarks-menu-button .toolbarbutton-icon,
+#library-button .toolbarbutton-icon,
+#star-button-box .toolbarbutton-icon {
+  -moz-image-region: rect(0px, 175px, 25px, 150px) !important;
+}
+
+#history-panelmenu .toolbarbutton-icon {
+  -moz-image-region: rect(0px, 200px, 25px, 175px) !important;
+}
+
+#print-button .toolbarbutton-icon {
+  -moz-image-region: rect(0px, 225px, 25px, 200px) !important;
+}
+
+#downloads-button .toolbarbutton-icon {
+  list-style-image: url("image/toolbar_fx_ie6.png") !important;
+  -moz-image-region: rect(0px, 198px, 18px, 180px) !important;
+}
+
+/* Hide modern tab/toolbar animations */
+.toolbarbutton-animatable-box {
+  display: none !important;
+}
+
+/* Hide flexible spring spacers in nav-bar so buttons don't get stretched */
+#nav-bar toolbarspring,
+#nav-bar [id^="customizableui-special-spring"] {
+  display: none !important;
+}
+
+/* ------------------------------------------------------------------------------
+   3. ADDRESS BAR (Row 3): 'Adres' label, Solid White Box, Green 'Ga naar' Button
+   ------------------------------------------------------------------------------ */
+#urlbar-container {
+  order: 100 !important;
+  flex-basis: 100% !important;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  margin-top: 3px !important;
+  padding-top: 3px !important;
+  border-top: 1px solid #FFFFFF !important;
+  box-shadow: 0 -1px 0 #D8D2BD !important;
+  max-width: none !important;
+  border-left: 8px solid transparent !important;
+  border-image: url("image/toolbar_handle.png") 2 2 2 8 fill !important;
+}
+
+/* Classic 'Adres' Label */
+#urlbar-container::before {
+  content: "Adres" !important;
+  font-family: Tahoma, "Segoe UI", sans-serif !important;
+  font-size: 11px !important;
+  color: #000000 !important;
+  margin-left: 6px !important;
+  margin-right: 8px !important;
+  white-space: nowrap !important;
+}
+
+#urlbar {
+  --urlbar-height: 24px !important;
+  min-height: 24px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+}
+
+#urlbar-background,
+#urlbar[focused="true"] > #urlbar-background,
+#urlbar:not([focused="true"]) > #urlbar-background {
+  opacity: 1 !important;
+  background-color: #FFFFFF !important;
+  border: 1px solid #7F9DB9 !important;
+  border-radius: 0px !important;
+  box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.2) !important;
+}
+
+#urlbar-input-container {
+  background-color: #FFFFFF !important;
+  height: 24px !important;
+  padding: 0 4px !important;
+}
+
+#urlbar-input {
+  color: #000000 !important;
+  font-family: Tahoma, "Segoe UI", sans-serif !important;
+  font-size: 12px !important;
+}
+
+/* Classic Dropmarker arrow for URL bar history */
+.urlbar-history-dropmarker,
+#urlbar-history-dropmarker {
+  display: block !important;
+  opacity: 1 !important;
+  list-style-image: url("image/comboboxbutton.png") !important;
+  width: 17px !important;
+  height: 21px !important;
+}
+
+/* Classic Authentic Green 'Ga naar' (Go) Button */
+#urlbar-container::after {
+  content: "Ga naar" !important;
+  font-family: Tahoma, "Segoe UI", sans-serif !important;
+  font-size: 11px !important;
+  color: #000000 !important;
+  padding: 2px 8px 2px 24px !important;
+  margin-left: 6px !important;
+  margin-right: 6px !important;
+  border: 1px solid #7F9DB9 !important;
+  background: linear-gradient(to bottom, #FFFFFF, #ECE9D8) !important;
+  background-image: url("image/go.png") !important;
+  background-repeat: no-repeat !important;
+  background-position: 4px center !important;
+  border-radius: 2px !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+}
+
+#urlbar-container::after:hover {
+  background-image: url("image/go-hover.png") !important;
+  background-color: #EBF3FD !important;
+  border-color: #316AC5 !important;
+}
+
+/* ------------------------------------------------------------------------------
+   4. LINKS TOOLBAR (Koppelingen / Bookmarks Bar)
+   ------------------------------------------------------------------------------ */
 #PersonalToolbar {
   order: 3 !important;
+  -moz-box-ordinal-group: 3 !important;
   background-color: #ECE9D8 !important;
   background-image: url("image/bottom.png") !important;
   border-top: 1px solid #FFFFFF !important;
+  border-bottom: 1px solid #D8D2BD !important;
   border-left: 7px solid transparent !important;
   border-image: url("image/toolbar_handle.png") 2 2 2 7 fill !important;
-  padding: 1px 4px !important;
+  padding: 2px 4px !important;
   display: flex !important;
   align-items: center !important;
+  min-height: 24px !important;
 }
 
 #PersonalToolbar::before {
-  content: "Links" !important;
+  content: "Koppelingen" !important;
   color: #808080 !important;
   font-family: Tahoma, "Segoe UI", sans-serif !important;
   font-size: 11px !important;
@@ -131,6 +473,7 @@
   color: #000000 !important;
   font-family: Tahoma, "Segoe UI", sans-serif !important;
   font-size: 11px !important;
+  padding: 2px 4px !important;
 }
 
 #PersonalToolbar .bookmark-item:hover {
@@ -139,19 +482,23 @@
   border-radius: 2px !important;
 }
 
-/* 4. Tabs Toolbar placed at the bottom of the toolbars */
+/* ------------------------------------------------------------------------------
+   5. TABS TOOLBAR (Classic Windows XP Folder Tabs, Below Address/Links Bar)
+   ------------------------------------------------------------------------------ */
 #TabsToolbar {
-  order: 4 !important;
+  order: 10 !important;
+  -moz-box-ordinal-group: 10 !important;
   background-color: #ECE9D8 !important;
   border-top: 1px solid #919B9C !important;
-  padding-left: 3px !important;
+  padding-left: 4px !important;
+  min-height: 27px !important;
 }
 
-#TabsToolbar .titlebar-buttonbox-container {
+#TabsToolbar .titlebar-buttonbox-container,
+#firefox-view-button {
   display: none !important;
 }
 
-/* --- TAB STYLING (Windows XP Folder Tabs) --- */
 .tabbrowser-tab {
   min-height: 25px !important;
   max-height: 26px !important;
@@ -181,134 +528,100 @@
 
 .tabbrowser-tab[selected="true"] .tab-label {
   font-weight: bold !important;
+  color: #000000 !important;
 }
 
 .tab-line {
   display: none !important;
 }
 
-/* --- ADDRESS BAR STYLING (Classic Wide Internet Explorer 6 Address Bar) --- */
-#urlbar-container {
-  --urlbar-container-height: 26px !important;
-  padding: 1px 0 !important;
-  flex: 1 1 auto !important;
-  max-width: none !important;
-  width: auto !important;
-  display: flex !important;
-  align-items: center !important;
+.tab-close-button {
+  list-style-image: url("image/close.png") !important;
+  width: 14px !important;
+  height: 14px !important;
 }
 
-#urlbar-container::before {
-  content: "Address" !important;
-  color: #000000 !important;
-  font-family: Tahoma, "Segoe UI", sans-serif !important;
-  font-size: 11px !important;
-  margin-right: 6px !important;
-  margin-left: 6px !important;
-}
-
-#urlbar-container::after {
-  content: "Go" !important;
-  color: #000000 !important;
-  font-family: Tahoma, "Segoe UI", sans-serif !important;
-  font-size: 11px !important;
-  font-weight: bold !important;
-  margin-left: 6px !important;
-  margin-right: 6px !important;
-  padding: 2px 10px !important;
-  border: 1px solid #7F9DB9 !important;
-  background: linear-gradient(to bottom, #FFFFFF, #ECE9D8) !important;
-  border-radius: 2px !important;
-  cursor: pointer !important;
-}
-
-#urlbar {
-  --urlbar-height: 24px !important;
-  min-height: 24px !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  border: none !important;
-  width: 100% !important;
-  max-width: none !important;
-}
-
-#urlbar-background {
-  background-color: #FFFFFF !important;
-  border: 1px solid #7F9DB9 !important;
-  border-radius: 0px !important;
-  box-shadow: inset 1px 1px 1px rgba(0,0,0,0.18) !important;
-}
-
-#urlbar-input {
-  color: #000000 !important;
-  font-family: Tahoma, "Segoe UI", sans-serif !important;
-  font-size: 12px !important;
-}
-
-/* --- TOOLBAR BUTTONS & ICONS --- */
-#nav-bar .toolbarbutton-1 {
-  border: 1px solid transparent !important;
-  border-radius: 2px !important;
-  padding: 2px 5px !important;
-  background: transparent !important;
-  margin: 0 1px !important;
-}
-
-#nav-bar .toolbarbutton-1:hover:not([disabled="true"]) {
-  border: 1px solid #316AC5 !important;
-  border-image: url("image/toolbar_button.png") 1 1 1 1 !important;
-  background: linear-gradient(to bottom, #EBF3FD, #B5D2F6) !important;
-}
-
-#nav-bar .toolbarbutton-1:active:not([disabled="true"]) {
-  border: 1px solid #28559D !important;
-  border-image: url("image/toolbar_button_pressed.png") 1 1 1 1 !important;
-  background: linear-gradient(to bottom, #9CBDDF, #BED9F8) !important;
-}
-
-/* Retro icon sprites */
-:is(#back-button, #forward-button, #home-button, #stop-button, #reload-button, #downloads-button, #library-button, #PanelUI-menu-button) .toolbarbutton-icon {
-  list-style-image: url("image/toolbar_fx_ie6.png") !important;
-  width: 22px !important;
-  height: 22px !important;
-  padding: 0 !important;
-}
-
-#back-button .toolbarbutton-icon {
-  -moz-image-region: rect(0px, 54px, 18px, 36px) !important;
-  width: 26px !important;
-  height: 26px !important;
-}
-
-#forward-button .toolbarbutton-icon {
-  -moz-image-region: rect(0px, 72px, 18px, 54px) !important;
-  width: 26px !important;
-  height: 26px !important;
-}
-
-#stop-button .toolbarbutton-icon {
-  -moz-image-region: rect(0px, 108px, 18px, 90px) !important;
-}
-
-#reload-button .toolbarbutton-icon {
-  -moz-image-region: rect(0px, 90px, 18px, 72px) !important;
-}
-
-#home-button .toolbarbutton-icon {
-  -moz-image-region: rect(0px, 126px, 18px, 108px) !important;
-}
-
-#downloads-button .toolbarbutton-icon {
-  -moz-image-region: rect(0px, 198px, 18px, 180px) !important;
-}
-
-/* Browser Frame & Scrollbars */
+/* ------------------------------------------------------------------------------
+   6. BROWSER CHROME & CONTENT SEPARATOR
+   ------------------------------------------------------------------------------ */
 #browser {
   background-color: #FFFFFF !important;
+  border-top: 2px solid #7F9DB9 !important;
+  margin-bottom: 22px !important;
 }
 
 /* Classic Windows XP Luna Scrollbars */
 :root {
   scrollbar-color: #5587D8 #ECE9D8 !important;
   scrollbar-width: auto !important;
+}
+
+/* ------------------------------------------------------------------------------
+   7. STATUS BAR (Onderaan met 'Gereed' en 'Internet' Zone Icoon)
+   ------------------------------------------------------------------------------ */
+#statuspanel,
+#statuspanel[inactive="true"],
+#statuspanel[hidden="true"] {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: fixed !important;
+  bottom: 0px !important;
+  left: 0px !important;
+  width: 100% !important;
+  height: 22px !important;
+  max-height: 22px !important;
+  background-color: #ECE9D8 !important;
+  border-top: 1px solid #FFFFFF !important;
+  box-shadow: 0 -1px 0 #919B9C !important;
+  padding: 1px 6px !important;
+  align-items: center !important;
+  z-index: 1000 !important;
+  pointer-events: none !important;
+}
+
+#statuspanel-inner {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+#statuspanel-label {
+  display: block !important;
+  background: transparent !important;
+  border: none !important;
+  color: #000000 !important;
+  font-family: Tahoma, "Segoe UI", sans-serif !important;
+  font-size: 11px !important;
+  padding: 0 !important;
+}
+
+#statuspanel-label[value=""]::before,
+#statuspanel-label:not([value])::before,
+#statuspanel[inactive="true"] #statuspanel-label::before {
+  content: "Gereed" !important;
+  color: #000000 !important;
+  font-family: Tahoma, "Segoe UI", sans-serif !important;
+  font-size: 11px !important;
+}
+
+#statuspanel::after {
+  content: "Internet" !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  font-family: Tahoma, "Segoe UI", sans-serif !important;
+  font-size: 11px !important;
+  color: #000000 !important;
+  background-image: url("image/internet.png") !important;
+  background-repeat: no-repeat !important;
+  background-position: 4px center !important;
+  padding-left: 24px !important;
+  padding-right: 12px !important;
+  margin-left: auto !important;
+  border-left: 1px solid #919B9C !important;
+  box-shadow: -1px 0 0 #FFFFFF !important;
+  height: 18px !important;
+  line-height: 18px !important;
 }
