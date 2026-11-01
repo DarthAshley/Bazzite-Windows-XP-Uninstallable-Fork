@@ -151,38 +151,124 @@ Item {
 
     function isPinned(name) {
         if (!name) return false
+        let target = name.toLowerCase().trim()
         for (let i = 0; i < pinnedList.length; ++i) {
-            if (pinnedList[i] === name) return true
+            let p = (pinnedList[i] || "").split("|")[0].toLowerCase().trim()
+            if (p === target) return true
+        }
+        let fav = menu.rootModel ? menu.rootModel.favoritesModel : null
+        if (fav) {
+            for (let j = 0; j < fav.count; ++j) {
+                let nm = (fav.data(fav.index(j, 0), Qt.DisplayRole) || "").toString().toLowerCase().trim()
+                if (nm === target) return true
+            }
         }
         return false
     }
 
+    function resolveAppInfo(name) {
+        let lower = name.toLowerCase().trim()
+        // 1. Check favoritesModel
+        let fav = menu.rootModel ? menu.rootModel.favoritesModel : null
+        if (fav) {
+            for (let i = 0; i < fav.count; ++i) {
+                let idx = fav.index(i, 0)
+                let nm = (fav.data(idx, Qt.DisplayRole) || "").toString().trim()
+                if (nm.toLowerCase() === lower) {
+                    let ic = fav.data(idx, Qt.DecorationRole) || ""
+                    return { icon: ic.toString(), sourceType: "fav", sourceIndex: i, cmd: "" }
+                }
+            }
+        }
+        // 2. Check usageModel
+        let um = menu.usageModel
+        if (um) {
+            for (let j = 0; j < um.count; ++j) {
+                let idx = um.index(j, 0)
+                let nm = (um.data(idx, Qt.DisplayRole) || "").toString().trim()
+                if (nm.toLowerCase() === lower) {
+                    let ic = um.data(idx, Qt.DecorationRole) || ""
+                    return { icon: ic.toString(), sourceType: "usage", sourceIndex: j, cmd: "" }
+                }
+            }
+        }
+        // 3. Check allAppsModel
+        let aam = menu.allAppsModel
+        if (aam) {
+            for (let k = 0; k < aam.count; ++k) {
+                let idx = aam.index(k, 0)
+                let nm = (aam.data(idx, Qt.DisplayRole) || "").toString().trim()
+                if (nm.toLowerCase() === lower) {
+                    let ic = aam.data(idx, Qt.DecorationRole) || ""
+                    return { icon: ic.toString(), sourceType: "allapps", sourceIndex: k, cmd: "" }
+                }
+            }
+        }
+        return { icon: lower, sourceType: "cmd", sourceIndex: -1, cmd: lower }
+    }
+
     function removeItemFromList(name) {
         if (!name) return
+        let target = name.toLowerCase().trim()
         let arr = []
         for (let i = 0; i < removedList.length; ++i) {
-            if (removedList[i] !== name) arr.push(removedList[i])
+            if (removedList[i].toLowerCase().trim() !== target) arr.push(removedList[i])
         }
         arr.push(name)
         removedList = arr
         Plasmoid.configuration.removedItems = arr
+
+        // Also unpin if pinned
+        let pArr = []
+        for (let j = 0; j < pinnedList.length; ++j) {
+            let p = (pinnedList[j] || "").split("|")[0].toLowerCase().trim()
+            if (p !== target) pArr.push(pinnedList[j])
+        }
+        pinnedList = pArr
+        Plasmoid.configuration.pinnedItems = pArr
+
         rebuildLeftItems()
     }
 
-    function togglePinItem(name) {
+    function togglePinItem(name, icon, cmd, sType, sIdx) {
         if (!name) return
+        let target = name.toLowerCase().trim()
         let arr = []
         let found = false
         for (let i = 0; i < pinnedList.length; ++i) {
-            if (pinnedList[i] === name) {
+            let p = (pinnedList[i] || "").split("|")[0].toLowerCase().trim()
+            if (p === target) {
                 found = true
             } else {
                 arr.push(pinnedList[i])
             }
         }
-        if (!found) arr.push(name)
+        if (!found) {
+            let entry = name
+            if (icon || cmd || sType) {
+                entry = name + "|" + (icon || "") + "|" + (cmd || "") + "|" + (sType || "") + "|" + (sIdx !== undefined ? sIdx : -1)
+            }
+            arr.push(entry)
+        }
         pinnedList = arr
         Plasmoid.configuration.pinnedItems = arr
+
+        // Also if unpinning and present in KDE favoritesModel, remove from it
+        if (found) {
+            let fav = menu.rootModel ? menu.rootModel.favoritesModel : null
+            if (fav && typeof fav.removeFavorite === "function") {
+                try {
+                    for (let f = 0; f < fav.count; ++f) {
+                        let fnm = (fav.data(fav.index(f, 0), Qt.DisplayRole) || "").toString().toLowerCase().trim()
+                        if (fnm === target) {
+                            fav.removeFavorite(f)
+                            break
+                        }
+                    }
+                } catch(e) {}
+            }
+        }
+
         rebuildLeftItems()
     }
 
@@ -194,34 +280,34 @@ Item {
 
     function isInQuickLaunch(name) {
         if (!name) return false
+        let target = name.toLowerCase().trim()
         let ql = Plasmoid.configuration.quickLaunchExtra || []
         for (let i = 0; i < ql.length; ++i) {
-            if (ql[i].split("|")[0] === name) return true
+            if ((ql[i] || "").split("|")[0].toLowerCase().trim() === target) return true
         }
         return false
     }
 
-    function toggleQuickLaunch(name) {
+    function toggleQuickLaunch(name, icon) {
         if (!name) return
+        let target = name.toLowerCase().trim()
         let ql = Plasmoid.configuration.quickLaunchExtra || []
         let next = []
         let found = false
         for (let i = 0; i < ql.length; ++i) {
-            if (ql[i].split("|")[0] === name) {
+            if ((ql[i] || "").split("|")[0].toLowerCase().trim() === target) {
                 found = true
             } else {
                 next.push(ql[i])
             }
         }
         if (!found) {
-            let ic = "application-x-executable"
-            for (let k = 0; k < leftAppsModel.count; ++k) {
-                let it = leftAppsModel.get(k)
-                if (it.appTitle === name) {
-                    ic = it.iconName
-                    break
-                }
+            let ic = icon || ""
+            if (!ic || ic === "") {
+                let resolved = resolveAppInfo(name)
+                ic = resolved.icon
             }
+            if (!ic || ic === "") ic = "application-x-executable"
             next.push(name + "|" + ic)
         }
         Plasmoid.configuration.quickLaunchExtra = next
@@ -243,17 +329,91 @@ Item {
     }
 
     ListModel {
+        id: pinnedAppsModel
+    }
+
+    ListModel {
         id: leftAppsModel
     }
 
     function rebuildLeftItems() {
+        pinnedAppsModel.clear()
         leftAppsModel.clear()
-        let rowH = menu.isSmallIcons ? 26 : 38
-        let availHeight = menu.menuHeight - 60 - 2 - 42 - 96 - 16 - 36
-        let autoSlots = Math.max(4, Math.floor(availHeight / rowH))
-        let maxSlots = (menu.effectiveItemsCount > 0) ? Math.min(autoSlots, menu.effectiveItemsCount) : autoSlots
+
         let seen = {}
+        // Don't duplicate Internet or E-mail
+        seen["internet"] = true
+        seen["e-mail"] = true
+        seen["email"] = true
+
         let mode = menu.effectiveItemsMode
+
+        // === 1. TOP SECTION: PINNED APPS (Vastgemaakte programma's) ===
+        // A. Explicit user pins
+        for (let p = 0; p < pinnedList.length; ++p) {
+            let entry = pinnedList[p] || ""
+            let parts = entry.split("|")
+            let pTitle = (parts[0] || "").trim()
+            if (pTitle === "" || isRemoved(pTitle)) continue
+
+            let pKey = pTitle.toLowerCase()
+            if (seen[pKey]) continue
+            seen[pKey] = true
+
+            let pIcon = (parts[1] || "").trim()
+            let pCmd = (parts[2] || "").trim()
+            let pType = (parts[3] || "").trim()
+            let pIdx = parts[4] !== undefined && parts[4] !== "" ? parseInt(parts[4]) : -1
+
+            if (pIcon === "" || pType === "") {
+                let resolved = resolveAppInfo(pTitle)
+                if (pIcon === "") pIcon = resolved.icon
+                if (pType === "") pType = resolved.sourceType
+                if (pIdx < 0) pIdx = resolved.sourceIndex
+                if (pCmd === "") pCmd = resolved.cmd
+            }
+
+            pinnedAppsModel.append({
+                "appTitle": pTitle,
+                "iconName": pIcon !== "" ? pIcon : "application-x-executable",
+                "subtitle": "",
+                "sourceType": pType !== "" ? pType : "cmd",
+                "sourceIndex": pIdx,
+                "cmd": pCmd
+            })
+        }
+
+        // B. KDE Favorites (when mode is "both" or "favorites")
+        let favModel = menu.rootModel ? menu.rootModel.favoritesModel : null
+        if (favModel && (mode === "both" || mode === "favorites")) {
+            for (let i = 0; i < favModel.count; ++i) {
+                let idx = favModel.index(i, 0)
+                let name = (favModel.data(idx, Qt.DisplayRole) || "").toString().trim()
+                let iconVal = favModel.data(idx, Qt.DecorationRole) || "application-x-executable"
+                let iconStr = iconVal.toString()
+                let nameKey = name.toLowerCase()
+                if (name !== "" && !seen[nameKey] && !isRemoved(name)) {
+                    seen[nameKey] = true
+                    pinnedAppsModel.append({
+                        "appTitle": name,
+                        "iconName": iconStr,
+                        "subtitle": "",
+                        "sourceType": "fav",
+                        "sourceIndex": i,
+                        "cmd": ""
+                    })
+                }
+            }
+        }
+
+        // === 2. BOTTOM SECTION: MOST FREQUENTLY USED APPS (MFU) ===
+        let rowH = menu.isSmallIcons ? 26 : 38
+        let hasInternet = !isRemoved("Internet")
+        let hasEmail = !isRemoved("E-mail")
+        let pinnedHeight = 5 + (hasInternet ? (menu.isSmallIcons ? 26 : 42) : 0) + (hasEmail ? (menu.isSmallIcons ? 26 : 42) : 0) + (pinnedAppsModel.count * (menu.isSmallIcons ? 26 : 38))
+        let availHeight = menu.menuHeight - 60 - 42 - 40 - 8 - pinnedHeight
+        let autoSlots = Math.max(2, Math.floor(availHeight / rowH))
+        let maxSlots = (menu.effectiveItemsCount > 0) ? Math.min(autoSlots, menu.effectiveItemsCount) : autoSlots
 
         // Modus: Vaste eigen lijst ("custom")
         if (mode === "custom") {
@@ -265,41 +425,21 @@ Item {
                 let cTitle = (parts[0] || "").trim()
                 let cIcon = (parts[1] || "application-x-executable").trim()
                 let cCmd = (parts[2] || cTitle.toLowerCase()).trim()
-                if (cTitle !== "" && !isRemoved(cTitle)) {
+                if (cTitle !== "" && !isRemoved(cTitle) && !seen[cTitle.toLowerCase()]) {
+                    seen[cTitle.toLowerCase()] = true
                     leftAppsModel.append({
                         "appTitle": cTitle,
                         "iconName": cIcon,
                         "sourceType": "custom:" + cCmd,
-                        "sourceIndex": c
+                        "sourceIndex": c,
+                        "cmd": cCmd
                     })
                 }
             }
             return
         }
 
-        // 1. Eerst door de gebruiker vastgemaakte items + favorieten (indien mode === "both" of "favorites")
-        let favModel = menu.rootModel ? menu.rootModel.favoritesModel : null
-        if (favModel && (mode === "both" || mode === "favorites")) {
-            for (let i = 0; i < favModel.count && leftAppsModel.count < maxSlots; ++i) {
-                let idx = favModel.index(i, 0)
-                let name = (favModel.data(idx, Qt.DisplayRole) || "").toString().trim()
-                let iconVal = favModel.data(idx, Qt.DecorationRole) || "application-x-executable"
-                let iconStr = iconVal.toString()
-                let nameKey = name.toLowerCase()
-                if (name !== "" && !seen[nameKey] && !seen[iconStr] && !isRemoved(name)) {
-                    seen[nameKey] = true
-                    seen[iconStr] = true
-                    leftAppsModel.append({
-                        "appTitle": name,
-                        "iconName": iconStr,
-                        "sourceType": "fav",
-                        "sourceIndex": i
-                    })
-                }
-            }
-        }
-
-        // 2. Aanvullen met meest gebruikte programma's (indien mode === "both" of "recent")
+        // Aanvullen met meest gebruikte programma's (indien mode === "both" of "recent")
         if (menu.usageModel && (mode === "both" || mode === "recent")) {
             for (let j = 0; j < menu.usageModel.count && leftAppsModel.count < maxSlots; ++j) {
                 let idx2 = menu.usageModel.index(j, 0)
@@ -307,30 +447,84 @@ Item {
                 let iconVal2 = menu.usageModel.data(idx2, Qt.DecorationRole) || "application-x-executable"
                 let iconStr2 = iconVal2.toString()
                 let nameKey2 = name2.toLowerCase()
-                if (name2 !== "" && !seen[nameKey2] && !seen[iconStr2] && !isRemoved(name2)) {
+                if (name2 !== "" && !seen[nameKey2] && !isRemoved(name2)) {
                     seen[nameKey2] = true
-                    seen[iconStr2] = true
                     leftAppsModel.append({
                         "appTitle": name2,
                         "iconName": iconStr2,
                         "sourceType": "usage",
-                        "sourceIndex": j
+                        "sourceIndex": j,
+                        "cmd": ""
                     })
                 }
             }
         }
     }
 
-    function triggerLeftItem(sourceType, sourceIndex) {
-        if (sourceType && sourceType.startsWith("custom:")) {
-            let cmd = sourceType.substring(7)
+    function triggerLeftItem(sourceType, sourceIndex, appTitle, cmd) {
+        if (cmd && cmd !== "") {
             menu.run(cmd)
-        } else if (sourceType === "fav" && menu.rootModel && menu.rootModel.favoritesModel) {
-            menu.rootModel.favoritesModel.trigger(sourceIndex, "", null)
-            menu.closeRequested()
-        } else if (sourceType === "usage" && menu.usageModel) {
-            menu.usageModel.trigger(sourceIndex, "", null)
-            menu.closeRequested()
+            return
+        }
+        if (sourceType && sourceType.startsWith("custom:")) {
+            menu.run(sourceType.substring(7))
+            return
+        }
+        if (sourceType === "fav" && menu.rootModel && menu.rootModel.favoritesModel) {
+            let fav = menu.rootModel.favoritesModel
+            if (sourceIndex >= 0 && sourceIndex < fav.count) {
+                let fnm = (fav.data(fav.index(sourceIndex, 0), Qt.DisplayRole) || "").toString().trim()
+                if (!appTitle || fnm.toLowerCase() === appTitle.toLowerCase()) {
+                    fav.trigger(sourceIndex, "", null)
+                    menu.closeRequested()
+                    return
+                }
+            }
+            if (appTitle) {
+                for (let i = 0; i < fav.count; ++i) {
+                    let fnm = (fav.data(fav.index(i, 0), Qt.DisplayRole) || "").toString().trim()
+                    if (fnm.toLowerCase() === appTitle.toLowerCase()) {
+                        fav.trigger(i, "", null)
+                        menu.closeRequested()
+                        return
+                    }
+                }
+            }
+        }
+        if (sourceType === "usage" && menu.usageModel) {
+            let um = menu.usageModel
+            if (sourceIndex >= 0 && sourceIndex < um.count) {
+                let unm = (um.data(um.index(sourceIndex, 0), Qt.DisplayRole) || "").toString().trim()
+                if (!appTitle || unm.toLowerCase() === appTitle.toLowerCase()) {
+                    um.trigger(sourceIndex, "", null)
+                    menu.closeRequested()
+                    return
+                }
+            }
+            if (appTitle) {
+                for (let j = 0; j < um.count; ++j) {
+                    let unm = (um.data(um.index(j, 0), Qt.DisplayRole) || "").toString().trim()
+                    if (unm.toLowerCase() === appTitle.toLowerCase()) {
+                        um.trigger(j, "", null)
+                        menu.closeRequested()
+                        return
+                    }
+                }
+            }
+        }
+        if (appTitle && menu.allAppsModel) {
+            let aam = menu.allAppsModel
+            for (let k = 0; k < aam.count; ++k) {
+                let anm = (aam.data(aam.index(k, 0), Qt.DisplayRole) || "").toString().trim()
+                if (anm.toLowerCase() === appTitle.toLowerCase()) {
+                    aam.trigger(k, "", null)
+                    menu.closeRequested()
+                    return
+                }
+            }
+        }
+        if (appTitle) {
+            menu.run("gtk-launch \"" + appTitle + "\" 2>/dev/null || kioclient6 exec $(grep -ril 'Name=" + appTitle + "' \"$HOME/.local/share/applications\" /usr/share/applications /var/lib/flatpak/exports/share/applications 2>/dev/null | head -n1)")
         }
     }
 
@@ -507,12 +701,12 @@ Item {
 
                         AppEntry {
                             Layout.fillWidth: true
-                            Layout.preferredHeight: 44
+                            Layout.preferredHeight: menu.isSmallIcons ? 26 : 42
                             visible: !menu.isRemoved("Internet")
                             label: "Internet"
                             subtitle: "Internet Explorer"
                             iconFile: "ie6.svg"
-                            iconSize: 32
+                            iconSize: menu.isSmallIcons ? 20 : 32
                             bold: true
                             onHovered: {
                                 menu.showRecentDocs = false
@@ -520,18 +714,18 @@ Item {
                             onActivated: menu.run("xdg-open https://www.google.nl")
                             onRightClicked: (gx, gy) => {
                                 let p = mapToItem(menu, gx, gy)
-                                ctxMenu.openForItem(p.x, p.y, "Internet", "cmd", "xdg-open https://www.google.nl", -1)
+                                ctxMenu.openForItem(p.x, p.y, "Internet", "cmd", "xdg-open https://www.google.nl", -1, "ie6.svg")
                             }
                         }
 
                         AppEntry {
                             Layout.fillWidth: true
-                            Layout.preferredHeight: 44
+                            Layout.preferredHeight: menu.isSmallIcons ? 26 : 42
                             visible: !menu.isRemoved("E-mail")
                             label: "E-mail"
                             subtitle: "Outlook Express"
                             iconFile: "outlook.svg"
-                            iconSize: 32
+                            iconSize: menu.isSmallIcons ? 20 : 32
                             bold: true
                             onHovered: {
                                 menu.showRecentDocs = false
@@ -539,7 +733,37 @@ Item {
                             onActivated: menu.run("xdg-open https://mail.steelhullstudio.nl")
                             onRightClicked: (gx, gy) => {
                                 let p = mapToItem(menu, gx, gy)
-                                ctxMenu.openForItem(p.x, p.y, "E-mail", "cmd", "xdg-open https://mail.steelhullstudio.nl", -1)
+                                ctxMenu.openForItem(p.x, p.y, "E-mail", "cmd", "xdg-open https://mail.steelhullstudio.nl", -1, "outlook.svg")
+                            }
+                        }
+
+                        // Bovenste lijst: Extra vastgepinde programma's / favorieten van de gebruiker (Steam, etc.)
+                        Repeater {
+                            model: pinnedAppsModel
+                            delegate: AppEntry {
+                                required property int index
+                                required property string appTitle
+                                required property string iconName
+                                required property string subtitle
+                                required property string sourceType
+                                required property int sourceIndex
+                                required property string cmd
+
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: subtitle !== "" ? (menu.isSmallIcons ? 26 : 42) : (menu.isSmallIcons ? 26 : 38)
+                                label: appTitle
+                                subtitle: subtitle
+                                icon: iconName
+                                iconSize: menu.isSmallIcons ? 20 : 30
+                                bold: true
+                                onHovered: {
+                                    menu.showRecentDocs = false
+                                }
+                                onActivated: menu.triggerLeftItem(sourceType, sourceIndex, appTitle, cmd)
+                                onRightClicked: (gx, gy) => {
+                                    let p = mapToItem(menu, gx, gy)
+                                    ctxMenu.openForItem(p.x, p.y, appTitle, sourceType, cmd, sourceIndex, iconName)
+                                }
                             }
                         }
 
@@ -548,7 +772,7 @@ Item {
                             lineColor: "#c8c6c0"
                         }
 
-                        // 6+ Meest gebruikte / favoriete programma's (enkele regel, gewone Tahoma)
+                        // 6+ Meest gebruikte programma's (enkele regel, gewone Tahoma, niet dikgedrukt)
                         ListView {
                             id: leftListView
                             Layout.fillWidth: true
@@ -563,20 +787,21 @@ Item {
                                 required property string iconName
                                 required property string sourceType
                                 required property int sourceIndex
+                                required property string cmd
 
                                 width: ListView.view.width
                                 height: menu.isSmallIcons ? 26 : 38
                                 label: appTitle
                                 icon: iconName
                                 iconSize: menu.isSmallIcons ? 20 : 30
-                                bold: menu.isPinned(appTitle)
+                                bold: false
                                 onHovered: {
                                     menu.showRecentDocs = false
                                 }
-                                onActivated: menu.triggerLeftItem(sourceType, sourceIndex)
+                                onActivated: menu.triggerLeftItem(sourceType, sourceIndex, appTitle, cmd)
                                 onRightClicked: (gx, gy) => {
                                     let p = mapToItem(menu, gx, gy)
-                                    ctxMenu.openForItem(p.x, p.y, appTitle, sourceType, "", sourceIndex)
+                                    ctxMenu.openForItem(p.x, p.y, appTitle, sourceType, cmd, sourceIndex, iconName)
                                 }
                             }
                         }
@@ -1207,7 +1432,34 @@ Item {
                     onActivated: menu.run("dolphin")
                 }
 
-                // Favoriete programma's van de gebruiker onderaan de lijst
+                // Vastgemaakte programma's van de gebruiker (dikgedrukt)
+                Repeater {
+                    model: pinnedAppsModel
+                    delegate: AppEntry {
+                        required property int index
+                        required property string appTitle
+                        required property string iconName
+                        required property string sourceType
+                        required property int sourceIndex
+                        required property string cmd
+
+                        width: col1Layout.width
+                        height: 24
+                        iconSize: 16
+                        fontSize: 11
+                        bold: true
+                        label: appTitle
+                        icon: iconName
+                        onHovered: menu.requestCol2Change(-1, "", 160)
+                        onActivated: menu.triggerLeftItem(sourceType, sourceIndex, appTitle, cmd)
+                        onRightClicked: (gx, gy) => {
+                            let p = mapToItem(menu, gx, gy)
+                            ctxMenu.openForItem(p.x, p.y, appTitle, sourceType, cmd, sourceIndex, iconName)
+                        }
+                    }
+                }
+
+                // Meest gebruikte programma's van de gebruiker onderaan de lijst
                 Repeater {
                     model: leftAppsModel
                     delegate: AppEntry {
@@ -1216,6 +1468,7 @@ Item {
                         required property string iconName
                         required property string sourceType
                         required property int sourceIndex
+                        required property string cmd
 
                         width: col1Layout.width
                         height: 24
@@ -1223,13 +1476,11 @@ Item {
                         fontSize: 11
                         label: appTitle
                         icon: iconName
-                        onHovered: {
-                            menu.requestCol2Change(-1, "", 160)
-                        }
-                        onActivated: menu.triggerLeftItem(sourceType, sourceIndex)
+                        onHovered: menu.requestCol2Change(-1, "", 160)
+                        onActivated: menu.triggerLeftItem(sourceType, sourceIndex, appTitle, cmd)
                         onRightClicked: (gx, gy) => {
                             let p = mapToItem(menu, gx, gy)
-                            ctxMenu.openForItem(p.x, p.y, appTitle, sourceType, "", sourceIndex)
+                            ctxMenu.openForItem(p.x, p.y, appTitle, sourceType, cmd, sourceIndex, iconName)
                         }
                     }
                 }
@@ -1419,7 +1670,7 @@ Item {
                         }
                         onRightClicked: (gx, gy) => {
                             let p = mapToItem(menu, gx, gy)
-                            ctxMenu.openForItem(p.x, p.y, model.display || "", "subcat", "", index)
+                            ctxMenu.openForItem(p.x, p.y, model.display || "", "subcat", "", index, (model.decoration || "").toString())
                         }
                     }
                 }
@@ -1652,12 +1903,14 @@ Item {
         property string targetType: ""
         property string targetCmd: ""
         property int targetIndex: -1
+        property string targetIcon: ""
 
-        function openForItem(px, py, label, sType, sCmd, sIdx) {
+        function openForItem(px, py, label, sType, sCmd, sIdx, sIcon) {
             targetLabel = label
             targetType = sType
             targetCmd = sCmd
             targetIndex = sIdx
+            targetIcon = sIcon || ""
             x = Math.min(px, menu.width - width - 4)
             y = Math.max(4, Math.min(py, menu.height - height - 4))
             visible = true
@@ -1685,7 +1938,7 @@ Item {
                         allProgramsCol2.subCatModel.trigger(ctxMenu.targetIndex, "", null)
                         menu.closeRequested()
                     } else {
-                        menu.triggerLeftItem(ctxMenu.targetType, ctxMenu.targetIndex)
+                        menu.triggerLeftItem(ctxMenu.targetType, ctxMenu.targetIndex, ctxMenu.targetLabel, ctxMenu.targetCmd)
                     }
                 }
             }
@@ -1711,7 +1964,7 @@ Item {
                 iconFile: "progfolder.svg"
                 onActivated: {
                     ctxMenu.visible = false
-                    menu.togglePinItem(ctxMenu.targetLabel)
+                    menu.togglePinItem(ctxMenu.targetLabel, ctxMenu.targetIcon, ctxMenu.targetCmd, ctxMenu.targetType, ctxMenu.targetIndex)
                 }
             }
 
@@ -1722,7 +1975,7 @@ Item {
                 iconFile: "show-desktop.svg"
                 onActivated: {
                     ctxMenu.visible = false
-                    menu.toggleQuickLaunch(ctxMenu.targetLabel)
+                    menu.toggleQuickLaunch(ctxMenu.targetLabel, ctxMenu.targetIcon)
                 }
             }
 
