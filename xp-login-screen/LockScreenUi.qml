@@ -284,12 +284,12 @@ Item {
 
             Image {
                 anchors.right: parent.right
-                width: 245
-                height: 127
-                source: Qt.resolvedUrl("images/xp-login-logo.svg")
-                sourceSize.width: 490
-                sourceSize.height: 254
+                width: 235
+                height: 142
+                source: Qt.resolvedUrl("images/xp-login-logo.png")
+                fillMode: Image.PreserveAspectFit
                 smooth: true
+                mipmap: true
             }
 
             Text {
